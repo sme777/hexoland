@@ -9,3 +9,6 @@ import { application } from "../controllers/application"
 // Lazy load controllers as they appear in the DOM (remember not to preload controllers in import map!)
 // import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
 // lazyLoadControllersFrom("controllers", application)
+import StudioController from "../controllers/studio_controller"
+
+application.register("signup", StudioController)

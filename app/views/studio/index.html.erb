@@ -1,8 +1,65 @@
+<div data-controller="studio">
 <div class="row">
     <div class="col-md-3">
         <%= render partial: "layouts/sidebar", locals: {tab: "Studio"} %>
     </div>
-    <div class="col-md-9">
-        <h1>Studio</h1>
+    <div class="col-md-9 px-4 py-4">
+        <div class="new-assembly">
+
+        <h1>Assembly Studio</h1>
+
+        <hr>
+        <%= form_with model: Assembly.new, url: :create_assembly, method: :post do |f| %>
+        
+            <h3>New Assembly</h3>
+            <br>
+            <div class="input-group mb-3">
+                <span class="input-group-text">@</span>
+                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control", placeholder: "Author" %>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">#</span>
+                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control", placeholder: "2x2x2 Block" %>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Structure Assembly</span>
+                <%= f.text_area :design_map, type: "text", id: "assemblyMap", class: "form-control", placeholder: "{'M1' => {'S1' => 'M2'}}, 'M2' => {'S4' => 'M1'}}" %>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">Volumes</span>
+                        <%= f.text_field :volumes, type: "text", id: "assemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...]" %>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">Well Positions</span>
+                        <%= f.text_field :wells, type: "text", id: "assemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
+                    </div>
+                </div>
+            </div>
+
+            <div id="jsoneditor" style="width: 400px; height: 400px;"></div>
+
+            <div class="">
+                <%= f.submit "Design Assembly", class: "btn btn-lg btn-dark w-100"%>
+            </div>
+        <% end %>
+
     </div>
+        <hr>
+        <div class="latest-assemblies py-4">
+        
+        <h3>All Assemblies</h3>
+            <% Assembly.all.each do |assembly| %>
+                <%= render partial: "assembly", locals: {assembly: assembly} %>
+            <% end %>
+        </div>
+    </div>
+
+</div>
 </div>
