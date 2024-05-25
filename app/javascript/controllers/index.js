@@ -10,5 +10,7 @@ import { application } from "../controllers/application"
 // import { lazyLoadControllersFrom } from "@hotwired/stimulus-loading"
 // lazyLoadControllersFrom("controllers", application)
 import StudioController from "../controllers/studio_controller"
+import VoxelizerController from "../controllers/voxelizer_controller"
 
 application.register("studio", StudioController)
+application.register("voxelizer", VoxelizerController)

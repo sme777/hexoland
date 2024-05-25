@@ -1,25 +1,27 @@
 import { Controller } from "@hotwired/stimulus"
-// import JSONEditor
+import { JSONEditor } from "vanilla-jsoneditor"
 
 export default class extends Controller {
   connect() {
-    console.log("hello")
-    // const container = document.getElementById("jsoneditor")
-    // const options = {}
-    // const editor = new JSONEditor(container, options)
+    console.log("Studio Controller Debugger:")
+    // console.log(JSONEditor)
+    let content = {
+      text: undefined,
+      json: {
+        greeting: 'Hello World'
+      }
+    }
 
-    // // set json
-    // const initialJson = {
-    //     "Array": [1, 2, 3],
-    //     "Boolean": true,
-    //     "Null": null,
-    //     "Number": 123,
-    //     "Object": {"a": "b", "c": "d"},
-    //     "String": "Hello World"
-    // }
-    // editor.set(initialJson)
-
-    // // get json
-    // const updatedJson = editor.get()
+    const editor = new JSONEditor({
+      target: document.getElementById('jsoneditor'),
+      props: {
+        content,
+        onChange: (updatedContent, previousContent, { contentErrors, patchResult }) => {
+          // content is an object { json: JSONData } | { text: string }
+          console.log('onChange', { updatedContent, previousContent, contentErrors, patchResult })
+          content = updatedContent
+        }
+      }
+    })
   }
 }

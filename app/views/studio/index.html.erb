@@ -3,7 +3,7 @@
     <div class="col-md-3">
         <%= render partial: "layouts/sidebar", locals: {tab: "Studio"} %>
     </div>
-    <div class="col-md-9 px-4 py-4">
+    <div class="col-md-9 px-4 py-4" id="assemblyColumn">
         <div class="new-assembly">
 
         <h1>Assembly Studio</h1>
@@ -43,10 +43,35 @@
                 </div>
             </div>
 
-            <div id="jsoneditor" style="width: 400px; height: 400px;"></div>
+            <div id="jsoneditor" style="width: 100%; height: 400px;">
+            
+            </div>
 
+
+            <div class="voxelizer-container" id="voxelizerContainer">
+
+                <canvas data-controller="voxelizer" id="voxelizerCanvas" style="width: 100%; height: 400px;">
+                
+                </canvas>
+  
+                <div class="row py-4">
+                    <div class="resolution-bar">
+                        <h3>Voxel Resolution</h3>
+                        <h5>80x60x140 -- 22,000 voxels</h5>
+                        <input type="range" class="form-range btn-dark" id="voxelResolution">
+                    </div>
+                    <div class="voxelizer-loader col-md-6 text-center">
+                        <button class="btn btn-outline-dark btn-large w-50">Load STL/Hexoland File</button>
+                    </div>
+
+                    <div class="col-md-6 voxelizer-saver text-center">
+                        <button class="btn btn-outline-dark btn-large w-50">Save Hexoland File</button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="">
-                <%= f.submit "Design Assembly", class: "btn btn-lg btn-dark w-100"%>
+                <%= f.button "Design Assembly", class: "btn btn-lg btn-dark w-100"%>
             </div>
         <% end %>
 

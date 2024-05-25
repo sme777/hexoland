@@ -12,7 +12,10 @@
     "nodemon": "^3.0.3",
     "postcss": "^8.4.35",
     "postcss-cli": "^11.0.0",
-    "sass": "^1.70.0"
+    "sass": "^1.70.0",
+    "three": "^0.164.1",
+    "three-js": "^79.0.0",
+    "vanilla-jsoneditor": "^0.23.4"
   },
   "scripts": {
     "build:css:compile": "sass ./app/assets/stylesheets/application.bootstrap.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
