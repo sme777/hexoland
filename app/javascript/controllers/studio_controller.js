@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
+    console.log("hello")
     // const container = document.getElementById("jsoneditor")
     // const options = {}
     // const editor = new JSONEditor(container, options)

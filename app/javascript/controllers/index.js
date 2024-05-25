@@ -11,4 +11,4 @@ import { application } from "../controllers/application"
 // lazyLoadControllersFrom("controllers", application)
 import StudioController from "../controllers/studio_controller"
 
-application.register("signup", StudioController)
+application.register("studio", StudioController)
