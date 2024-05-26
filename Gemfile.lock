@@ -73,6 +73,7 @@ GEM
     bootsnap (1.18.3)
       msgpack (~> 1.2)
     builder (3.2.4)
+    byebug (11.1.3)
     capybara (3.40.0)
       addressable
       matrix
@@ -230,6 +231,7 @@ GEM
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    will_paginate (4.0.0)
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.6.14)
@@ -240,6 +242,7 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap
+  byebug (~> 11.1, >= 11.1.3)
   capybara
   cssbundling-rails (~> 1.4)
   daru
@@ -258,6 +261,7 @@ DEPENDENCIES
   turbo-rails
   tzinfo-data
   web-console
+  will_paginate (~> 4.0)
 
 RUBY VERSION
    ruby 3.0.3p157

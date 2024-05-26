@@ -3,30 +3,29 @@ import * as THREE from "three";
 
 export default class extends Controller {
   connect() {
-    console.log("Voxelizer Controller Debugger:")
-    console.log("Basic THREEJS Setup")
+    console.log("GUI Controller Debugger:")
     this.setup();
   }
 
   setup() {
-    const canvas = document.getElementById('voxelizerCanvas');
-    const voxelizerContainer = document.getElementById('voxelizerContainer')
+    const canvas = document.getElementById('guiCanvas');
+    const guiContainer = document.getElementById('guiContainer')
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
         75,
-        voxelizerContainer.clientWidth / voxelizerContainer.clientHeight,
+        guiContainer.clientWidth / guiContainer.clientHeight,
         0.1,
         1000
     );
 
     this.renderer = new THREE.WebGLRenderer({canvas: canvas});
-    this.renderer.setSize(voxelizerContainer.clientWidth, voxelizerContainer.clientHeight);
+    this.renderer.setSize(guiContainer.clientWidth, guiContainer.clientHeight);
     this.renderer.setClearColor(0xffffff, 1);
     // camera.aspect = window.innerWidth / window.innerHeight;
     // camera.updateProjectionMatrix();
 
     this.basicCubeGeometry = new THREE.BoxGeometry();
-    this.material = new THREE.MeshBasicMaterial({color: 0xff0000})
+    this.material = new THREE.MeshBasicMaterial({color: 0x000ff0})
 
     this.mesh = new THREE.Mesh(this.basicCubeGeometry, this.material);
     this.mesh.position.set(0, 0, 0)
@@ -44,8 +43,8 @@ export default class extends Controller {
 
     // Function to set the size of the renderer
     setRendererSize() {
-        this.renderer.setSize(voxelizerContainer.clientWidth, voxelizerContainer.clientHeight);
-        this.camera.aspect = voxelizerContainer.clientWidth / voxelizerContainer.clientHeight;
+        this.renderer.setSize(guiContainer.clientWidth, guiContainer.clientHeight);
+        this.camera.aspect = guiContainer.clientWidth / guiContainer.clientHeight;
         this.camera.updateProjectionMatrix();
     }
 

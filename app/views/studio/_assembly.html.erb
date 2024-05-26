@@ -1,27 +1,49 @@
-<div class="container" role="button" onclick="location.href='/orders/<%= order.id %>'">
-    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col-md-9 p-4 d-flex flex-column position-static">
-            <div class="row">
-                <div class="col-md-6">
-                    <strong class="d-inline-block mb-2 text-primary-emphasis"><%= order.artist %></strong>
-                </div>
 
+    <div class="py-2">
+        <div class="row g-0 border rounded flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col-md-4 p-4 d-flex flex-column position-static">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong class="d-inline-block mb-2 text-primary-emphasis"><%= assembly.author %></strong>
+                    </div>
+
+                </div>
+                <h3 class="mb-0"><%= assembly.name %></h3>
+                
+                <div class="row">
+
+                </div>
+                <div class="pt-3">
+                    <div class="pb-3 row">
+                        <div class="mb-1 text-body-secondary"><%= "#{assembly.created_at.strftime("%H:%M, %A, %B %e, %Y") if !assembly.created_at.nil?}" %></div>
+
+                    </div>
+                    <div class="row">
+                        <div class="mb-3">
+                            <label for="assemblyDescriptionField" class="form-label">Assembly Description</label>
+                            <textarea class="form-control" id="assemblyDescriptionField" placeholder="No Description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
+                        <div class="px-0 mx-0">
+                            <div class="pt-4">
+                                <%= f.submit "Delete", class: "btn btn-outline-danger w-100"%>
+                            </div>
+                        </div>
+                        <% end %>
+                    </div>
+
+                </div>
             </div>
-            <h3 class="mb-0"><%= assembly.name %></h3>
-            <div class="row">
-
-            </div>
-            <div class="py-3">
-                <div class="pb-3 row">
-
-                </div>
-
-                <div class="pb-3 row">
-  
-                </div>
-
+            <div class="col-md-8">
+                <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
+                <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_code", style: "display: none;", value: assembly.design_map %>
+                <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 20vh;">
+                    
+                </div> 
             </div>
         </div>
 
+
     </div>
-</div>

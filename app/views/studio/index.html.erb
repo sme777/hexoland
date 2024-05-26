@@ -1,90 +1,93 @@
 <div data-controller="studio">
-<div class="row">
-    <div class="col-md-3">
-        <%= render partial: "layouts/sidebar", locals: {tab: "Studio"} %>
-    </div>
-    <div class="col-md-9 px-4 py-4" id="assemblyColumn">
-        <div class="new-assembly">
-
-        <h1>Assembly Studio</h1>
-
-        <hr>
-        <%= form_with model: Assembly.new, url: :create_assembly, method: :post do |f| %>
-        
-            <h3>New Assembly</h3>
-            <br>
-            <div class="input-group mb-3">
-                <span class="input-group-text">@</span>
-                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control", placeholder: "Author" %>
-            </div>
-
-            <div class="input-group mb-3">
-                <span class="input-group-text">#</span>
-                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control", placeholder: "2x2x2 Block" %>
-            </div>
-
-            <div class="input-group mb-3">
-                <span class="input-group-text">Structure Assembly</span>
-                <%= f.text_area :design_map, type: "text", id: "assemblyMap", class: "form-control", placeholder: "{'M1' => {'S1' => 'M2'}}, 'M2' => {'S4' => 'M1'}}" %>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text">Volumes</span>
-                        <%= f.text_field :volumes, type: "text", id: "assemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...]" %>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text">Well Positions</span>
-                        <%= f.text_field :wells, type: "text", id: "assemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
-                    </div>
-                </div>
-            </div>
-
-            <div id="jsoneditor" style="width: 100%; height: 400px;">
-            
-            </div>
-
-
-            <div class="voxelizer-container" id="voxelizerContainer">
-
-                <canvas data-controller="voxelizer" id="voxelizerCanvas" style="width: 100%; height: 400px;">
-                
-                </canvas>
-  
-                <div class="row py-4">
-                    <div class="resolution-bar">
-                        <h3>Voxel Resolution</h3>
-                        <h5>80x60x140 -- 22,000 voxels</h5>
-                        <input type="range" class="form-range btn-dark" id="voxelResolution">
-                    </div>
-                    <div class="voxelizer-loader col-md-6 text-center">
-                        <button class="btn btn-outline-dark btn-large w-50">Load STL/Hexoland File</button>
-                    </div>
-
-                    <div class="col-md-6 voxelizer-saver text-center">
-                        <button class="btn btn-outline-dark btn-large w-50">Save Hexoland File</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="">
-                <%= f.button "Design Assembly", class: "btn btn-lg btn-dark w-100"%>
-            </div>
-        <% end %>
-
-    </div>
-        <hr>
-        <div class="latest-assemblies py-4">
-        
-        <h3>All Assemblies</h3>
-            <% Assembly.all.each do |assembly| %>
-                <%= render partial: "assembly", locals: {assembly: assembly} %>
-            <% end %>
+    <div class="row">
+        <div class="col-md-3">
+            <%= render partial: "layouts/sidebar", locals: {tab: "Studio"} %>
         </div>
-    </div>
+        <div class="col-md-9 px-4 py-4" id="assemblyColumn">
+            <div class="new-assembly">
 
-</div>
+                <h1>Assembly Studio</h1>
+
+                <hr>
+                <%= form_with model: Assembly.new, url: :create_assembly, id: "newAssemblyForm", method: :post do |f| %>
+
+                <h3>New Assembly</h3>
+                <br>
+                <strong><label for="assemblyAuthor" class="form-label">For You</label></strong>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">@</span>
+                            <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control", placeholder: "Author" %>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please specify author!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Title</span>
+                            <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control", placeholder: "2x2x2 Block" %>
+                            <div class="valid-feedback">
+                                Looks good!
+                            </div>
+                            <div class="invalid-feedback">
+                                Please specify title!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Assembly Description</span>
+                        <%= f.text_area :description, class: "form-control", id: "assemblyDescription", placeholder: "Description for refernce" %>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <strong><label for="assemblyVolume" class="form-label">For Picklist</label></strong>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">Volumes</span>
+                            <%= f.text_field :volumes, type: "text", id: "assemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">Well Positions</span>
+                            <%= f.text_field :wells, type: "text", id: "assemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <strong><label for="assemblyBlock" class="form-label">For Assembly</label></strong>
+                    <%= f.hidden_field :design_map, type: "text", id: "designMap", style: "display: none;" %>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <div class="invalid-feedback">
+                        Please specify assembly code!
+                    </div>
+                    <div id="assemblyBlock">
+                        <%= render partial: "code"%>
+                    </div>
+                </div>
+
+                <div class="">
+                    <%= f.button "Design Assembly", id: "designAssemblyButton", class: "btn btn-lg btn-dark w-100"%>
+                </div>
+                <% end %>
+
+            </div>
+            <hr>
+            <div class="latest-assemblies py-4">
+                <h3>All Assemblies</h3>
+                <%= render partial: "page_assemblies" %>
+            </div>
+        </div>
+
+    </div>
 </div>

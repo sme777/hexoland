@@ -8,4 +8,10 @@ Rails.application.routes.draw do
 
   post '/studio/' => 'studio#create', as: :create_assembly
   
+  get '/studio/code_assembly' => 'studio#code', as: :code_assembly
+  get '/studio/model_assembly' => 'studio#model', as: :model_assembly
+  get '/studio/gui_assembly' => 'studio#gui', as: :gui_assembly
+
+  get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
+  post '/studio/assembly/:id/delete' => 'studio#delete', as: :delete_assembly
 end

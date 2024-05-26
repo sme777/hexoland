@@ -1,0 +1,60 @@
+<%= turbo_frame_tag "assembly_method" do %>
+<div data-controller="voxelizer">
+    <div class="pt-1 px-0 mb-4">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <%= form_with(url: code_assembly_path, method: :get, data: {turbo: false, turbo_frame: "assembly_method"}) do |f| %>
+                <% if @assembly_method == "Code" %>
+                <%= f.button "Code", class: "nav-link text-primary-emphasis active" %>
+                <% else %>
+                <%= f.button "Code", class: "nav-link text-primary-emphasis" %>
+                <% end %>
+                <% end %>
+            </li>
+            <li class="nav-item">
+                <%= form_with(url: model_assembly_path, method: :get, data: {turbo: false, turbo_frame: "assembly_method"}) do |f| %>
+                <% if @assembly_method == "Voxelizer" %>
+                <%= f.button "Voxelizer", class: "nav-link text-primary-emphasis active" %>
+                <% else %>
+                <%= f.button "Voxelizer", class: "nav-link text-primary-emphasis" %>
+                <% end %>
+                <% end %>
+            </li>
+            <li class="nav-item">
+                <%= form_with(url: gui_assembly_path, method: :get, data: {turbo: false, turbo_frame: "assembly_method"}) do |f| %>
+                <% if @assembly_method == "GUI" %>
+                <%= f.button "GUI", class: "nav-link text-primary-emphasis active" %>
+                <% else %>
+                <%= f.button "GUI", class: "nav-link text-primary-emphasis" %>
+                <% end %>
+                <% end %>
+            </li>
+        </ul>
+    </div>
+
+    <div class="voxelizer-container" id="voxelizerContainer">
+
+        <canvas id="voxelizerCanvas" style="width: 100%; height: auto;">
+
+        </canvas>
+
+    </div>
+
+    <div class="row py-4">
+        <div class="voxelizer-loader col-md-6 text-center">
+            <button class="btn btn-outline-dark btn-large w-50">Load STL/Hexoland File</button>
+        </div>
+
+        <div class="voxelizer-saver col-md-6  text-center">
+            <button class="btn btn-outline-dark btn-large w-50">Save Hexoland File</button>
+        </div>
+    </div>
+    <div class="row py-4">
+        <div class="resolution-bar">
+            <h3>Voxel Resolution</h3>
+            <h5>80x60x140 -- 22,000 voxels</h5>
+            <input type="range" class="form-range btn-dark" id="voxelResolution">
+        </div>
+    </div>
+</div>
+<% end %>

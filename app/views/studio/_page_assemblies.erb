@@ -1,0 +1,24 @@
+<%= turbo_frame_tag "page_assembly" do %>
+
+    <div data-controller="assembly">
+        <% @assemblies.each do |assembly| %>
+        <%= render partial: "assembly", locals: {assembly: assembly} %>
+        <% end %>
+    </div>
+    <div class="container">
+        <nav>
+            <ul class="pagination justify-content-center">
+                <% if @page_count < 5 %>
+                    <% @page_count.times do |idx| %>
+                    <li class="page-item">
+                        <%= form_with(url: page_assemblies_path(idx + 1), method: :get, data: {turbo: false, turbo_frame: "page_assembly"}) do |f| %>
+                            <%= f.submit idx + 1, class: "page-link #{"active" if @current_page == idx+1} "%>
+                        <% end %>
+                      </li>
+                    <% end %>
+
+                <% end %>
+            </ul>
+        </nav>
+    </div>
+<% end %>
