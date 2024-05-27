@@ -1,9 +1,10 @@
 require 'json'
+require 'csv'
 require 'will_paginate/array'
 
 class StudioController < ApplicationController
     before_action :init_params, only: [:create, :get_picklist]
-    before_action :set_assembly, only: [:delete]
+    before_action :set_assembly, only: [:delete, :get_picklist]
 
     def index
         @assembly_method = "Code"
@@ -53,7 +54,20 @@ class StudioController < ApplicationController
     end
 
     def get_picklist
-        @bond_generator.generate_picklist()
+        volumes = params[:volumes].gsub(" ", "").split(",")
+        wells = params[:wells].gsub(" ", "").split(",")
+        picklist = @picklist_generator.generate_picklist(JSON.parse(@assembly.design_map), volumes, wells)
+        temp_file = Tempfile.new(["#{@assembly.name}_picklist.csv", '.csv'])
+        
+        CSV.open(temp_file.path, 'w') do |csv|
+            csv << picklist.vectors.to_a
+            picklist.each_row do |row|
+                csv << row
+            end
+        end
+
+        send_file(Rails.root.join("#{temp_file.path}"), :type => 'text/csv', 
+            :filename => "#{@assembly.name}_picklist.csv", :disposition => 'attachment')
     end
 
     def delete
@@ -73,6 +87,7 @@ class StudioController < ApplicationController
 
     def init_params
         @bond_generator = BondGenerator.new
+        @picklist_generator = PicklistGenerator.new
     end
 
     def set_assembly

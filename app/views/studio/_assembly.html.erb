@@ -24,11 +24,28 @@
                             <textarea class="form-control" id="assemblyDescriptionField" placeholder="No Description" rows="3"></textarea>
                         </div>
                     </div>
+
+                    <%= form_with url: get_picklist_path(assembly.id), id: "picklistGeneratorForm", method: :get, data: {turbo: false} do |f| %>
+                        <div class="row py-2">
+                            <div class="input-group">
+                                <span class="input-group-text">Volumes</span>
+                                <%= f.text_field :volumes, type: "text", id: "itemAssemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
+                            </div>
+                        </div>
+                        <div class="row py-2">
+                            <div class="input-group">
+                                <span class="input-group-text">Wells</span>
+                                <%= f.text_field :wells, type: "text", id: "itemAssemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
+                            </div>
+                        </div>
+                        <%= f.submit "Get Picklist", class: "btn bg-primary-subtle w-100"%>
+                    <% end %>
+
                     <div class="row">
                         <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
                         <div class="px-0 mx-0">
-                            <div class="pt-4">
-                                <%= f.submit "Delete", class: "btn btn-outline-danger w-100"%>
+                            <div class="pt-2">
+                                <%= f.submit "Delete", class: "btn bg-danger-subtle w-100"%>
                             </div>
                         </div>
                         <% end %>
@@ -39,7 +56,7 @@
             <div class="col-md-8">
                 <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
                 <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_code", style: "display: none;", value: assembly.design_map %>
-                <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 20vh;">
+                <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 27vh;">
                     
                 </div> 
             </div>

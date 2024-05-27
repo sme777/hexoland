@@ -12,6 +12,9 @@ Rails.application.routes.draw do
   get '/studio/model_assembly' => 'studio#model', as: :model_assembly
   get '/studio/gui_assembly' => 'studio#gui', as: :gui_assembly
 
-  get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
   post '/studio/assembly/:id/delete' => 'studio#delete', as: :delete_assembly
+  get '/studio/assembly/:id/get_picklist' => 'studio#get_picklist', as: :get_picklist
+  
+  get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
+
 end
