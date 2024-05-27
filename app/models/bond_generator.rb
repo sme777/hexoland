@@ -1,15 +1,12 @@
 require 'set'
 require 'csv'
 
-MAC_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-POP_PATH = "/home/sme777/Desktop/hexoland/app/assets/sequences/bond.csv"
-
 class BondGenerator
 
     
     def initialize
         @bond_map = {}
-        CSV.foreach(POP_PATH) do |row|
+        CSV.foreach(Rails.root.join("app/assets/sequences/bond.csv")) do |row|
             @bond_map[row[0]] = row[1]
         end
     end

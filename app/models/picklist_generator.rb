@@ -2,7 +2,7 @@ require 'csv'
 
 class PicklistGenerator
     def initialize
-        @hex_plate = Daru::DataFrame.from_csv("/home/sme777/Desktop/hexoland/app/assets/sequences/plate.csv")
+        @hex_plate = Daru::DataFrame.from_csv(Rails.root.join("app/assets/sequences/plate.csv"))
     end
 
     def new_picklist(sequences, volume, destination)
