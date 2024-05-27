@@ -128,9 +128,9 @@ class BondGenerator
                 if side == "S1"
                     s14_side_count += 1
                 elsif side == "S2"
-                    s25_side_count += 2
+                    s25_side_count += 1
                 elsif side == "S3"
-                    s36_side_count += 3
+                    s36_side_count += 1
                 end
             end
         end

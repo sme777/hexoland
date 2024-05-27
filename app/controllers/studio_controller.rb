@@ -41,15 +41,19 @@ class StudioController < ApplicationController
     def create
         assembly = Assembly.new(assembly_params)
         
-        
-        bond_map = @bond_generator.build_from_neighbors(JSON.parse(assembly_params[:design_map]))
-        assembly[:design_map] = bond_map.to_json
-        
-        if assembly.save
-            flash[:success] = "Successfully designed assembly #{assembly[:name]}"
-        else
-            flash[:danger] = assembly.errors.full_messages
+        begin
+            bond_map = @bond_generator.build_from_neighbors(JSON.parse(assembly_params[:design_map]))
+            assembly[:design_map] = bond_map.to_json
+
+            if assembly.save
+                flash[:success] = "Successfully designed assembly #{assembly[:name]}"
+            else
+                flash[:danger] = assembly.errors.full_messages
+            end
+        rescue => e
+            flash[:danger] = "An error was encountered while trying to parse assembly code, please double-check!"
         end
+
         redirect_to '/studio'
     end
 
