@@ -6,9 +6,15 @@ class BondGenerator
     
     def initialize
         @bond_map = {}
+        @basic_zs= []
         CSV.foreach(Rails.root.join("app/assets/sequences/bond.csv")) do |row|
             @bond_map[row[0]] = row[1]
         end
+
+        CSV.foreach(Rails.root.join("app/assets/sequences/basic_z.csv")) do |row|
+            @basic_zs << row[1]
+        end
+        @basic_zs = @basic_zs[1..]
     end
 
     ### Compute Free Eneregy of a the Given Sequence ###
@@ -121,6 +127,7 @@ class BondGenerator
         block_neighbors = {}
         # Count of each side
         s14_side_count, s25_side_count, s36_side_count = 0, 0, 0
+        z_tail_count = 0
         neighbor_map.each do |block, neighbors|
             block_sequences[block] = []
             neighbors.each do |side, neighbor|
@@ -131,6 +138,8 @@ class BondGenerator
                     s25_side_count += 1
                 elsif side == "S3"
                     s36_side_count += 1
+                elsif side == "ZU"
+                    z_tail_count += 1
                 end
             end
         end
@@ -143,7 +152,9 @@ class BondGenerator
         s14s, _ = best_sides_out_of("S14", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
         s25s, _ = best_sides_out_of("S25", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
         s36s, _ = best_sides_out_of("S36", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
-        s14_idx, s25_idx, s36_idx = 0, 0, 0
+        z_tails, _ = best_z_bonds_out_of(3, z_tail_count, "TAIL", 0.34, 500)
+        
+        s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
         neighbor_map.each do |block, neighbors|
             neighbors.each do |side, neighbor|
@@ -159,6 +170,10 @@ class BondGenerator
                     block_neighbors[block][side] = [s36s[s36_idx][0], "BS"]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s36s[s36_idx][0], "BS"]]
                     s36_idx += 1
+                elsif side == "ZU"
+                    # block_neighbors[block][side] = z_tails[z_idx][0]
+                    neighbor_map[block][side] = [neighbor_map[block][side], z_tails[z_idx]]
+                    z_idx += 1
                 end
             end
         end
@@ -178,6 +193,9 @@ class BondGenerator
                     s6_bonds = complement_side(block_neighbors[neighbor]["S3"][0])
                     block_neighbors[block][side] = [s6_bonds, "BS"]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s6_bonds, "BS"]]
+                elsif side == "ZD"
+                    z_head = z_complement_side([neighbor_map[neighbor]["ZU"][1]])
+                    neighbor_map[block][side] = [neighbor_map[block][side], z_head[0]]
                 end
             end
         end
@@ -188,7 +206,16 @@ class BondGenerator
 
 
         neighbor_map.each do |block, neighbors|
-            neighbor_map[block] = [block_sequences[block], neighbor_map[block]]
+            all_seqs = block_sequences[block]
+            if z_idx != 0
+                z_tail_seqs = neighbor_map[block].keys.include?("ZU") ? add_z_bonds("TAIL", neighbor_map[block]["ZU"][1]) : add_z_bonds("TAIL", [])
+                z_head_seqs = neighbor_map[block].keys.include?("ZD") ? add_z_bonds("HEAD", neighbor_map[block]["ZD"][1]) : add_z_bonds("HEAD", [])
+                all_seqs += z_tail_seqs
+                all_seqs += z_head_seqs
+                all_seqs += @basic_zs
+            end
+
+            neighbor_map[block] = [all_seqs, neighbor_map[block]]
         end
         neighbor_map
     end
