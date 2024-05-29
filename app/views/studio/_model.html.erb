@@ -42,11 +42,13 @@
 
     <div class="row py-4">
         <div class="voxelizer-loader col-md-6 text-center">
-            <button class="btn btn-outline-dark btn-large w-50">Load STL/Hexoland File</button>
+                <button class="btn btn-outline-dark btn-large w-50" id="fileLoaderMask">Load STL/Hexoland File</button>
+                <input type="file" class="form-control" id="fileLoaderField" accept=".stl", style="opacity: 0;">
         </div>
 
-        <div class="voxelizer-saver col-md-6  text-center">
-            <button class="btn btn-outline-dark btn-large w-50">Save Hexoland File</button>
+        <div class="voxelizer-saver col-md-6 text-center">
+            <button class="btn btn-outline-dark btn-large w-50" id="fileDownloaderMask">Save Hexoland File</button>
+            <input type="file" class="form-control" id="fileDownLoaderField" accept=".stl", style="opacity: 0;">
         </div>
     </div>
     <div class="row py-4">

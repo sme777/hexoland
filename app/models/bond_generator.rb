@@ -116,34 +116,44 @@ class BondGenerator
         sample_map
     end
 
-    def generate_picklist(sequences, volumes, wells)
-
-    end
-
     def build_from_neighbors(neighbor_map)
         # Stores sequence list for each monomer
         block_sequences = {}
         # Stores neighbor map for information
         block_neighbors = {}
         # Count of each side
-        s14_side_count, s25_side_count, s36_side_count = 0, 0, 0
-        z_tail_count = 0
+        s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
+        s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
+        z_tail_count, z_head_count = 0, 0
         neighbor_map.each do |block, neighbors|
             block_sequences[block] = []
             neighbors.each do |side, neighbor|
                 block_neighbors[block] = {}
                 if side == "S1"
-                    s14_side_count += 1
+                    s1_side_count += 1
                 elsif side == "S2"
-                    s25_side_count += 1
+                    s2_side_count += 1
                 elsif side == "S3"
-                    s36_side_count += 1
+                    s3_side_count += 1
+                elsif side == "S4"
+                    s4_side_count += 1
+                elsif side == "S5"
+                    s5_side_count += 1
+                elsif side == "S6"
+                    s6_side_count += 1
                 elsif side == "ZU"
                     z_tail_count += 1
+                elsif side == "ZD"
+                    z_head_count += 1
                 end
             end
         end
 
+        ### Set S14, S25, S36 side count 
+        s14_side_count, last_s14_idx = [s1_side_count, s4_side_count].max, [s1_side_count, s4_side_count].min
+        s25_side_count, last_s25_idx = [s2_side_count, s5_side_count].max, [s2_side_count, s5_side_count].min
+        s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
+        z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
         ### Generate the Sides
 
         # Emperical Rules for the number of Trials  
@@ -152,7 +162,7 @@ class BondGenerator
         s14s, _ = best_sides_out_of("S14", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
         s25s, _ = best_sides_out_of("S25", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
         s36s, _ = best_sides_out_of("S36", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(3, z_tail_count, "TAIL", 0.34, 500)
+        z_tails, _ = best_z_bonds_out_of(3, z_count, "TAIL", 0.34, 500) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
@@ -178,23 +188,50 @@ class BondGenerator
             end
         end
 
+        curr_last_s14_idx_count, curr_last_s25_idx_count, curr_last_s36_idx_count = last_s14_idx, last_s25_idx, last_s36_idx
+        curr_z_idx_count = last_z_idx
+
         neighbor_map.each do |block, neighbors|
             neighbors.each do |side, neighbor|
                 
                 if side == "S4"
-                    s4_bonds = complement_side(block_neighbors[neighbor]["S1"][0])
+                    if block_neighbors[neighbor].nil?
+                        s4_bonds = complement_side(s14s[curr_last_s14_idx_count][0])
+                        curr_last_s14_idx_count += 1
+                    else
+                        s4_bonds = complement_side(block_neighbors[neighbor]["S1"][0])
+                    end
+                    
                     block_neighbors[block][side] = [s4_bonds, "BS"]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s4_bonds, "BS"]]
                 elsif side == "S5"
-                    s5_bonds = complement_side(block_neighbors[neighbor]["S2"][0])
+                    if block_neighbors[neighbor].nil?
+                        s5_bonds = complement_side(s25s[curr_last_s25_idx_count][0])
+                        curr_last_s25_idx_count += 1
+                    else
+                        s5_bonds = complement_side(block_neighbors[neighbor]["S2"][0])
+                    end
+
                     block_neighbors[block][side] = [s5_bonds, "BS"]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s5_bonds, "BS"]]
                 elsif side == "S6"
-                    s6_bonds = complement_side(block_neighbors[neighbor]["S3"][0])
+                    if block_neighbors[neighbor].nil?
+                        s6_bonds = complement_side(s36s[curr_last_s36_idx_count][0])
+                        curr_last_s36_idx_count += 1
+                    else
+                        s6_bonds = complement_side(block_neighbors[neighbor]["S3"][0])
+                    end
+
                     block_neighbors[block][side] = [s6_bonds, "BS"]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s6_bonds, "BS"]]
                 elsif side == "ZD"
-                    z_head = z_complement_side([neighbor_map[neighbor]["ZU"][1]])
+                    if neighbor_map[neighbor].nil?
+                        z_head = z_complement_side([z_tails[curr_z_idx_count]])
+                        curr_z_idx_count += 1
+                    else
+                        z_head = z_complement_side([neighbor_map[neighbor]["ZU"][1]])
+                    end
+                    
                     neighbor_map[block][side] = [neighbor_map[block][side], z_head[0]]
                 end
             end
