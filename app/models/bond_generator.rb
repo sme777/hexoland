@@ -244,13 +244,30 @@ class BondGenerator
 
         neighbor_map.each do |block, neighbors|
             all_seqs = block_sequences[block]
-            if z_idx != 0
-                z_tail_seqs = neighbor_map[block].keys.include?("ZU") ? add_z_bonds("TAIL", neighbor_map[block]["ZU"][1]) : add_z_bonds("TAIL", [])
-                z_head_seqs = neighbor_map[block].keys.include?("ZD") ? add_z_bonds("HEAD", neighbor_map[block]["ZD"][1]) : add_z_bonds("HEAD", [])
-                all_seqs += z_tail_seqs
-                all_seqs += z_head_seqs
+            include_z_bonds = neighbor_map[block].keys.include?("ZU") || neighbor_map[block].keys.include?("ZD")
+            if include_z_bonds
                 all_seqs += @basic_zs
             end
+
+            if include_z_bonds && neighbor_map[block].keys.include?("ZU")
+                all_seqs += add_z_bonds("TAIL", neighbor_map[block]["ZU"][1])
+            else
+                all_seqs += add_z_bonds("TAIL", [])
+            end
+
+            if include_z_bonds && neighbor_map[block].keys.include?("ZD")
+                all_seqs += add_z_bonds("HEAD", neighbor_map[block]["ZD"][1])
+            else
+                all_seqs += add_z_bonds("HEAD", [])
+            end
+            
+            # if curr_z_idx_count != 0
+            #     z_tail_seqs = neighbor_map[block].keys.include?("ZU") ? add_z_bonds("TAIL", neighbor_map[block]["ZU"][1]) : add_z_bonds("TAIL", [])
+            #     z_head_seqs = neighbor_map[block].keys.include?("ZD") ? add_z_bonds("HEAD", neighbor_map[block]["ZD"][1]) : add_z_bonds("HEAD", [])
+            #     all_seqs += z_tail_seqs
+            #     all_seqs += z_head_seqs
+                
+            # end
 
             neighbor_map[block] = [all_seqs, neighbor_map[block]]
         end

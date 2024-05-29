@@ -19,7 +19,6 @@ class PicklistGenerator
     end
 
     def generate_picklist(design_map, vol_arr, dest_arr)
-        # byebug
         seq_arr = convert_design_map_to_sequences(design_map)
         columns = ['Source Plate Name', 'Source Plate Type', 'Source Well', 'Sample Comments', 'Destination Plate Name', 'Destination Well', 'Transfer Volume']
         main_picklist = Daru::DataFrame.new({}, order: columns)

@@ -15,7 +15,6 @@ class StudioController < ApplicationController
     end
 
     def paginate_assemblies
-        # byebug
         @current_page = params[:page].to_i
         @assemblies = Assembly.paginate(page: @current_page, per_page: 3)
         @page_count = (Assembly.all.size.to_f / 3).ceil
