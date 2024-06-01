@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get '/' => 'user#index', as: :home
   get '/studio' => 'studio#index', as: :studio
   get '/feed' => 'feed#index', as: :feed
+  get '/docs' => 'docs#index', as: :docs
 
   post '/studio/' => 'studio#create', as: :create_assembly
   

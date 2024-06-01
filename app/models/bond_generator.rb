@@ -162,7 +162,7 @@ class BondGenerator
         s14s, _ = best_sides_out_of("S14", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
         s25s, _ = best_sides_out_of("S25", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
         s36s, _ = best_sides_out_of("S36", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(3, z_count, "TAIL", 0.34, 500) unless z_count == 0
+        z_tails, _ = best_z_bonds_out_of(3, z_count, 0.51, 100) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
@@ -457,11 +457,11 @@ class BondGenerator
         bond_seqs
     end
 
-    def z_bond_sampler(count, number, side, max_overlap)
-        all_edges = side == "TAIL" ? BondGenerator.tail_z_helices : BondGenerator.head_z_helices
+    def z_bond_sampler(count, number, max_overlap)
+        # all_edges = BondGenerator.tail_groups.map { |group| group.sample }
         random_samples = []
         while random_samples.size  != number
-            random_helices = all_edges.sample(count).flatten
+            random_helices = BondGenerator.tail_groups.map { |group| group.sample }.flatten
             should_add = true
 
             random_samples.each do |sample|
@@ -506,9 +506,9 @@ class BondGenerator
         sim_mat
     end
 
-    def best_z_bonds_out_of(bond_size, bond_quantity, side, max_overlap, trials)
+    def best_z_bonds_out_of(bond_size, bond_quantity, max_overlap, trials)
         
-        sample_map = sample_z_bonds(bond_size, bond_quantity, side, max_overlap, trials)
+        sample_map = sample_z_bonds(bond_size, bond_quantity, max_overlap, trials)
         best_sample = []
         best_sample_score = Float::INFINITY
         sample_map.each do |sample|
@@ -520,10 +520,10 @@ class BondGenerator
         [best_sample, best_sample_score]
     end
 
-    def sample_z_bonds(bond_size, bond_quantity, side, max_overlap, trials)
+    def sample_z_bonds(bond_size, bond_quantity, max_overlap, trials)
         sample_map = []
         trials.times do |_|
-            bonds = z_bond_sampler(bond_size, bond_quantity, side, max_overlap)
+            bonds = z_bond_sampler(bond_size, bond_quantity, max_overlap)
             bonds_sim_mat = compute_z_bond_matrix(bonds)
             assembly_rows, assmebly_score = compute_assembly_score(bonds_sim_mat)
             sample_map << [bonds, assmebly_score]
@@ -636,6 +636,12 @@ class BondGenerator
             "S5" => ["H70_R", "H70_L", "H71_R", "H71_L", "H32_R", "H32_L", "H33_R", "H33_L"],
             "S6" => ["H68_R", "H68_L", "H67_R", "H67_L", "H64_R", "H64_L", "H63_R", "H63_L"]
         }
+    end
+
+    def self.tail_groups
+        [["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
+         ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H50_H51"],
+         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"], "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]]]
     end
 
     def self.tail_z_helices
@@ -864,3 +870,6 @@ class BondGenerator
         }
     end
 end
+
+
+# puts z_3x6_6h_tail_bonds.inspect, z_score

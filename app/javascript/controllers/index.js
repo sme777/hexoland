@@ -14,9 +14,11 @@ import VoxelizerController from "../controllers/voxelizer_controller"
 import GUIController from "../controllers/gui_controller"
 import CodeController from "../controllers/code_controller"
 import AssemblyController from "../controllers/assembly_controller"
+import DocsController from "../controllers/docs_controller"
 
 application.register("studio", StudioController)
 application.register("code", CodeController)
 application.register("voxelizer", VoxelizerController)
 application.register("gui", GUIController)
 application.register("assembly", AssemblyController)
+application.register("docs", DocsController)

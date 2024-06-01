@@ -3,7 +3,7 @@ require 'csv'
 require 'will_paginate/array'
 
 class StudioController < ApplicationController
-    before_action :init_params, only: [:create, :get_picklist]
+    before_action :init_params, only: [:index, :create, :get_picklist]
     before_action :set_assembly, only: [:delete, :get_picklist]
 
     def index

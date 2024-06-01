@@ -28,6 +28,15 @@
                 Feed
                 <% end %>
             </li>
+
+            <li class="nav-item">
+                <%= link_to docs_path, class: (tab == "Docs" ? "nav-link active" : "nav-link text-white")  do %>
+                <svg class="bi pe-none me-2" width="16" height="16">
+                    <use xlink:href="#docs" /></svg>
+                Docs
+                <% end %>
+            </li>
+            <li>
         </ul>
         <hr>
         <div class="dropdown">

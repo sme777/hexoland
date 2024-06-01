@@ -40,3 +40,4 @@ pin "style-mod" # @4.1.2
 pin "uri-js" # @4.4.1
 pin "vanilla-picker" # @2.12.3
 pin "w3c-keyname" # @2.2.8
+pin "highlight.js"
