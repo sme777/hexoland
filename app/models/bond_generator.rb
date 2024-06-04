@@ -283,12 +283,12 @@ class BondGenerator
     # Overlap: max edge overlap #
     #############################
     #############################
-    def generate_sides(side, reference=[], count=1, number=4, max_overlap=0.5, godmode=False, min_strength=0.0, max_strength=110.0)
+    def generate_sides(face, reference=[], count=1, number=4, max_overlap=0.5, godmode=False, min_strength=0.0, max_strength=110.0)
         sides = reference.map(&:dup)
         current_count = reference.size
-        capacity = count > 25 ? 1000 : 500
+        capacity = count > 25 ? 10000 : 500
         while sides.size < count
-            candidate = randomize_sides(side, number, godmode)
+            candidate = randomize_sides(face, number, godmode)
             next unless (min_strength < sum_fes_of(candidate) && sum_fes_of(candidate) < max_strength)
             side_overlap = false
             sides.each do |side|
@@ -298,7 +298,7 @@ class BondGenerator
                     total_sum += (candidate + side[0]).count(x) - 1
                 end
                 overlap = total_sum.to_f / candidate.length
-                if overlap > max_overlap
+                if overlap > max_overlap or uneven_bonds_exist?(face, candidate, sides)
                     side_overlap = true
                     break
                 end
@@ -317,6 +317,32 @@ class BondGenerator
             end
         end
         sides
+    end
+
+    def uneven_bonds_exist?(side, candidate, sides)
+        helix_pair1,  helix_pair2 = BondGenerator.helix_pairs[side]
+        sides.each do |side|
+            overlap_helices = []
+            side[0].each do |bond1|
+                candidate.each do |bond2|
+                    overlap_helices << bond1 if bond1 == bond2
+                end
+            end
+
+            
+            if overlap_helices.size > 2
+                return true
+            end
+
+            if overlap_helices.size > 1 && 
+                (
+                (overlap_helices.all? { |h| helix_pair1.include?(h) }) || 
+                (overlap_helices.all? { |h| helix_pair2.include?(h) }) 
+                )
+                return true
+            end
+        end
+        return false
     end
 
     def compute_similiarity_matrix(sides)
@@ -609,6 +635,21 @@ class BondGenerator
         matrix.each do |row|
           puts row.join(" ")
         end
+    end
+
+    def self.helix_pairs
+
+        {
+            "S14" => [["H60_L_S", "H61_L_S", "H60_L_P", "H61_L_P", "H60_R_S", "H61_R_S", "H60_R_P", "H61_R_P"],
+                        ["H56_L_S", "H57_L_S", "H56_L_P", "H57_L_P", "H56_R_S", "H57_R_S", "H56_R_P", "H57_R_P"]],
+
+            "S25" => [["H54_L_S", "H53_L_S", "H54_L_P", "H53_L_P", "H54_R_S", "H53_R_S", "H54_R_P", "H53_R_P"],
+                        ["H50_L_S", "H49_L_S", "H50_L_P", "H49_L_P", "H50_R_S", "H49_R_S", "H50_R_P", "H49_R_P"]],
+
+            "S36" => [["H42_L_S", "H43_L_S", "H42_L_P", "H43_L_P", "H42_R_S", "H43_R_S", "H42_R_P", "H43_R_P"],
+                        ["H46_L_S", "H47_L_S", "H46_L_P", "H47_L_P", "H46_R_S", "H47_R_S", "H46_R_P", "H47_R_P"]]
+        }
+
     end
       
 
