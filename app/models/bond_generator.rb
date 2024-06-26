@@ -4,20 +4,27 @@ require 'csv'
 BOND_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
 BASIC_Z_PATH ="/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
+BOND_LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+BASIC_Z_LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+
 class BondGenerator
 
     
     def initialize
         @bond_map = {}
         @basic_zs= []
-        CSV.foreach(BOND_PATH) do |row|
+        CSV.foreach(BOND_LINUX_PATH) do |row|
             @bond_map[row[0]] = row[1]
         end
 
-        CSV.foreach(BASIC_Z_PATH) do |row|
+        CSV.foreach(BASIC_Z_LINUX_PATH) do |row|
             @basic_zs << row[1]
         end
         @basic_zs = @basic_zs[1..]
+    end
+
+    def get_basic_zs
+        @basic_zs
     end
 
     ### Compute Free Eneregy of a the Given Sequence ###
@@ -39,7 +46,7 @@ class BondGenerator
         fe_sum.round(4)
     end
 
-    def randomize_sides(side, number, godmode=false)
+    def randomize_sides(side, count, number, type="handles",godmode=false)
         if number == 1
             if side == "S14"
                 return group_randomizer(BondGenerator.singles_s14_sides[0], number) + group_randomizer(BondGenerator.singles_s14_sides[1], number)
@@ -59,11 +66,17 @@ class BondGenerator
                 end
             else
                 if side == "S14"
-                    return group_randomizer(BondGenerator.s14_sides[0], number) + group_randomizer(BondGenerator.s14_sides[1], number) 
+                    return type == "handles" ? 
+                        group_randomizer(BondGenerator.s14_sides[0], number) + group_randomizer(BondGenerator.s14_sides[1], number) :
+                        (count > 8 ? sample_from_hinges(BondGenerator.s14_hinges, false).flatten : sample_from_hinges(BondGenerator.s14_hinges, true).flatten)
                 elsif side == "S25"
-                    return group_randomizer(BondGenerator.s25_sides[0], number) + group_randomizer(BondGenerator.s25_sides[1], number)
+                    return type == "handles" ? 
+                        group_randomizer(BondGenerator.s25_sides[0], number) + group_randomizer(BondGenerator.s25_sides[1], number) :
+                        (count > 8 ? sample_from_hinges(BondGenerator.s25_hinges, false).flatten : sample_from_hinges(BondGenerator.s25_hinges, true).flatten)
                 elsif side == "S36"
-                    return group_randomizer(BondGenerator.s36_sides[0], number) + group_randomizer(BondGenerator.s36_sides[1], number)
+                    return type == "handles" ? 
+                        group_randomizer(BondGenerator.s36_sides[0], number) + group_randomizer(BondGenerator.s36_sides[1], number) :
+                        (count > 8 ? sample_from_hinges(BondGenerator.s36_hinges, false).flatten : sample_from_hinges(BondGenerator.s36_hinges, true).flatten)
                 end
             end
 
@@ -95,8 +108,36 @@ class BondGenerator
         random_samples
     end
 
-    def best_sides_out_of(side, samples=10, reference=[], count=1, number=4, max_overlap=0.5, godemode=False, min_strength=0.0, max_strength=110.0)
-        sample_map = sample_sides(side, samples, reference, count, number, max_overlap, godemode, min_strength, max_strength)
+    def sample_from_handles(elements, number)
+
+    end
+
+    def sample_from_hinges(elements, only_alternate=true)
+        bonds = []
+        group1, group2 = elements[0], elements[1]
+        group1_bonds = group1.sample.map {|group| group.sample }
+        group2_bonds = group2.sample.map {|group| group.sample }
+        # p only_alternate
+        if only_alternate
+            # p group1_bonds
+            # p "hi"
+            while group1_bonds[0][4] == group2_bonds[0][4]
+                group2_bonds = group2.sample.map {|group| group.sample }
+            end
+            bonds << group1_bonds
+            bonds << group2_bonds
+        else
+            # while group1_bonds[0][4] != group2_bonds[0][4]
+            #     group2_bonds = group2.sample.map {|group| group.sample }
+            # end
+            bonds << group1_bonds
+            bonds << group2_bonds
+        end
+        bonds
+    end
+
+    def best_sides_out_of(side, type="handles", samples=10, reference=[], count=1, number=4, max_overlap=0.5, godemode=False, min_strength=0.0, max_strength=110.0)
+        sample_map = sample_sides(side, type, samples, reference, count, number, max_overlap, godemode, min_strength, max_strength)
         best_sample = []
         best_sample_score = Float::INFINITY
         sample_map.each do |sample|
@@ -108,10 +149,10 @@ class BondGenerator
         [best_sample, best_sample_score]
     end
 
-    def sample_sides(side, samples=10, reference=[], count=1, number=4, max_overlap=0.5, godemode=false, min_strength=0.0, max_strength=110.0)
+    def sample_sides(side, type="handles", samples=10, reference=[], count=1, number=4, max_overlap=0.5, godemode=false, min_strength=0.0, max_strength=110.0)
         sample_map = []
         samples.times do |_|
-            sides = generate_sides(side, reference, count, number, max_overlap, godemode)
+            sides = generate_sides(side, type, reference, count, number, max_overlap, godemode)
             sides_sim_mad = compute_similiarity_matrix(sides)
             assembly_rows, assmebly_score = compute_assembly_score(sides_sim_mad)
             sample_map << [sides, assmebly_score]
@@ -162,9 +203,9 @@ class BondGenerator
         # Emperical Rules for the number of Trials  
         trials=5
 
-        s14s, _ = best_sides_out_of("S14", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
-        s25s, _ = best_sides_out_of("S25", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
-        s36s, _ = best_sides_out_of("S36", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
+        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
+        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
+        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
         z_tails, _ = best_z_bonds_out_of(3, z_count, 0.51, 100) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
@@ -263,14 +304,6 @@ class BondGenerator
             else
                 all_seqs += add_z_bonds("HEAD", [])
             end
-            
-            # if curr_z_idx_count != 0
-            #     z_tail_seqs = neighbor_map[block].keys.include?("ZU") ? add_z_bonds("TAIL", neighbor_map[block]["ZU"][1]) : add_z_bonds("TAIL", [])
-            #     z_head_seqs = neighbor_map[block].keys.include?("ZD") ? add_z_bonds("HEAD", neighbor_map[block]["ZD"][1]) : add_z_bonds("HEAD", [])
-            #     all_seqs += z_tail_seqs
-            #     all_seqs += z_head_seqs
-                
-            # end
 
             neighbor_map[block] = [all_seqs, neighbor_map[block]]
         end
@@ -286,12 +319,13 @@ class BondGenerator
     # Overlap: max edge overlap #
     #############################
     #############################
-    def generate_sides(face, reference=[], count=1, number=4, max_overlap=0.5, godmode=False, min_strength=0.0, max_strength=110.0)
+    def generate_sides(face, type="handles",reference=[], count=1, number=4, max_overlap=0.5, godmode=False, min_strength=0.0, max_strength=110.0)
         sides = reference.map(&:dup)
         current_count = reference.size
         capacity = count > 25 ? 10000 : 500
         while sides.size < count
-            candidate = randomize_sides(face, number, godmode)
+            candidate = randomize_sides(face, count, number, type, godmode)
+            # p max_overlap
             next unless (min_strength < sum_fes_of(candidate) && sum_fes_of(candidate) < max_strength)
             side_overlap = false
             sides.each do |side|
@@ -301,7 +335,10 @@ class BondGenerator
                     total_sum += (candidate + side[0]).count(x) - 1
                 end
                 overlap = total_sum.to_f / candidate.length
-                if overlap > max_overlap or uneven_bonds_exist?(face, candidate, sides)
+                if overlap > max_overlap || (type=="handles" && uneven_bonds_exist?(face, candidate, sides))
+                    # p overlap
+                    # p candidate, side[0]
+                    # p unique_set, total_sum
                     side_overlap = true
                     break
                 end
@@ -407,10 +444,10 @@ class BondGenerator
             else
                 pair = BondGenerator.exception_pairs[orbital.slice(0, 5)]
                 next if bonds.any? { |bond| bond.include?(pair) }
-                if type == "B"
-                    # switch to open since T not available for exception pairs
-                    type = "S"
-                end
+                # if type == "B"
+                #     # switch to open since T not available for exception pairs
+                #     type = "S"
+                # end
                 if !@bond_map["#{orbital}_#{type}_AND_#{pair}_#{type}"].nil?
                     neutral_seqs << @bond_map["#{orbital}_#{type}_AND_#{pair}_#{type}"]
                 elsif !@bond_map["#{pair}_#{type}_AND_#{orbital}_#{type}"].nil?
@@ -482,10 +519,10 @@ class BondGenerator
                     bond_seqs << @bond_map["#{bond}_AND_#{exists}"] unless @bond_map["#{bond}_AND_#{exists}"].nil?
                     bond_seqs << @bond_map["#{exists}_AND_#{bond}"] unless @bond_map["#{exists}_AND_#{bond}"].nil?
                 else
-                    if type == "B"
-                        # switch to open since blocked not available for exception pairs
-                        type = "S"
-                    end
+                    # if type == "B"
+                    #     # switch to open since blocked not available for exception pairs
+                    #     type = "S"
+                    # end
                     bond_seqs << @bond_map["#{bond}_AND_#{pair}_#{type}"] unless @bond_map["#{bond}_AND_#{pair}_#{type}"].nil?
                     bond_seqs << @bond_map["#{pair}_#{type}_AND_#{bond}"] unless @bond_map["#{pair}_#{type}_AND_#{bond}"].nil?
                 end
@@ -498,8 +535,10 @@ class BondGenerator
         # all_edges = BondGenerator.tail_groups.map { |group| group.sample }
         random_samples = []
         while random_samples.size  != number
-            random_helices = BondGenerator.tail_groups.map {|group| group.sample } # sample one per group
-            # random_helices = BondGenerator.tail_z_helices.sample(count) # sample randomly
+            # random_helices = BondGenerator.tail_groups.map {|group| group.sample } # sample one per group
+            random_helices = BondGenerator.tail_z_helices.sample(count) # sample randomly
+            # random_helices = BondGenerator.tail_groups.flatten.sample(count)
+            # random_helices = BondGenerator.tail_groups_4bonds.map { |group| group.sample }.flatten
             should_add = true
 
             random_samples.each do |sample|
@@ -701,6 +740,15 @@ class BondGenerator
         }
     end
 
+    def self.tail_groups_4bonds
+        [
+            ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
+            ["H10_H11", "H8_H9", "H44_H45", "H12_H13"],
+            ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
+            ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17"]
+        ]
+    end
+
     def self.tail_groups
         [["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
          ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H50_H51"],
@@ -765,6 +813,46 @@ class BondGenerator
         [["H60_L_S", "H61_L_S", "H60_L_P", "H61_L_P", "H60_R_S", "H61_R_S", "H60_R_P", "H61_R_P"],
          ["H56_L_S", "H57_L_S", "H56_L_P", "H57_L_P", "H56_R_S", "H57_R_S", "H56_R_P", "H57_R_P"]]
     end
+
+
+    ### BONDS FOR HINGES
+    def self.s14_hinges
+        [[[["H60_L_S", "H60_L_P"], ["H61_L_S", "H61_L_P"]], [["H60_R_S", "H60_R_P"], ["H61_R_S", "H61_R_P"]]],
+         [[["H56_L_S", "H56_L_P"], ["H57_L_S", "H57_L_P"]], [["H56_R_S", "H56_R_P"], ["H57_R_S", "H57_R_P"]]]]
+    end
+
+    def self.s25_hinges
+        [[[["H54_L_S", "H54_L_P"], ["H53_L_S", "H53_L_P"]], [["H54_R_S", "H54_R_P"], ["H53_R_S", "H53_R_P"]]],
+         [[["H50_L_S", "H50_L_P"], ["H49_L_S", "H49_L_P"]], [["H50_R_S", "H50_R_P"], ["H49_R_S", "H49_R_P"]]]]
+    end
+
+    def self.s36_hinges
+        [[[["H42_L_S", "H42_L_P"], ["H43_L_S", "H43_L_P"]], [["H42_R_S", "H42_R_P"], ["H43_R_S", "H43_R_P"]]],
+         [[["H46_L_S", "H46_L_P"], ["H47_L_S", "H47_L_P"]], [["H46_R_S", "H46_R_P"], ["H47_R_S", "H47_R_P"]]]]
+    end
+
+    # def self.s25_hinges
+
+    # end
+
+    # def self.s36_hinges
+
+    # end
+
+    # def self.s14_handles
+    #     [["H60_L_S", "H61_L_S", "H60_L_P", "H61_L_P", "H60_R_S", "H61_R_S", "H60_R_P", "H61_R_P"],
+    #     ["H56_L_S", "H57_L_S", "H56_L_P", "H57_L_P", "H56_R_S", "H57_R_S", "H56_R_P", "H57_R_P"]]
+    # end
+
+    # def self.s25_handles
+    #     [["H54_L_S", "H53_L_S", "H54_L_P", "H53_L_P", "H54_R_S", "H53_R_S", "H54_R_P", "H53_R_P"],
+    #     ["H50_L_S", "H49_L_S", "H50_L_P", "H49_L_P", "H50_R_S", "H49_R_S", "H50_R_P", "H49_R_P"]]
+    # end
+
+    # def self.s36_handles
+    #     [["H42_L_S", "H43_L_S", "H42_L_P", "H43_L_P", "H42_R_S", "H43_R_S", "H42_R_P", "H43_R_P"],
+    #     ["H46_L_S", "H47_L_S", "H46_L_P", "H47_L_P", "H46_R_S", "H47_R_S", "H46_R_P", "H47_R_P"]]
+    # end
 
     def self.singles_s36_sides
         [["H42_L_S", "H43_L_S", "H42_L_P", "H43_L_P"], ["H46_L_S", "H47_L_S", "H46_L_P", "H47_L_P"]]
@@ -936,8 +1024,7 @@ end
 
 
 # puts z_3x6_6h_tail_bonds.inspect, z_score
-bg = BondGenerator.new
-
+# bg = BondGenerator.new
 # 16M#A
 
 # s14_4s4b, s14_score = bg.best_sides_out_of("S14", 1, [], count=16, number=2, overlap=0.5, godmode=false)
@@ -2587,18 +2674,7 @@ bg = BondGenerator.new
 #     "S3" => [s36_4s4b[4][0], "BS"],
 #     "S4" => [bg.complement_side(s14_4s4b[1][0]), "BS"],
 #     "S5" => [bg.complement_side(s25_4s4b[0][0]), "BS"],
-#     "S6" => [bg.complement_side(s36_4s4b[3][0]), "BS"]
-# })
-
-# m7_16m_D_T = bg.sequence_generator({
-#     "S1" => [s14_4s4b[6][0], "BS"],
-#     "S2" => [s25_4s4b[5][0], "BS"],
-#     "S3" => [s36_4s4b[5][0], "BS"],
-#     "S4" => [bg.complement_side(s14_4s4b[2][0]), "BS"],
-#     "S5" => [bg.complement_side(s25_4s4b[1][0]), "BS"],
-#     "S6" => [bg.complement_side(s36_4s4b[4][0]), "BS"]
-# })
-
+#     "S6" =>to schedule a meeting, I am available anytime this week
 # m8_16m_D_T = bg.sequence_generator({
 #     "S1" => [s14_4s4b[7][0], "BS"],
 #     "S4" => [bg.complement_side(s14_4s4b[3][0]), "BS"],
@@ -3354,3 +3430,1060 @@ bg = BondGenerator.new
 # bg.to_csv(["Sequence"] + m4e_5x6, "/Users/samsonpetrosyan/Desktop/hexoland/sequences/5x6M/m4e.csv")
 # bg.to_csv(["Sequence"] + m5e_5x6, "/Users/samsonpetrosyan/Desktop/hexoland/sequences/5x6M/m5e.csv")
 # bg.to_csv(["Sequence"] + m6e_5x6, "/Users/samsonpetrosyan/Desktop/hexoland/sequences/5x6M/m6e.csv")
+
+# 2x16M in One-POT
+bg = BondGenerator.new
+
+# s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 5, [], count=12, number=2, overlap=0.25, godmode=false)
+# puts "Handle S14 score: #{s14_handles_score}"
+# s25_handles, s25_handles_score = bg.best_sides_out_of("S25", "handles", 25, [], count=9, number=2, overlap=0.25, godmode=false)
+# puts "Handle S25 score: #{s25_handles_score}"
+# s36_handles, s36_handles_score = bg.best_sides_out_of("S36", "handles", 5, [], count=12, number=2, overlap=0.25, godmode=false)
+# puts "Handle S36 score: #{s36_handles_score}"
+
+
+# s14_hinges, s14_hinges_score = bg.best_sides_out_of("S14", "hinges", 50, [], count=8, number=2, overlap=0.5, godmode=false)
+# puts "Hinge S14 score: #{s14_hinges_score}"
+# s25_hinges, s25_hinges_score = bg.best_sides_out_of("S25", "hinges", 50, [], count=13, number=2, overlap=0.5, godmode=false)
+# puts "Hinge S25 score: #{s25_hinges_score}"
+# s36_hinges, s36_hinges_score = bg.best_sides_out_of("S36", "hinges", 50, [], count=8, number=2, overlap=0.5, godmode=false)
+# puts "Hinge S36 score: #{s36_hinges_score}"
+
+
+# p "Sample S14 handle: #{s14_handles[0]} and hinge: #{s14_hinges[0]}"
+# p "Sample S25 handle: #{s25_handles[0]} and hinge: #{s25_hinges[0]}"
+# p "Sample S36 handle: #{s36_handles[0]} and hinge: #{s36_hinges[0]}"
+
+
+# m1_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[0][0], "BS"],
+#     "S2" => [s25_handles[0][0], "BS"],
+#     "S3" => [s36_handles[0][0], "BS"]
+# })
+
+# m2_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[1][0], "BS"],
+#     "S2" => [s25_handles[1][0], "BS"],
+#     "S3" => [s36_handles[1][0], "BS"],
+#     "S6" => [bg.complement_side(s36_handles[0][0]), "BS"]
+# })
+
+# m3_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[2][0], "BS"],
+#     "S2" => [s25_handles[2][0], "BS"],
+#     "S3" => [s36_handles[2][0], "BS"],
+#     "S6" => [bg.complement_side(s36_handles[1][0]), "BS"]
+# })
+
+# m4_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[3][0], "BS"],
+#     "S2" => [s25_hinges[0][0], "B"], # HINGE
+#     "S3" => [s36_hinges[0][0], "B"],  # HINGE
+#     "S6" => [bg.complement_side(s36_handles[2][0]), "BS"]
+# })
+
+# m5_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[4][0], "BS"],
+#     "S2" => [s25_handles[3][0], "BS"],
+#     "S3" => [s36_handles[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[0][0]), "BS"]
+# })
+
+# m6_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[5][0], "BS"],
+#     "S2" => [s25_handles[4][0], "BS"],
+#     "S3" => [s36_handles[4][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[1][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[0][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[3][0]), "BS"]
+# })
+
+# m7_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[6][0], "BS"],
+#     "S2" => [s25_handles[5][0], "BS"],
+#     "S3" => [s36_handles[5][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[2][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[1][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[4][0]), "BS"]
+# })
+
+# m8_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[7][0], "BS"],
+#     "S2" => [s25_hinges[1][0], "B"],  # HINGE
+#     "S3" => [s36_hinges[1][0], "B"],  # HINGE
+#     "S4" => [bg.complement_side(s14_handles[3][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[2][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[5][0]), "BS"]
+# })
+
+# m9_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[8][0], "BS"],
+#     "S2" => [s25_handles[6][0], "BS"],
+#     "S3" => [s36_handles[6][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[4][0]), "BS"]
+# })
+
+# m10_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[9][0], "BS"],
+#     "S2" => [s25_handles[7][0], "BS"],
+#     "S3" => [s36_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[5][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[3][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[6][0]), "BS"]
+# })
+
+# m11_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[10][0], "BS"],
+#     "S2" => [s25_handles[8][0], "BS"],
+#     "S3" => [s36_handles[8][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[6][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[4][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[7][0]), "BS"]
+# })
+
+# m12_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[11][0], "BS"],
+#     "S2" => [s25_hinges[2][0], "B"],  # HINGE
+#     "S3" => [s36_hinges[2][0], "B"],  # HINGE
+#     "S4" => [bg.complement_side(s14_handles[7][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[5][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[8][0]), "BS"]
+# })
+
+# m13_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[0][0], "B"],  # HINGE
+#     "S2" => [s25_hinges[3][0], "B"],  # HINGE
+#     "S3" => [s36_handles[9][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[8][0]), "BS"]
+# })
+
+# m14_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[1][0], "B"],  # HINGE
+#     "S2" => [s25_hinges[4][0], "B"],  # HINGE
+#     "S3" => [s36_handles[10][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[9][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[6][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[9][0]), "BS"]
+# })
+
+# m15_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[2][0], "B"],  # HINGE
+#     "S2" => [s25_hinges[5][0], "B"],  # HINGE
+#     "S3" => [s36_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[10][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[7][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[10][0]), "BS"]
+# })
+
+# m16_16m_A_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[3][0], "B"],  # HINGE
+#     "S2" => [s25_hinges[6][0], "B"],  # HINGE
+#     "S3" => [s36_hinges[3][0], "B"],  # HINGE
+#     "S4" => [bg.complement_side(s14_handles[11][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[8][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[11][0]), "BS"]
+# })
+
+# # 16M#B
+
+# m1_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[0][0], "BS"],
+#     "S2" => [s25_handles[0][0], "BS"],
+#     "S3" => [s36_handles[0][0], "BS"],
+#     "S6" => [bg.complement_side(s36_hinges[0][0]), "B"],
+# })
+
+# m2_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[1][0], "BS"],
+#     "S2" => [s25_handles[1][0], "BS"],
+#     "S3" => [s36_handles[1][0], "BS"],
+#     "S6" => [bg.complement_side(s36_handles[0][0]), "BS"]
+# })
+
+# m3_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[2][0], "BS"],
+#     "S2" => [s25_handles[2][0], "BS"],
+#     "S3" => [s36_handles[2][0], "BS"],
+#     "S6" => [bg.complement_side(s36_handles[1][0]), "BS"]
+# })
+
+# m4_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[3][0], "BS"],
+#     "S6" => [bg.complement_side(s36_handles[2][0]), "BS"]
+# })
+
+# m5_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[4][0], "BS"],
+#     "S2" => [s25_handles[3][0], "BS"],
+#     "S3" => [s36_handles[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[0][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[0][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[1][0]), "B"],
+# })
+
+# m6_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[5][0], "BS"],
+#     "S2" => [s25_handles[4][0], "BS"],
+#     "S3" => [s36_handles[4][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[1][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[0][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[3][0]), "BS"]
+# })
+
+# m7_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[6][0], "BS"],
+#     "S2" => [s25_handles[5][0], "BS"],
+#     "S3" => [s36_handles[5][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[2][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[1][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[4][0]), "BS"]
+# })
+
+# m8_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[3][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[2][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[5][0]), "BS"]
+# })
+
+# m9_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[8][0], "BS"],
+#     "S2" => [s25_handles[6][0], "BS"],
+#     "S3" => [s36_handles[6][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[4][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[1][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[2][0]), "B"],
+# })
+
+# m10_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[9][0], "BS"],
+#     "S2" => [s25_handles[7][0], "BS"],
+#     "S3" => [s36_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[5][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[3][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[6][0]), "BS"]
+# })
+
+# m11_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[10][0], "BS"],
+#     "S2" => [s25_handles[8][0], "BS"],
+#     "S3" => [s36_handles[8][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[6][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[4][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[7][0]), "BS"]
+# })
+
+# m12_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[7][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[5][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[8][0]), "BS"]
+# })
+
+# m13_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[4][0], "B"],
+#     "S2" => [s25_hinges[7][0], "B"],
+#     "S3" => [s36_handles[9][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[8][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[2][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[3][0]), "B"],
+# })
+
+# m14_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[5][0], "B"],
+#     "S2" => [s25_hinges[8][0], "B"],
+#     "S3" => [s36_handles[10][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[9][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[6][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[9][0]), "BS"]
+# })
+
+# m15_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[6][0], "B"],
+#     "S2" => [s25_hinges[9][0], "B"],
+#     "S3" => [s36_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[10][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[7][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[10][0]), "BS"]
+# })
+
+# m16_16m_B_HiHa = bg.sequence_generator({
+#     "S1" => [s14_hinges[7][0], "B"],
+#     "S4" => [bg.complement_side(s14_handles[11][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[8][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[11][0]), "BS"]
+# })
+
+# # 16M#C
+
+# m1_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[0][0], "BS"],
+#     "S2" => [s25_handles[0][0], "BS"],
+#     "S3" => [s36_handles[0][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[0][0]), "B"],
+# })
+
+# m2_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[1][0], "BS"],
+#     "S2" => [s25_handles[1][0], "BS"],
+#     "S3" => [s36_handles[1][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[1][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[3][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[0][0]), "BS"]
+# })
+
+# m3_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[2][0], "BS"],
+#     "S2" => [s25_handles[2][0], "BS"],
+#     "S3" => [s36_handles[2][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[2][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[4][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[1][0]), "BS"]
+# })
+
+# m4_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[3][0], "BS"],
+#     "S2" => [s25_hinges[10][0], "B"],
+#     "S3" => [s36_hinges[4][0], "B"],
+#     "S4" => [bg.complement_side(s14_hinges[3][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[5][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[2][0]), "BS"]
+# })
+
+# m5_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[4][0], "BS"],
+#     "S2" => [s25_handles[3][0], "BS"],
+#     "S3" => [s36_handles[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[0][0]), "BS"]
+# })
+
+# m6_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[5][0], "BS"],
+#     "S2" => [s25_handles[4][0], "BS"],
+#     "S3" => [s36_handles[4][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[1][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[0][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[3][0]), "BS"]
+# })
+
+# m7_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[6][0], "BS"],
+#     "S2" => [s25_handles[5][0], "BS"],
+#     "S3" => [s36_handles[5][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[2][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[1][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[4][0]), "BS"]
+# })
+
+# m8_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[7][0], "BS"],
+#     "S2" => [s25_hinges[11][0], "B"],
+#     "S3" => [s36_hinges[5][0], "B"],
+#     "S4" => [bg.complement_side(s14_handles[3][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[2][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[5][0]), "BS"]
+# })
+
+# m9_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[8][0], "BS"],
+#     "S2" => [s25_handles[6][0], "BS"],
+#     "S3" => [s36_handles[6][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[4][0]), "BS"]
+# })
+
+# m10_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[9][0], "BS"],
+#     "S2" => [s25_handles[7][0], "BS"],
+#     "S3" => [s36_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[5][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[3][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[6][0]), "BS"]
+# })
+
+# m11_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[10][0], "BS"],
+#     "S2" => [s25_handles[8][0], "BS"],
+#     "S3" => [s36_handles[8][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[6][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[4][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[7][0]), "BS"]
+# })
+
+# m12_16m_C_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[11][0], "BS"],
+#     "S2" => [s25_hinges[12][0], "B"],
+#     "S3" => [s36_hinges[6][0], "B"],
+#     "S4" => [bg.complement_side(s14_handles[7][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[5][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[8][0]), "BS"]
+# })
+
+# m13_16m_C_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[9][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[8][0]), "BS"]
+# })
+
+# m14_16m_C_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[10][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[9][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[6][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[9][0]), "BS"]
+# })
+
+# m15_16m_C_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[10][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[7][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[10][0]), "BS"]
+# })
+
+# m16_16m_C_HiHa = bg.sequence_generator({
+#     "S3" => [s36_hinges[7][0], "B"],
+#     "S4" => [bg.complement_side(s14_handles[11][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[8][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[11][0]), "BS"]
+# })
+
+# # 16M#D
+
+# m1_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[0][0], "BS"],
+#     "S2" => [s25_handles[0][0], "BS"],
+#     "S3" => [s36_handles[0][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[4][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[6][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[4][0]), "B"]
+# })
+
+# m2_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[1][0], "BS"],
+#     "S2" => [s25_handles[1][0], "BS"],
+#     "S3" => [s36_handles[1][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[5][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[7][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[0][0]), "BS"]
+# })
+
+# m3_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[2][0], "BS"],
+#     "S2" => [s25_handles[2][0], "BS"],
+#     "S3" => [s36_handles[2][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[6][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[8][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[1][0]), "BS"]
+# })
+
+# m4_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_hinges[7][0]), "B"],
+#     "S5" => [bg.complement_side(s25_hinges[9][0]), "B"],
+#     "S6" => [bg.complement_side(s36_handles[2][0]), "BS"]
+# })
+
+# m5_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[4][0], "BS"],
+#     "S2" => [s25_handles[3][0], "BS"],
+#     "S3" => [s36_handles[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[0][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[10][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[5][0]), "B"]
+# })
+
+# m6_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[5][0], "BS"],
+#     "S2" => [s25_handles[4][0], "BS"],
+#     "S3" => [s36_handles[4][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[1][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[0][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[3][0]), "BS"]
+# })
+
+# m7_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[6][0], "BS"],
+#     "S2" => [s25_handles[5][0], "BS"],
+#     "S3" => [s36_handles[5][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[2][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[1][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[4][0]), "BS"]
+# })
+
+# m8_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[3][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[2][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[5][0]), "BS"]
+# })
+
+# m9_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[8][0], "BS"],
+#     "S2" => [s25_handles[6][0], "BS"],
+#     "S3" => [s36_handles[6][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[4][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[11][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[6][0]), "B"]
+# })
+
+# m10_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[9][0], "BS"],
+#     "S2" => [s25_handles[7][0], "BS"],
+#     "S3" => [s36_handles[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[5][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[3][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[6][0]), "BS"]
+# })
+
+# m11_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[10][0], "BS"],
+#     "S2" => [s25_handles[8][0], "BS"],
+#     "S3" => [s36_handles[8][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[6][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[4][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[7][0]), "BS"]
+# })
+
+# m12_16m_D_HiHa = bg.sequence_generator({
+#     "S1" => [s14_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[7][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[5][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[8][0]), "BS"]
+# })
+
+# m13_16m_D_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[9][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[8][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_hinges[12][0]), "B"],
+#     "S6" => [bg.complement_side(s36_hinges[7][0]), "B"]
+# })
+
+# m14_16m_D_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[10][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[9][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[6][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[9][0]), "BS"]
+# })
+
+# m15_16m_D_HiHa = bg.sequence_generator({
+#     "S3" => [s36_handles[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_handles[10][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[7][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[10][0]), "BS"]
+# })
+
+# m16_16m_D_HiHa = bg.sequence_generator({
+#     "S4" => [bg.complement_side(s14_handles[11][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_handles[8][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_handles[11][0]), "BS"]
+# })
+
+# LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/sequences/"
+
+# bg.to_csv(["Sequence"] + m1_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m1A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m2_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m2A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m3_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m3A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m4_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m4A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m5_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m5A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m6_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m6A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m7_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m7A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m8_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m8A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m9_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m9A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m10_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m10A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m11_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m11A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m12_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m12A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m13_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m13A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m14_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m14A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m15_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m15A_HiHa.csv")
+# bg.to_csv(["Sequence"] + m16_16m_A_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m16A_HiHa.csv")
+
+# bg.to_csv(["Sequence"] + m1_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m1B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m2_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m2B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m3_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m3B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m4_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m4B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m5_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m5B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m6_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m6B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m7_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m7B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m8_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m8B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m9_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m9B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m10_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m10B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m11_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m11B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m12_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m12B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m13_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m13B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m14_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m14B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m15_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m15B_HiHa.csv")
+# bg.to_csv(["Sequence"] + m16_16m_B_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m16B_HiHa.csv")
+
+# bg.to_csv(["Sequence"] + m1_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m1C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m2_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m2C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m3_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m3C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m4_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m4C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m5_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m5C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m6_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m6C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m7_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m7C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m8_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m8C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m9_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m9C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m10_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m10C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m11_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m11C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m12_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m12C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m13_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m13C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m14_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m14C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m15_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m15C_HiHa.csv")
+# bg.to_csv(["Sequence"] + m16_16m_C_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m16C_HiHa.csv")
+
+# bg.to_csv(["Sequence"] + m1_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m1D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m2_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m2D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m3_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m3D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m4_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m4D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m5_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m5D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m6_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m6D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m7_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m7D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m8_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m8D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m9_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m9D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m10_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m10D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m11_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m11D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m12_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m12D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m13_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m13D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m14_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m14D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m15_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m15D_HiHa.csv")
+# bg.to_csv(["Sequence"] + m16_16m_D_HiHa, "#{LINUX_PATH}64M_HiHa_V2/m16D_HiHa.csv")
+
+# bg = BondGenerator.new
+
+# s14_4s4b, s14_handles_score = bg.best_sides_out_of("S14", "handles", 150, [], count=5, number=2, overlap=0.25, godmode=false)
+# puts "Handle S14 score: #{s14_handles_score}"
+# s25_4s4b, s25_handles_score = bg.best_sides_out_of("S25", "handles", 25, [], count=9, number=2, overlap=0.25, godmode=false)
+# puts "Handle S25 score: #{s25_handles_score}"
+# s36_4s4b, s36_handles_score = bg.best_sides_out_of("S36", "handles", 5, [], count=12, number=2, overlap=0.25, godmode=false)
+# puts "Handle S36 score: #{s36_handles_score}"
+
+# # p "Sample S14 handle: #{s14_handles[0]} and hinge: #{s14_hinges[0]}"
+# # p "Sample S25 handle: #{s25_handles[0]} and hinge: #{s25_hinges[0]}"
+# # p "Sample S36 handle: #{s36_handles[0]} and hinge: #{s36_hinges[0]}"
+
+# m1_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[0][0], "BS"],
+#     "S2" => [s25_4s4b[0][0], "BS"],
+#     "S3" => [s36_4s4b[0][0], "BS"]
+# })
+
+# m2_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[1][0], "BS"],
+#     "S2" => [s25_4s4b[1][0], "BS"],
+#     "S3" => [s36_4s4b[1][0], "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[0][0]), "BS"]
+# })
+
+# m3_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[2][0], "BS"],
+#     "S2" => [s25_4s4b[2][0], "BS"],
+#     "S3" => [s36_4s4b[2][0], "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[1][0]), "BS"]
+# })
+
+# m4_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[3][0], "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[2][0]), "BS"]
+# })
+
+# m5_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[4][0], "BS"],
+#     "S2" => [s25_4s4b[3][0], "BS"],
+#     "S3" => [s36_4s4b[3][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[0][0]), "BS"]
+# })
+
+# m6_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[5][0], "BS"],
+#     "S2" => [s25_4s4b[4][0], "BS"],
+#     "S3" => [s36_4s4b[4][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[1][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[0][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[3][0]), "BS"]
+# })
+
+# m7_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[6][0], "BS"],
+#     "S2" => [s25_4s4b[5][0], "BS"],
+#     "S3" => [s36_4s4b[5][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[2][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[1][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[4][0]), "BS"]
+# })
+
+# m8_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[3][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[2][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[5][0]), "BS"]
+# })
+
+# m9_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[8][0], "BS"],
+#     "S2" => [s25_4s4b[6][0], "BS"],
+#     "S3" => [s36_4s4b[6][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[4][0]), "BS"]
+# })
+
+# m10_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[9][0], "BS"],
+#     "S2" => [s25_4s4b[7][0], "BS"],
+#     "S3" => [s36_4s4b[7][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[5][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[3][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[6][0]), "BS"]
+# })
+
+# m11_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[10][0], "BS"],
+#     "S2" => [s25_4s4b[8][0], "BS"],
+#     "S3" => [s36_4s4b[8][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[6][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[4][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[7][0]), "BS"]
+# })
+
+# m12_16m = bg.sequence_generator({
+#     "S1" => [s14_4s4b[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[7][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[5][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[8][0]), "BS"]
+# })
+
+# m13_16m = bg.sequence_generator({
+#     "S3" => [s36_4s4b[9][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[8][0]), "BS"]
+# })
+
+# m14_16m = bg.sequence_generator({
+#     "S3" => [s36_4s4b[10][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[9][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[6][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[9][0]), "BS"]
+# })
+
+# m15_16m = bg.sequence_generator({
+#     "S3" => [s36_4s4b[11][0], "BS"],
+#     "S4" => [bg.complement_side(s14_4s4b[10][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[7][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[10][0]), "BS"]
+# })
+
+# m16_16m = bg.sequence_generator({
+#     "S4" => [bg.complement_side(s14_4s4b[11][0]), "BS"],
+#     "S5" => [bg.complement_side(s25_4s4b[8][0]), "BS"],
+#     "S6" => [bg.complement_side(s36_4s4b[11][0]), "BS"]
+# })
+
+# Z bonds
+# bg = BondGenerator.new
+
+# s14_4s4b, s14_handles_score = bg.best_sides_out_of("S14", "handles", 150, [], count=5, number=2, overlap=0.25, godmode=false)
+# puts "Handle S14 score: #{s14_handles_score}"
+# z_2x16h_tail_bonds, z_score = bg.best_z_bonds_out_of(4, 8, 0.25, 100)
+# p z_2x16h_tail_bonds
+# p z_score
+# z_2x16h_head_bonds = bg.z_complement_side(z_2x16h_tail_bonds)
+# p z_2x16h_head_bonds
+# p "Z score is: #{z_score}"
+# p z_2x16h_tail_bonds
+# p z_2x16h_head_bonds
+
+# m01a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
+# m02a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[1]) + bg.add_z_bonds("HEAD", [])
+# m03a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[2]) + bg.add_z_bonds("HEAD", [])
+# m04a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[3]) + bg.add_z_bonds("HEAD", [])
+# m05a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[4]) + bg.add_z_bonds("HEAD", [])
+# m06a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[5]) + bg.add_z_bonds("HEAD", [])
+# m07a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[6]) + bg.add_z_bonds("HEAD", [])
+# m08a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[7]) + bg.add_z_bonds("HEAD", [])
+# m09a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[8]) + bg.add_z_bonds("HEAD", [])
+# m10a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[9]) + bg.add_z_bonds("HEAD", [])
+# m11a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[10]) + bg.add_z_bonds("HEAD", [])
+# m12a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[11]) + bg.add_z_bonds("HEAD", [])
+# m13a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[12]) + bg.add_z_bonds("HEAD", [])
+# m14a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[13]) + bg.add_z_bonds("HEAD", [])
+# m15a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[14]) + bg.add_z_bonds("HEAD", [])
+# m16a_z_seqs = bg.add_z_bonds("TAIL", z_2x16h_tail_bonds[15]) + bg.add_z_bonds("HEAD", [])
+
+
+# m01b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[0])
+# m02b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[1])
+# m03b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[2])
+# m04b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[3])
+# m05b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[4])
+# m06b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[5])
+# m07b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[6])
+# m08b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[7])
+# m09b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[8])
+# m10b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[9])
+# m11b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[10])
+# m12b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[11])
+# m13b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[12])
+# m14b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[13])
+# m15b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[14])
+# m16b_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_2x16h_head_bonds[15])
+
+# m01a_16m = m1_16m + m01a_z_seqs
+# m02a_16m = m2_16m + m02a_z_seqs
+# m03a_16m = m3_16m + m03a_z_seqs
+# m04a_16m = m4_16m + m04a_z_seqs
+# m05a_16m = m5_16m + m05a_z_seqs
+# m06a_16m = m6_16m + m06a_z_seqs
+# m07a_16m = m7_16m + m07a_z_seqs
+# m08a_16m = m8_16m + m08a_z_seqs
+# m09a_16m = m9_16m + m09a_z_seqs
+# m10a_16m = m10_16m + m10a_z_seqs
+# m11a_16m = m11_16m + m11a_z_seqs
+# m12a_16m = m12_16m + m12a_z_seqs
+# m13a_16m = m13_16m + m13a_z_seqs
+# m14a_16m = m14_16m + m14a_z_seqs
+# m15a_16m = m15_16m + m15a_z_seqs
+# m16a_16m = m16_16m + m16a_z_seqs
+
+# m01b_16m = m1_16m + m01b_z_seqs
+# m02b_16m = m2_16m + m02b_z_seqs
+# m03b_16m = m3_16m + m03b_z_seqs
+# m04b_16m = m4_16m + m04b_z_seqs
+# m05b_16m = m5_16m + m05b_z_seqs
+# m06b_16m = m6_16m + m06b_z_seqs
+# m07b_16m = m7_16m + m07b_z_seqs
+# m08b_16m = m8_16m + m08b_z_seqs
+# m09b_16m = m9_16m + m09b_z_seqs
+# m10b_16m = m10_16m + m10b_z_seqs
+# m11b_16m = m11_16m + m11b_z_seqs
+# m12b_16m = m12_16m + m12b_z_seqs
+# m13b_16m = m13_16m + m13b_z_seqs
+# m14b_16m = m14_16m + m14b_z_seqs
+# m15b_16m = m15_16m + m15b_z_seqs
+# m16b_16m = m16_16m + m16b_z_seqs
+
+LINUX_SAVE_PATH = "/home/spetrosyan/Desktop/hexoland/sequences/"
+
+# bg.to_csv(["Sequence"] + m01a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m01a.csv")
+# bg.to_csv(["Sequence"] + m02a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m02a.csv")
+# bg.to_csv(["Sequence"] + m03a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m03a.csv")
+# bg.to_csv(["Sequence"] + m04a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m04a.csv")
+# bg.to_csv(["Sequence"] + m05a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m05a.csv")
+# bg.to_csv(["Sequence"] + m06a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m06a.csv")
+# bg.to_csv(["Sequence"] + m07a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m07a.csv")
+# bg.to_csv(["Sequence"] + m08a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m08a.csv")
+# bg.to_csv(["Sequence"] + m09a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m09a.csv")
+# bg.to_csv(["Sequence"] + m10a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m10a.csv")
+# bg.to_csv(["Sequence"] + m11a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m11a.csv")
+# bg.to_csv(["Sequence"] + m12a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m12a.csv")
+# bg.to_csv(["Sequence"] + m13a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m13a.csv")
+# bg.to_csv(["Sequence"] + m14a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m14a.csv")
+# bg.to_csv(["Sequence"] + m15a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m15a.csv")
+# bg.to_csv(["Sequence"] + m16a_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m16a.csv")
+
+# bg.to_csv(["Sequence"] + m01b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m01b.csv")
+# bg.to_csv(["Sequence"] + m02b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m02b.csv")
+# bg.to_csv(["Sequence"] + m03b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m03b.csv")
+# bg.to_csv(["Sequence"] + m04b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m04b.csv")
+# bg.to_csv(["Sequence"] + m05b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m05b.csv")
+# bg.to_csv(["Sequence"] + m06b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m06b.csv")
+# bg.to_csv(["Sequence"] + m07b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m07b.csv")
+# bg.to_csv(["Sequence"] + m08b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m08b.csv")
+# bg.to_csv(["Sequence"] + m09b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m09b.csv")
+# bg.to_csv(["Sequence"] + m10b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m10b.csv")
+# bg.to_csv(["Sequence"] + m11b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m11b.csv")
+# bg.to_csv(["Sequence"] + m12b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m12b.csv")
+# bg.to_csv(["Sequence"] + m13b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m13b.csv")
+# bg.to_csv(["Sequence"] + m14b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m14b.csv")
+# bg.to_csv(["Sequence"] + m15b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m15b.csv")
+# bg.to_csv(["Sequence"] + m16b_16m, "#{LINUX_SAVE_PATH}2x16M_8H/m16b.csv")
+
+# z_2x16h_tail_bonds, z_score = bg.best_z_bonds_out_of(4, 48, 0.5, 1)
+# p z_score
+
+bg = BondGenerator.new
+
+s14_4s4b, s14_handles_score = bg.best_sides_out_of("S14", "handles", 150, [], count=5, number=2, overlap=0.25, godmode=false)
+p s14_4s4b
+p "Handle S14 score: #{s14_handles_score}"
+
+z_8h_tail_bonds, z_score = bg.best_z_bonds_out_of(4, 8, 0.25, 200)
+p z_8h_tail_bonds
+p "Z score: #{z_score}"
+
+z_8h_head_bonds = bg.z_complement_side(z_8h_tail_bonds)
+p z_8h_head_bonds
+
+### Linear Chain 1
+
+m1a_tw = bg.sequence_generator({
+    "S1" => [s14_4s4b[0][0], "BS"]
+})
+
+m1b_tw = bg.sequence_generator({
+    "S1" => [s14_4s4b[1][0], "BS"]
+})
+
+m1c_tw = bg.sequence_generator({
+    "S1" => [s14_4s4b[2][0], "BS"]
+})
+
+m1d_tw = bg.sequence_generator({
+    "S1" => [s14_4s4b[3][0], "BS"]
+})
+
+m1e_tw = bg.sequence_generator({
+    "S1" => [s14_4s4b[4][0], "BS"]
+})
+
+### Linear Chain 2
+
+m2a_tw = bg.sequence_generator({
+    "S4" => [bg.complement_side(s14_4s4b[0][0]), "BS"]
+})
+
+m2b_tw = bg.sequence_generator({
+    "S4" => [bg.complement_side(s14_4s4b[1][0]), "BS"]
+})
+
+m2c_tw = bg.sequence_generator({
+    "S4" => [bg.complement_side(s14_4s4b[2][0]), "BS"]
+})
+
+m2d_tw = bg.sequence_generator({
+    "S4" => [bg.complement_side(s14_4s4b[3][0]), "BS"]
+})
+
+m2e_tw = bg.sequence_generator({
+    "S4" => [bg.complement_side(s14_4s4b[4][0]), "BS"]
+})
+
+# 1x2
+
+m1a_1x2_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
+m2a_1x2_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[1]) + bg.add_z_bonds("HEAD", [])
+
+m1b_1x2_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[0])
+m2b_1x2_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[1])
+
+# 1x3
+
+m1a_1x3_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
+m2a_1x3_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[1]) + bg.add_z_bonds("HEAD", [])
+
+m1b_1x3_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[2]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[0])
+m2b_1x3_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[3]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[1])
+
+m1c_1x3_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[2])
+m2c_1x3_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[3])
+
+# 1x4
+
+m1a_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
+m2a_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[1]) + bg.add_z_bonds("HEAD", [])
+
+m1b_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[2]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[0])
+m2b_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[3]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[1])
+
+m1c_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[4]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[2])
+m2c_1x4_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[5]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[3])
+
+m1d_1x4_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[4])
+m2d_1x4_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[5])
+
+# 1x5
+
+m1a_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
+m2a_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[1]) + bg.add_z_bonds("HEAD", [])
+
+m1b_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[2]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[0])
+m2b_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[3]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[1])
+
+m1c_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[4]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[2])
+m2c_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[5]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[3])
+
+m1d_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[6]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[4])
+m2d_1x5_z_seqs = bg.add_z_bonds("TAIL", z_8h_tail_bonds[7]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[5])
+
+m1e_1x5_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[6])
+m2e_1x5_z_seqs = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[7])
+
+# 1x2
+
+m1a_1x2 = m1a_tw + m1a_1x2_z_seqs
+m1b_1x2 = m1b_tw + m1b_1x2_z_seqs
+
+m2a_1x2 = m2a_tw + m2a_1x2_z_seqs
+m2b_1x2 = m2b_tw + m2b_1x2_z_seqs
+
+# 1x3
+
+m1a_1x3 = m1a_tw + m1a_1x3_z_seqs
+m1b_1x3 = m1b_tw + m1b_1x3_z_seqs
+m1c_1x3 = m1c_tw + m1c_1x3_z_seqs
+
+m2a_1x3 = m2a_tw + m2a_1x3_z_seqs
+m2b_1x3 = m2b_tw + m2b_1x3_z_seqs
+m2c_1x3 = m2c_tw + m2c_1x3_z_seqs
+
+# 1x4
+
+m1a_1x4 = m1a_tw + m1a_1x4_z_seqs
+m1b_1x4 = m1b_tw + m1b_1x4_z_seqs
+m1c_1x4 = m1c_tw + m1c_1x4_z_seqs
+m1d_1x4 = m1d_tw + m1d_1x4_z_seqs
+
+m2a_1x4 = m2a_tw + m2a_1x4_z_seqs
+m2b_1x4 = m2b_tw + m2b_1x4_z_seqs
+m2c_1x4 = m2c_tw + m2c_1x4_z_seqs
+m2d_1x4 = m2d_tw + m2d_1x4_z_seqs
+
+# 1x5
+
+m1a_1x5 = m1a_tw + m1a_1x5_z_seqs
+m1b_1x5 = m1b_tw + m1b_1x5_z_seqs
+m1c_1x5 = m1c_tw + m1c_1x5_z_seqs
+m1d_1x5 = m1d_tw + m1d_1x5_z_seqs
+m1e_1x5 = m1e_tw + m1e_1x5_z_seqs
+
+m2a_1x5 = m2a_tw + m2a_1x5_z_seqs
+m2b_1x5 = m2b_tw + m2b_1x5_z_seqs
+m2c_1x5 = m2c_tw + m2c_1x5_z_seqs
+m2d_1x5 = m2d_tw + m2d_1x5_z_seqs
+m2e_1x5 = m2e_tw + m2e_1x5_z_seqs
+
+basic_zs = bg.get_basic_zs
+# p "Basic Z: #{bg.basic_zs}"
+
+# 1x2
+bg.to_csv(["Sequence"] + m1a_1x2 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1a_1x2.csv")
+bg.to_csv(["Sequence"] + m1b_1x2 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1b_1x2.csv")
+
+bg.to_csv(["Sequence"] + m2a_1x2 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2a_1x2.csv")
+bg.to_csv(["Sequence"] + m2b_1x2 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2b_1x2.csv")
+
+# 1x3
+bg.to_csv(["Sequence"] + m1a_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1a_1x3.csv")
+bg.to_csv(["Sequence"] + m1b_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1b_1x3.csv")
+bg.to_csv(["Sequence"] + m1c_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1c_1x3.csv")
+
+bg.to_csv(["Sequence"] + m2a_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2a_1x3.csv")
+bg.to_csv(["Sequence"] + m2b_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2b_1x3.csv")
+bg.to_csv(["Sequence"] + m2c_1x3 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2c_1x3.csv")
+
+# 1x4
+bg.to_csv(["Sequence"] + m1a_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1a_1x4.csv")
+bg.to_csv(["Sequence"] + m1b_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1b_1x4.csv")
+bg.to_csv(["Sequence"] + m1c_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1c_1x4.csv")
+bg.to_csv(["Sequence"] + m1d_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1d_1x4.csv")
+
+bg.to_csv(["Sequence"] + m2a_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2a_1x4.csv")
+bg.to_csv(["Sequence"] + m2b_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2b_1x4.csv")
+bg.to_csv(["Sequence"] + m2c_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2c_1x4.csv")
+bg.to_csv(["Sequence"] + m2d_1x4 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2d_1x4.csv")
+
+# 1x5
+bg.to_csv(["Sequence"] + m1a_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1a_1x5.csv")
+bg.to_csv(["Sequence"] + m1b_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1b_1x5.csv")
+bg.to_csv(["Sequence"] + m1c_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1c_1x5.csv")
+bg.to_csv(["Sequence"] + m1d_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1d_1x5.csv")
+bg.to_csv(["Sequence"] + m1e_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m1e_1x5.csv")
+
+bg.to_csv(["Sequence"] + m2a_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2a_1x5.csv")
+bg.to_csv(["Sequence"] + m2b_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2b_1x5.csv")
+bg.to_csv(["Sequence"] + m2c_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2c_1x5.csv")
+bg.to_csv(["Sequence"] + m2d_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2d_1x5.csv")
+bg.to_csv(["Sequence"] + m2e_1x5 + basic_zs, "#{LINUX_SAVE_PATH}1xTW/m2e_1x5.csv")
