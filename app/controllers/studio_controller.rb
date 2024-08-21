@@ -41,7 +41,7 @@ class StudioController < ApplicationController
         assembly = Assembly.new(assembly_params)
         
         # begin
-            bond_map = @bond_generator.build_from_neighbors(JSON.parse(assembly_params[:design_map]))
+            bond_map = @bond_generator.configure_blocks(JSON.parse(assembly_params[:design_map]))
             assembly[:design_map] = bond_map.to_json
 
             if assembly.save
