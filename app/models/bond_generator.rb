@@ -9,7 +9,6 @@ BASIC_Z_LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bas
 
 class BondGenerator
 
-    
     def initialize
         @bond_map = {}
         @basic_zs= []
@@ -50,15 +49,15 @@ class BondGenerator
     end
 
     def randomize_sides(side, count, number, type="handles",godmode=false)
-        # if number == 1
-        #     if side == "S14"
-        #         return group_randomizer(BondGenerator.single_s14_sides[0], number) + group_randomizer(BondGenerator.single_s14_sides[1], number)
-        #     elsif side == "S25"
-        #         return group_randomizer(BondGenerator.single_s25_sides[0], number) + group_randomizer(BondGenerator.single_s25_sides[1], number)
-        #     elsif side == "S36"
-        #         return group_randomizer(BondGenerator.single_s36_sides[0], number) + group_randomizer(BondGenerator.single_s36_sides[1], number)
-        #     end
-        # end
+        if number == 1
+            if side == "S14"
+                return group_randomizer(BondGenerator.single_s14_sides[0], number) + group_randomizer(BondGenerator.single_s14_sides[1], number)
+            elsif side == "S25"
+                return group_randomizer(BondGenerator.single_s25_sides[0], number) + group_randomizer(BondGenerator.single_s25_sides[1], number)
+            elsif side == "S36"
+                return group_randomizer(BondGenerator.single_s36_sides[0], number) + group_randomizer(BondGenerator.single_s36_sides[1], number)
+            end
+        end
 
         if godmode
             if side == "S14"
@@ -1368,4 +1367,3 @@ class BondGenerator
         }
     end
 end
-
