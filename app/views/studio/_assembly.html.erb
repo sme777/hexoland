@@ -1,66 +1,81 @@
+<div class="py-2">
+    <div class="row g-0 border rounded flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col-md-4 p-4 d-flex flex-column position-static">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong class="d-inline-block mb-2 text-primary-emphasis"><%= assembly.author %></strong>
+                </div>
 
-    <div class="py-2">
-        <div class="row g-0 border rounded flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-            <div class="col-md-4 p-4 d-flex flex-column position-static">
-                <div class="row">
-                    <div class="col-md-6">
-                        <strong class="d-inline-block mb-2 text-primary-emphasis"><%= assembly.author %></strong>
+            </div>
+            <h3 class="mb-0"><%= assembly.name %></h3>
+
+            <div class="row">
+
+            </div>
+            <div class="pt-3">
+                <div class="pb-3 row">
+                    <div class="mb-1 text-body-secondary">
+                        <%= "#{assembly.created_at.strftime("%H:%M, %A, %B %e, %Y") if !assembly.created_at.nil?}" %>
                     </div>
 
                 </div>
-                <h3 class="mb-0"><%= assembly.name %></h3>
-                
                 <div class="row">
-
+                    <div class="mb-3">
+                        <label for="assemblyDescriptionField" class="form-label">Assembly Description</label>
+                        <textarea class="form-control" id="assemblyDescriptionField" placeholder="No Description"
+                            rows="3"></textarea>
+                    </div>
                 </div>
-                <div class="pt-3">
-                    <div class="pb-3 row">
-                        <div class="mb-1 text-body-secondary"><%= "#{assembly.created_at.strftime("%H:%M, %A, %B %e, %Y") if !assembly.created_at.nil?}" %></div>
 
+                <%= form_with url: get_picklist_path(assembly.id), id: "picklistGeneratorForm", method: :get, data: {turbo: false} do |f| %>
+                <div class="row py-2">
+                    <div class="input-group">
+                        <span class="input-group-text">Volumes</span>
+                        <%= f.text_field :volumes, type: "text", id: "itemAssemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
                     </div>
-                    <div class="row">
-                        <div class="mb-3">
-                            <label for="assemblyDescriptionField" class="form-label">Assembly Description</label>
-                            <textarea class="form-control" id="assemblyDescriptionField" placeholder="No Description" rows="3"></textarea>
-                        </div>
+                </div>
+                <div class="row py-2">
+                    <div class="input-group">
+                        <span class="input-group-text">Wells</span>
+                        <%= f.text_field :wells, type: "text", id: "itemAssemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
                     </div>
+                </div>
 
-                    <%= form_with url: get_picklist_path(assembly.id), id: "picklistGeneratorForm", method: :get, data: {turbo: false} do |f| %>
-                        <div class="row py-2">
-                            <div class="input-group">
-                                <span class="input-group-text">Volumes</span>
-                                <%= f.text_field :volumes, type: "text", id: "itemAssemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
-                            </div>
-                        </div>
-                        <div class="row py-2">
-                            <div class="input-group">
-                                <span class="input-group-text">Wells</span>
-                                <%= f.text_field :wells, type: "text", id: "itemAssemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
-                            </div>
-                        </div>
-                        <%= f.submit "Get Picklist", class: "btn bg-primary-subtle w-100"%>
-                    <% end %>
+                <%= f.submit "Get Picklist", class: "btn bg-primary-subtle w-100"%>
 
-                    <div class="row">
-                        <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
-                        <div class="px-0 mx-0">
-                            <div class="pt-2">
-                                <%= f.submit "Delete", class: "btn bg-danger-subtle w-100"%>
-                            </div>
+                <% end %>
+
+                <div class="row">
+                    <%= form_with url: get_json_path(assembly.id), method: :get, data: {turbo: false} do |f| %>
+                    <div class="px-0 mx-0">
+                        <div class="pt-2">
+                            <%= f.submit "Get JSON", class: "btn bg-secondary-subtle w-100"%>
                         </div>
                         <% end %>
                     </div>
-
                 </div>
-            </div>
-            <div class="col-md-8">
-                <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
-                <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_code", style: "display: none;", value: assembly.design_map %>
-                <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 27vh;">
-                    
-                </div> 
+
+
+                <div class="row">
+                    <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
+                    <div class="px-0 mx-0">
+                        <div class="pt-2">
+                            <%= f.submit "Delete", class: "btn bg-danger-subtle w-100"%>
+                        </div>
+                    </div>
+                    <% end %>
+                </div>
+
             </div>
         </div>
+        <div class="col-md-8">
+            <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
+            <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_code", style: "display: none;", value: assembly.design_map %>
+            <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 27vh;">
 
-
+            </div>
+        </div>
     </div>
+
+
+</div>

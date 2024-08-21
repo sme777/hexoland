@@ -4,7 +4,7 @@ require 'will_paginate/array'
 
 class StudioController < ApplicationController
     before_action :init_params, only: [:index, :create, :get_picklist]
-    before_action :set_assembly, only: [:delete, :get_picklist]
+    before_action :set_assembly, only: [:delete, :get_picklist, :get_json]
 
     def index
         @assembly_method = "Code"
@@ -69,8 +69,19 @@ class StudioController < ApplicationController
             end
         end
 
-        send_file(Rails.root.join("#{temp_file.path}"), :type => 'text/csv', 
-            :filename => "#{@assembly.name}_picklist.csv", :disposition => 'attachment')
+        send_file(Rails.root.join("#{temp_file.path}"), type: 'text/csv', 
+            filename: "#{@assembly.name}_picklist.csv", disposition: 'attachment')
+    end
+
+    def get_json
+        temp_file = Tempfile.new(["#{@assembly.name}_design_map.json", '.json'])
+        # Write the JSON data to the temporary file
+        temp_file.write(@assembly.design_map)
+        temp_file.rewind  # Rewind the file to the beginning
+    
+        # Send the file for download
+        send_file(Rails.root.join("#{temp_file.path}"), type: 'application/json', 
+            filename: "#{@assembly.name}_design_map.json", :disposition => 'attachment')
     end
 
     def delete

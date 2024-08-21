@@ -200,22 +200,55 @@ class BondGenerator
 
             design_map[block]["building_blocks"].each do |component, quantity|
               quantity.times do |idx|
-                structure_map["#{component}##{idx+1}"] = structure_map[component]
+                structure_map["#{component}##{idx+1}"] = Marshal.load(Marshal.dump(structure_map[component]))
               end
             end
 
+            # check if it's necessary to keep building_blocks
+
             # go over bond-map and replace old bond with the new bonds
-            structure_map[block] = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, min_fe, max_fe)
-            return structure_map
+            attr_bonds = design_map[block]["bonds_attractive"]
+            repl_bonds = design_map[block]["bonds_repulsive"]
+            neut_bonds = design_map[block]["bonds_neutral"]
+            min_fe = design_map[block]["min_fe"]
+            max_fe = design_map[block]["max_fe"]
+
+            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, min_fe, max_fe)
+            # byebug
+            pairing_map.each do |pairing, bonds|
+                pair1, pair2 = pairing.split('-')
+                # For 2x7M#1-2x7M#2
+                name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
+                name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+
+                bonds.each do |bond_name, bond|
+                    monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
+                    name = block_id == idx1 ? name1 : name2
+                    bond.each do |side, bs|
+                        structure_map["#{name}##{block_id}"][monomer][side] = bs
+                    end
+                end
+            end
+            structure_map
+
         end
       end
+
+        # delete any blocks that should be ignored
+        design_map.each do |block_name, block_map|
+            if block_map["ignore_generation"] && structure_map.include?(block_name)
+                structure_map.delete(block_name)
+            end
+        end
+
+      generate_sequences(structure_map)
     end
 
     def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, min_fe=0, max_fe=100)
         s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
         s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
         z_tail_count, z_head_count = 0, 0
-        byebug
+        # byebug
         block_map.each do |pairing, bonding|
             # block_map[pairing].each do |monomer|
             bonding.each do |monomer, sides|
@@ -240,16 +273,17 @@ class BondGenerator
                 end
             end
         end
-        # {"count": [s1_side_count, s2_side_count, s3_side_count, s4_side_count, s5_side_count, s6_side_count]}
         ### Set S14, S25, S36 side count 
         s14_side_count, last_s14_idx = [s1_side_count, s4_side_count].max, [s1_side_count, s4_side_count].min
         s25_side_count, last_s25_idx = [s2_side_count, s5_side_count].max, [s2_side_count, s5_side_count].min
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
 
-        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=0.25, godmode=false, min_fe, max_fe) unless s14_side_count == 0
-        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=0.25, godmode=false, min_fe, max_fe) unless s25_side_count == 0
-        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=0.25, godmode=false, min_fe, max_fe) unless s36_side_count == 0
+        trials = 5
+
+        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s14_side_count == 0
+        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s25_side_count == 0
+        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s36_side_count == 0
         z_tails, _ = best_z_bonds_out_of(3, z_count, 0.51, 100) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
@@ -287,7 +321,7 @@ class BondGenerator
                             s4_bonds = complement_side(s14s[curr_last_s14_idx_count][0])
                             curr_last_s14_idx_count += 1
                         else
-                            s4_bonds = complement_side(block_map[pairing][neighbor]["S1"][0])
+                            s4_bonds = complement_side(block_map[pairing][neighbor]["S1"][1][0])
                         end
                         
                         block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s4_bonds, "BS"]]
@@ -297,7 +331,7 @@ class BondGenerator
                             s5_bonds = complement_side(s25s[curr_last_s25_idx_count][0])
                             curr_last_s25_idx_count += 1
                         else
-                            s5_bonds = complement_side(block_map[pairing][neighbor]["S2"][0])
+                            s5_bonds = complement_side(block_map[pairing][neighbor]["S2"][1][0])
                         end
                         
                         block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s5_bonds, "BS"]]
@@ -307,7 +341,7 @@ class BondGenerator
                             s6_bonds = complement_side(s36s[curr_last_s36_idx_count][0])
                             curr_last_s36_idx_count += 1
                         else
-                            s6_bonds = complement_side(block_map[pairing][neighbor]["S3"][0])
+                            s6_bonds = complement_side(block_map[pairing][neighbor]["S3"][1][0])
                         end
                         
                         block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s6_bonds, "BS"]]
@@ -327,32 +361,6 @@ class BondGenerator
             end
         end
 
-        # block_neighbors.each do |block, bonds|
-        #     block_sequences[block] = sequence_generator(bonds)
-        # end
-        block_map.each do |pairing, bonding|
-            bonding.each do |block, neighbors|
-                all_seqs = sequence_generator(block[1])
-                include_z_bonds = block_map[pairing][block].keys.include?("ZU") || neighbor_map[block].keys.include?("ZD")
-                if include_z_bonds
-                    all_seqs += @basic_zs
-                end
-
-                if include_z_bonds && block_map[pairing][block].keys.include?("ZU")
-                    all_seqs += add_z_bonds("TAIL", block_map[pairing][block]["ZU"][1])
-                else
-                    all_seqs += add_z_bonds("TAIL", [])
-                end
-
-                if include_z_bonds && block_map[pairing][block].keys.include?("ZD")
-                    all_seqs += add_z_bonds("HEAD", block_map[pairing][block]["ZD"][1])
-                else
-                    all_seqs += add_z_bonds("HEAD", [])
-                end
-
-                block_map[pairing][block]["Sequences"] = all_seqs
-            end
-        end
         block_map
     end
 
@@ -421,7 +429,6 @@ class BondGenerator
                     neighbor_map[block][side] = [neighbor_map[block][side], [s36s[s36_idx][0], "BS"]]
                     s36_idx += 1
                 elsif side == "ZU"
-                    # block_neighbors[block][side] = z_tails[z_idx][0]
                     neighbor_map[block][side] = [neighbor_map[block][side], z_tails[z_idx]]
                     z_idx += 1
                 end
@@ -477,32 +484,52 @@ class BondGenerator
             end
         end
 
-        block_neighbors.each do |block, bonds|
-            block_sequences[block] = sequence_generator(bonds)
-        end
+        # block_neighbors.each do |block, bonds|
+        #     block_sequences[block] = sequence_generator(bonds)
+        # end
 
-        neighbor_map.each do |block, neighbors|
-            all_seqs = block_sequences[block]
-            include_z_bonds = neighbor_map[block].keys.include?("ZU") || neighbor_map[block].keys.include?("ZD")
-            if include_z_bonds
-                all_seqs += @basic_zs
-            end
+        # neighbor_map.each do |block, neighbors|
+        #     all_seqs = block_sequences[block]
+        #     all_seqs += @basic_zs
+        #     if neighbor_map[block].keys.include?("ZU") #include_z_bonds && 
+        #         all_seqs += add_z_bonds("TAIL", neighbor_map[block]["ZU"][1])
+        #     else
+        #         all_seqs += add_z_bonds("TAIL", [])
+        #     end
 
-            if include_z_bonds && neighbor_map[block].keys.include?("ZU")
-                all_seqs += add_z_bonds("TAIL", neighbor_map[block]["ZU"][1])
-            else
-                all_seqs += add_z_bonds("TAIL", [])
-            end
+        #     if neighbor_map[block].keys.include?("ZD") #include_z_bonds && 
+        #         all_seqs += add_z_bonds("HEAD", neighbor_map[block]["ZD"][1])
+        #     else
+        #         all_seqs += add_z_bonds("HEAD", [])
+        #     end
 
-            if include_z_bonds && neighbor_map[block].keys.include?("ZD")
-                all_seqs += add_z_bonds("HEAD", neighbor_map[block]["ZD"][1])
-            else
-                all_seqs += add_z_bonds("HEAD", [])
-            end
-
-            neighbor_map[block]["Sequences"] = all_seqs
-        end
+        #     neighbor_map[block]["Sequences"] = all_seqs
+        # end
         neighbor_map
+    end
+
+    def generate_sequences(bond_map)
+        bond_map.each do |pairing, bonding|
+            bonding.each do |block, neighbors|
+                all_seqs = sequence_generator(block[1])
+                all_seqs += @basic_zs
+
+                if bond_map[pairing][block].keys.include?("ZU") #include_z_bonds && 
+                    all_seqs += add_z_bonds("TAIL", bond_map[pairing][block]["ZU"][1])
+                else
+                    all_seqs += add_z_bonds("TAIL", [])
+                end
+
+                if bond_map[pairing][block].keys.include?("ZD") #include_z_bonds && 
+                    all_seqs += add_z_bonds("HEAD", bond_map[pairing][block]["ZD"][1])
+                else
+                    all_seqs += add_z_bonds("HEAD", [])
+                end
+
+                bond_map[pairing][block]["Sequences"] = all_seqs
+            end
+        end
+        bond_map
     end
 
     #### Generate Side Bonds ####

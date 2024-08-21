@@ -1,11 +1,13 @@
 {
     "2x(2x7M)": {
       "building_blocks": [["2x7M", 2]],
+      "ignore_generation": false,
       "bonds_attractive": 2,
       "bonds_neutral": 2,
       "bonds_repulsive": 0,
-      "min_fe": 43,
-      "max_fe": 53,
+      "bonds_z": 0,
+      "min_fe": 0,
+      "max_fe": 100,
       "bond_map": {
         "2x7M#1-2x7M#2": {
           "M6A#1": {
@@ -42,9 +44,11 @@
   
     "2x7M": {
       "building_blocks": null,
+      "ignore_generation": true,
       "bonds_attractive": 4,
       "bonds_neutral": 4,
       "bonds_repulsive": 0,
+      "bonds_z": 4,
       "min_fe": 43,
       "max_fe": 53,
       "bond_map": {

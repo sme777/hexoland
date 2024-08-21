@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   post '/studio/assembly/:id/delete' => 'studio#delete', as: :delete_assembly
   get '/studio/assembly/:id/get_picklist' => 'studio#get_picklist', as: :get_picklist
+  get '/studio/assembly/:id/get_json' => 'studio#get_json', as: :get_json
   
   get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
 
