@@ -1,11 +1,8 @@
 require 'set'
 require 'csv'
 
-BOND_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-BASIC_Z_PATH ="/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
-
-BOND_LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-BASIC_Z_LINUX_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
