@@ -171,10 +171,11 @@ class BondGenerator
         attr_bonds = design_map[blocks[0]]["bonds_attractive"]
         repl_bonds = design_map[blocks[0]]["bonds_repulsive"]
         neut_bonds = design_map[blocks[0]]["bonds_neutral"]
+        z_bonds = design_map[block]["bonds_z"]
         min_fe = design_map[blocks[0]]["min_fe"]
         max_fe = design_map[blocks[0]]["max_fe"]
 
-        build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, min_fe, max_fe)
+        build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
       else
         structure_map = {}
         # first build structures with no dependencies
@@ -184,10 +185,11 @@ class BondGenerator
           attr_bonds = design_map[block]["bonds_attractive"]
           repl_bonds = design_map[block]["bonds_repulsive"]
           neut_bonds = design_map[block]["bonds_neutral"]
+          z_bonds = design_map[block]["bonds_z"]
           min_fe = design_map[block]["min_fe"]
           max_fe = design_map[block]["max_fe"]
 
-          structure_map[block] = build_from_neighbors(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, min_fe, max_fe)
+          structure_map[block] = build_from_neighbors(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
         end
 
         # second build structures with no 1 layer dependencies
@@ -206,10 +208,11 @@ class BondGenerator
             attr_bonds = design_map[block]["bonds_attractive"]
             repl_bonds = design_map[block]["bonds_repulsive"]
             neut_bonds = design_map[block]["bonds_neutral"]
+            z_bonds = design_map[block]["bonds_z"]
             min_fe = design_map[block]["min_fe"]
             max_fe = design_map[block]["max_fe"]
 
-            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, min_fe, max_fe)
+            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
             # byebug
             pairing_map.each do |pairing, bonds|
                 pair1, pair2 = pairing.split('-')
@@ -240,7 +243,7 @@ class BondGenerator
       generate_sequences(structure_map)
     end
 
-    def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, min_fe=0, max_fe=100)
+    def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, z_bonds=3, min_fe=0, max_fe=100)
         s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
         s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
         z_tail_count, z_head_count = 0, 0
@@ -280,7 +283,8 @@ class BondGenerator
         s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s14_side_count == 0
         s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s25_side_count == 0
         s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(3, z_count, 0.51, 100) unless z_count == 0
+        # byebug
+        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
@@ -360,7 +364,7 @@ class BondGenerator
         block_map
     end
 
-    def build_from_neighbors(neighbor_map, attr_bonds=4, repl_bonds=0, neut_bonds=4, min_fe=0, max_fe=100)
+    def build_from_neighbors(neighbor_map, attr_bonds=4, repl_bonds=0, neut_bonds=4, z_bonds=3, min_fe=0, max_fe=100)
         # Stores sequence list for each monomer
         block_sequences = {}
         # Stores neighbor map for information
@@ -406,7 +410,7 @@ class BondGenerator
         s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
         s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
         s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(3, z_count, 0.51, 100) unless z_count == 0
+        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
@@ -507,22 +511,22 @@ class BondGenerator
     def generate_sequences(bond_map)
         bond_map.each do |pairing, bonding|
             bonding.each do |block, neighbors|
-                all_seqs = sequence_generator(block[1])
+                all_seqs = sequence_generator(bonding[block])
                 all_seqs += @basic_zs
 
-                if bond_map[pairing][block].keys.include?("ZU") #include_z_bonds && 
-                    all_seqs += add_z_bonds("TAIL", bond_map[pairing][block]["ZU"][1])
+                if bonding[block].keys.include?("ZU") #include_z_bonds && 
+                    all_seqs += add_z_bonds("TAIL", bonding[block]["ZU"][1])
                 else
                     all_seqs += add_z_bonds("TAIL", [])
                 end
 
-                if bond_map[pairing][block].keys.include?("ZD") #include_z_bonds && 
-                    all_seqs += add_z_bonds("HEAD", bond_map[pairing][block]["ZD"][1])
+                if bonding[block].keys.include?("ZD") #include_z_bonds && 
+                    all_seqs += add_z_bonds("HEAD", bonding[block]["ZD"][1])
                 else
                     all_seqs += add_z_bonds("HEAD", [])
                 end
 
-                bond_map[pairing][block]["Sequences"] = all_seqs
+                bonding[block]["Sequences"] = all_seqs
             end
         end
         bond_map
@@ -642,12 +646,14 @@ class BondGenerator
 
     def sequence_generator(hex)
         seq_arr = []
+        # byebug
+
         BondGenerator.sides.each do |side|
             if hex[side].nil?
                 seq_arr << add_blockers(side)
             else
-                seq_arr << add_bonds(side, hex[side][0], hex[side][1])
-                seq_arr << add_neutrals(side, hex[side][0], hex[side][1])
+                seq_arr << add_bonds(side, hex[side][1][0], hex[side][1][1])
+                seq_arr << add_neutrals(side, hex[side][1][0], hex[side][1][1])
             end
         end
         seq_arr.flat_map { |sublist| Array(sublist) }.uniq
@@ -787,8 +793,10 @@ class BondGenerator
         current_count = 0
         while random_samples.size  != number
             # random_helices = BondGenerator.tail_groups_4bonds.map {|group| group.sample }
-            if count == 3
-                random_helices = BondGenerator.tail_groups.map {|group| group.sample } # sample one per group
+            if count == 2
+                random_helices = BondGenerator.tail_groups_2bonds.map {|group| group.sample }
+            elsif count == 3
+                random_helices = BondGenerator.tail_groups_3bonds.map {|group| group.sample }
             elsif count == 4
                 random_helices = BondGenerator.tail_groups_4bonds.map {|group| group.sample }
             elsif count == 5
@@ -1041,6 +1049,13 @@ class BondGenerator
         }
     end
 
+    def self.tail_groups_2bonds
+      [
+        ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"], "H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
+        ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
+      ]
+    end
+
     def self.tail_groups_4bonds
         [
             ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
@@ -1060,7 +1075,7 @@ class BondGenerator
         ]
     end
 
-    def self.tail_groups
+    def self.tail_groups_3bonds
         [["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
          ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H50_H51"],
          ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"], "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]]]
