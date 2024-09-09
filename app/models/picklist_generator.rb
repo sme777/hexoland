@@ -10,8 +10,8 @@ class PicklistGenerator
         df = Daru::DataFrame.new({}, order: columns)
         counter = 1
         @hex_plate.each_row do |row|
-            if sequences.include?(row["Sequence2"])
-                destination_row = [row["Plate Name"], "384PP_AQ_BP", row["Well Position"], row["Sequence2"], "Destination[1]", destination, volume]
+            if sequences[1].include?(row["Sequence2"])
+                destination_row = [row["Plate Name"], "384PP_AQ_BP", row["Well Position"], "#{sequences[0]}-#{row["Sequence2"]}", "Destination[1]", destination, volume]
                 df.add_row(destination_row)
             end
         end
@@ -23,7 +23,7 @@ class PicklistGenerator
         seq_arr = convert_design_map_to_sequences(design_map)
         columns = ['Source Plate Name', 'Source Plate Type', 'Source Well', 'Sample Comments', 'Destination Plate Name', 'Destination Well', 'Transfer Volume']
         main_picklist = Daru::DataFrame.new({}, order: columns)
-
+        # byebug
         seq_arr.each_with_index do |seqs, idx|
             sub_picklist = new_picklist(seqs, vol_arr[idx], dest_arr[idx])
             filtered_sub_picklist = sub_picklist.filter_rows { |row| row['Source Plate Name'] != 'New Hex Core' }
@@ -37,7 +37,7 @@ class PicklistGenerator
         seq_arr = []
         design_map.each do |key1, monomer|
             monomer.each do |key2, bond|
-                seq_arr << bond["Sequences"]
+                seq_arr << ["#{key1}-#{key2}", bond["Sequences"]]
             end
         end
         seq_arr

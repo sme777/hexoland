@@ -162,7 +162,7 @@ class BondGenerator
 
     def configure_blocks(design_map)
       blocks = design_map.keys
-    
+      structure_map = {}
       if blocks.size == 1
         if !design_map[blocks[0]]["building_blocks"].nil?
           raise ArgumentError, "The building block cannot be non-empty for single structures."
@@ -171,13 +171,13 @@ class BondGenerator
         attr_bonds = design_map[blocks[0]]["bonds_attractive"]
         repl_bonds = design_map[blocks[0]]["bonds_repulsive"]
         neut_bonds = design_map[blocks[0]]["bonds_neutral"]
-        z_bonds = design_map[block]["bonds_z"]
+        z_bonds = design_map[blocks[0]]["bonds_z"]
         min_fe = design_map[blocks[0]]["min_fe"]
         max_fe = design_map[blocks[0]]["max_fe"]
 
-        build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
+        structure_map[structure] = build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
       else
-        structure_map = {}
+        
         # first build structures with no dependencies
         blocks.each do |block|
           next unless design_map[block]["building_blocks"].nil?
@@ -239,7 +239,7 @@ class BondGenerator
                 structure_map.delete(block_name)
             end
         end
-
+        byebug
       generate_sequences(structure_map)
     end
 

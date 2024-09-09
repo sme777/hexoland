@@ -1,0 +1,50 @@
+{
+    "7x(2x7M)": {
+      "building_blocks": [["2x7M", 7]],
+      "ignore_generation": false,
+      "bonds_attractive": 2,
+      "bonds_neutral": 2,
+      "bonds_repulsive": 0,
+      "bonds_z": 0,
+      "min_fe": 0,
+      "max_fe": 100,
+      "bond_map": {
+        "2x7M#1-2x7M#2": {
+
+        },
+        "2x7M#1-2x7M#5": {
+
+        },
+        "2x7M#1-2x7M#4": {
+
+        },
+        "2x7M#2-2x7M#3": {
+
+        },
+        "2x7M#2-2x7M#4": {
+
+        },
+        "2x7M#3-2x7M#7": {
+
+        },
+        "2x7M#3-2x7M#4": {
+
+        },
+        "2x7M#7-2x7M#6": {
+
+        },
+        "2x7M#7-2x7M#4": {
+
+        },
+        "2x7M#6-2x7M#5": {
+
+        },
+        "2x7M#6-2x7M#4": {
+
+        },
+        "2x7M#5-2x7M#4": {
+
+        }
+      }
+    }
+}
