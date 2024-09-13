@@ -1,5 +1,6 @@
 require 'set'
 require 'csv'
+require 'timeout'
 
 BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
 BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
@@ -172,10 +173,19 @@ class BondGenerator
         repl_bonds = design_map[blocks[0]]["bonds_repulsive"]
         neut_bonds = design_map[blocks[0]]["bonds_neutral"]
         z_bonds = design_map[blocks[0]]["bonds_z"]
-        min_fe = design_map[blocks[0]]["min_fe"]
-        max_fe = design_map[blocks[0]]["max_fe"]
-
-        structure_map[structure] = build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
+        min_xy_fe = design_map[blocks[0]]["min_xy_fe"]
+        max_xy_fe = design_map[blocks[0]]["max_xy_fe"]
+        min_z_fe = design_map[blocks[0]]["min_z_fe"]
+        max_z_fe = design_map[blocks[0]]["max_z_fe"]
+        begin
+            Timeout.timeout(40) do
+                structure_map[structure] = build_from_neighbors(design_map[structure]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds,
+                                                        min_xy_fe, max_xy_fe, min_z_fe, max_z_fe)
+            end
+        rescue Timeout::Error
+            Rails.logger.error "The process took too long and was terminated."
+            raise "The process took too long to complete."
+        end                                           
       else
         
         # first build structures with no dependencies
@@ -186,10 +196,13 @@ class BondGenerator
           repl_bonds = design_map[block]["bonds_repulsive"]
           neut_bonds = design_map[block]["bonds_neutral"]
           z_bonds = design_map[block]["bonds_z"]
-          min_fe = design_map[block]["min_fe"]
-          max_fe = design_map[block]["max_fe"]
+          min_xy_fe = design_map[blocks[0]]["min_xy_fe"]
+          max_xy_fe = design_map[blocks[0]]["max_xy_fe"]
+          min_z_fe = design_map[blocks[0]]["min_z_fe"]
+          max_z_fe = design_map[blocks[0]]["max_z_fe"]
 
-          structure_map[block] = build_from_neighbors(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
+          structure_map[block] = build_from_neighbors(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, 
+                                                                                    min_xy_fe, max_xy_fe, min_z_fe, max_z_fe)
         end
 
         # second build structures with no 1 layer dependencies
@@ -209,11 +222,13 @@ class BondGenerator
             repl_bonds = design_map[block]["bonds_repulsive"]
             neut_bonds = design_map[block]["bonds_neutral"]
             z_bonds = design_map[block]["bonds_z"]
-            min_fe = design_map[block]["min_fe"]
-            max_fe = design_map[block]["max_fe"]
+            min_xy_fe = design_map[blocks[0]]["min_xy_fe"]
+            max_xy_fe = design_map[blocks[0]]["max_xy_fe"]
+            min_z_fe = design_map[blocks[0]]["min_z_fe"]
+            max_z_fe = design_map[blocks[0]]["max_z_fe"]
 
-            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, min_fe, max_fe)
-            # byebug
+            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, 
+                                                                            min_xy_fe, max_xy_fe, min_z_fe, max_z_fe)
             pairing_map.each do |pairing, bonds|
                 pair1, pair2 = pairing.split('-')
                 # For 2x7M#1-2x7M#2
@@ -239,15 +254,13 @@ class BondGenerator
                 structure_map.delete(block_name)
             end
         end
-        byebug
       generate_sequences(structure_map)
     end
 
-    def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, z_bonds=3, min_fe=0, max_fe=100)
+    def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, z_bonds=3, min_xy_fe=0, max_xy_fe=100, min_z_fe=0, max_z_fe=140)
         s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
         s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
         z_tail_count, z_head_count = 0, 0
-        # byebug
         block_map.each do |pairing, bonding|
             # block_map[pairing].each do |monomer|
             bonding.each do |monomer, sides|
@@ -278,13 +291,12 @@ class BondGenerator
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
 
-        trials = 5
+        trials = 1
 
-        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s14_side_count == 0
-        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s25_side_count == 0
-        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_fe, max_fe) unless s36_side_count == 0
-        # byebug
-        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100) unless z_count == 0
+        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s14_side_count == 0
+        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s25_side_count == 0
+        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s36_side_count == 0
+        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100, min_z_fe, max_z_fe) unless z_count == 0
         
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
@@ -364,7 +376,7 @@ class BondGenerator
         block_map
     end
 
-    def build_from_neighbors(neighbor_map, attr_bonds=4, repl_bonds=0, neut_bonds=4, z_bonds=3, min_fe=0, max_fe=100)
+    def build_from_neighbors(neighbor_map, attr_bonds=4, repl_bonds=0, neut_bonds=4, z_bonds=3, min_xy_fe=0, max_xy_fe=100, min_z_fe=0, max_z_fe=140)
         # Stores sequence list for each monomer
         block_sequences = {}
         # Stores neighbor map for information
@@ -396,7 +408,7 @@ class BondGenerator
                 end
             end
         end
-
+        
         ### Set S14, S25, S36 side count 
         s14_side_count, last_s14_idx = [s1_side_count, s4_side_count].max, [s1_side_count, s4_side_count].min
         s25_side_count, last_s25_idx = [s2_side_count, s5_side_count].max, [s2_side_count, s5_side_count].min
@@ -405,13 +417,14 @@ class BondGenerator
         ### Generate the Sides
 
         # Emperical Rules for the number of Trials  
-        trials=5
+        trials=1
 
-        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false) unless s14_side_count == 0
-        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false) unless s25_side_count == 0
-        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100) unless z_count == 0
+        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=2, overlap=0.25, godmode=false, min_xy_fe, max_xy_fe) unless s14_side_count == 0
+        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=2, overlap=0.25, godmode=false, min_xy_fe, max_xy_fe) unless s25_side_count == 0
+        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=2, overlap=0.25, godmode=false, min_xy_fe, max_xy_fe) unless s36_side_count == 0
         
+        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100, min_z_fe, max_z_fe) unless z_count == 0
+
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
         neighbor_map.each do |block, neighbors|
@@ -646,7 +659,6 @@ class BondGenerator
 
     def sequence_generator(hex)
         seq_arr = []
-        # byebug
 
         BondGenerator.sides.each do |side|
             if hex[side].nil?
@@ -862,7 +874,6 @@ class BondGenerator
     end
 
     def best_z_bonds_out_of(bond_size, bond_quantity, max_overlap, trials, min_ge=0, max_ge=120)
-        
         sample_map = sample_z_bonds(bond_size, bond_quantity, max_overlap, trials, min_ge, max_ge)
         best_sample = []
         best_sample_score = Float::INFINITY
