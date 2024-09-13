@@ -137,6 +137,104 @@ class BondGenerator
         bonds
     end
 
+    def best_sides_out_of_w_reference(side, ref_bonds, samples)
+        # Classify bonds into groups
+        # byebug
+        if side == "S14"
+            bonds_list = BondGenerator.s14_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H60', 'H61') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H56', 'H57') }
+        elsif side == "S25"
+            bonds_list = BondGenerator.s25_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H54', 'H53') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H50', 'H49') }
+        elsif side == "S36"
+            bonds_list = BondGenerator.s36_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H46', 'H47') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H42', 'H43') }
+        elsif side == "Z"
+            bonds_list = BondGenerator.tail_z_helices
+            group_a_bonds, group_b_bonds = BondGenerator.tail_groups_2bonds[0], BondGenerator.tail_groups_2bonds[1]
+        end
+        
+        # Generate all possible two-bond combinations with one bond from each group
+        two_bond_combinations = []
+
+        group_a_bonds.each do |bond_a|
+          group_b_bonds.each do |bond_b|
+            # Sort the combination to ensure consistent ordering
+            combination = [bond_a, bond_b].sort_by do |x|
+                # Assign a sort order based on class
+                class_order = x.is_a?(String) ? 0 : 1  # Strings first, Arrays last
+                [class_order, x.to_s]  # Sort by class order, then by string representation
+              end
+            two_bond_combinations << combination
+          end
+        end
+        
+        # Remove duplicates by converting the array to a set and back to an array
+        two_bond_combinations.uniq!
+      
+        # Calculate overlap with four-bond systems for each two-bond combination
+        overlap_with_ref_bonds = {}
+        two_bond_combinations.each do |two_bond|
+          total_overlap = 0
+          two_bond_set = two_bond.to_set
+          ref_bonds.each do |four_bond|
+            overlap = (two_bond_set & four_bond.to_set).size
+            total_overlap += overlap
+          end
+          overlap_with_ref_bonds[two_bond] = total_overlap
+        end
+      
+        # Initialize selected two-bond systems
+        selected_two_bond_systems = []
+        remaining_two_bond_systems = two_bond_combinations.dup
+      
+        while selected_two_bond_systems.size < samples && !remaining_two_bond_systems.empty?
+          # Evaluate each candidate two-bond system
+          best_two_bond = nil
+          minimal_cost = nil
+      
+          remaining_two_bond_systems.each do |candidate|
+            # Overlap with four-bond systems
+            overlap_four_bond = overlap_with_ref_bonds[candidate]
+      
+            # Mutual overlap with already selected two-bond systems
+            mutual_overlap = selected_two_bond_systems.sum do |selected|
+              (candidate.to_set & selected.to_set).size
+            end
+      
+            # Total cost (Weights can be adjusted if necessary)
+            total_cost = overlap_four_bond + mutual_overlap
+      
+            if minimal_cost.nil? || total_cost < minimal_cost
+              minimal_cost = total_cost
+              best_two_bond = candidate
+            end
+          end
+      
+          # Add the best candidate to the selected list
+          if best_two_bond
+            selected_two_bond_systems << best_two_bond
+            remaining_two_bond_systems.delete(best_two_bond)
+          else
+            break # No suitable candidate found
+          end
+        end
+        
+        filtered_bonds = []
+        selected_two_bond_systems.each do |bonds|
+            if side == "Z"
+                filtered_bonds << bonds
+            else
+                filtered_bonds << [bonds, sum_fes_of(bonds)]
+        
+            end
+        end
+        filtered_bonds
+      end 
+
     def best_sides_out_of(side, type="handles", samples=10, reference=[], count=1, number=4, max_overlap=0.5, godemode=False, min_strength=0.0, max_strength=110.0)
         sample_map = sample_sides(side, type, samples, reference, count, number, max_overlap, godemode, min_strength, max_strength)
         best_sample = []
@@ -164,6 +262,7 @@ class BondGenerator
     def configure_blocks(design_map)
       blocks = design_map.keys
       structure_map = {}
+      messages = []
       if blocks.size == 1
         if !design_map[blocks[0]]["building_blocks"].nil?
           raise ArgumentError, "The building block cannot be non-empty for single structures."
@@ -208,13 +307,17 @@ class BondGenerator
         # second build structures with no 1 layer dependencies
         blocks.each do |block|
             next if design_map[block]["building_blocks"].nil?
+            
+            used_bonds = {"S1" => [], "S2" => [], "S3" => [], "ZU" => []}
 
             design_map[block]["building_blocks"].each do |component, quantity|
-              quantity.times do |idx|
-                structure_map["#{component}##{idx+1}"] = Marshal.load(Marshal.dump(structure_map[component]))
-              end
+                count_bonds(structure_map[component]).each do |key, bonds|
+                    used_bonds[key] << bonds
+                end
+                quantity.times do |idx|
+                    structure_map["#{component}##{idx+1}"] = Marshal.load(Marshal.dump(structure_map[component]))
+                end
             end
-
             # check if it's necessary to keep building_blocks
 
             # go over bond-map and replace old bond with the new bonds
@@ -227,8 +330,9 @@ class BondGenerator
             min_z_fe = design_map[blocks[0]]["min_z_fe"]
             max_z_fe = design_map[blocks[0]]["max_z_fe"]
 
-            pairing_map = build_from_blocks(design_map[block]["bond_map"], attr_bonds, repl_bonds, neut_bonds, z_bonds, 
+            pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, repl_bonds, neut_bonds, z_bonds, 
                                                                             min_xy_fe, max_xy_fe, min_z_fe, max_z_fe)
+            messages << block_messages
             pairing_map.each do |pairing, bonds|
                 pair1, pair2 = pairing.split('-')
                 # For 2x7M#1-2x7M#2
@@ -254,10 +358,73 @@ class BondGenerator
                 structure_map.delete(block_name)
             end
         end
-      generate_sequences(structure_map)
+      [generate_sequences(structure_map), messages]
     end
 
-    def build_from_blocks(block_map, attr_bonds=2, repl_bonds=0, neut_bonds=2, z_bonds=3, min_xy_fe=0, max_xy_fe=100, min_z_fe=0, max_z_fe=140)
+    def count_bonds(block)
+        interface_map = {"S1" => [], "S2" => [], "S3" => [], "ZU" => []}
+        block.each do |key, bond_map|
+            bond_map.each do |key, bonds|
+                if key == "S1" || key == "S2" || key == "S3"
+                    interface_map[key] << bonds[1][0]
+                elsif key == "ZU"
+                    interface_map[key] << bonds[1]
+                end 
+            end
+        end
+        interface_map
+    end
+
+    def compute_overlap_score(four_bond_systems, two_bond_systems)
+        # Flatten and normalize bonds in the four-bond systems
+        normalized_four_bonds = four_bond_systems.flatten.map do |bond|
+          if bond.is_a?(Array)
+            bond.flatten.join('_')  # Convert array to string
+          else
+            bond  # Bond is already a string
+          end
+        end
+      
+        # Flatten and normalize bonds in the two-bond systems
+        normalized_two_bonds = two_bond_systems.flatten.map do |bond|
+          if bond.is_a?(Array)
+            bond.flatten.join('_')  # Convert array to string
+          else
+            bond  # Bond is already a string
+          end
+        end
+      
+        # Convert to sets for efficient comparison
+        four_bond_set = normalized_four_bonds.to_set
+        two_bond_set = normalized_two_bonds.to_set
+      
+        # Calculate the intersection and union
+        intersection = four_bond_set & two_bond_set
+        union = four_bond_set | two_bond_set
+      
+        # Calculate the Jaccard Index
+        if union.size > 0
+          overlap_score = intersection.size.to_f / union.size.to_f
+        else
+          overlap_score = 0.0
+        end
+      
+        overlap_score
+    end
+
+    def evaluate_bonds(parent, design1, design2, side)
+        unless design1.nil?
+            overlap_score1 = compute_overlap_score(parent, design1)
+
+            overlap_score2 = compute_overlap_score(parent, design2)
+            
+
+            ["Optimized Score for #{side}: #{overlap_score1.round(2)}", "Regular Score for #{side}: #{overlap_score2.round(2)}"] 
+        end
+    end
+
+    def build_from_blocks(block_map, used_bonds, attr_bonds=2, repl_bonds=0, neut_bonds=2, z_bonds=3, min_xy_fe=0, max_xy_fe=100, min_z_fe=0, max_z_fe=140)
+        messages = []
         s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
         s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
         z_tail_count, z_head_count = 0, 0
@@ -292,12 +459,25 @@ class BondGenerator
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
 
         trials = 1
-
-        s14s, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s14_side_count == 0
-        s25s, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s25_side_count == 0
-        s36s, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s36_side_count == 0
-        z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100, min_z_fe, max_z_fe) unless z_count == 0
+        # byebug
+        s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count) unless s14_side_count == 0
+        s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count) unless s25_side_count == 0
+        s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count) unless s36_side_count == 0
+        z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count) unless z_count == 0
         
+        
+        s14s_2, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s14_side_count == 0
+        s25s_2, _ = best_sides_out_of("S25", "handles", trials, [], count=s25_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s25_side_count == 0
+        s36s_2, _ = best_sides_out_of("S36", "handles", trials, [], count=s36_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s36_side_count == 0
+        z_tails2, _ = best_z_bonds_out_of(z_bonds, z_count, 1.to_f/z_bonds, 100, min_z_fe, max_z_fe) unless z_count == 0
+
+
+        messages << evaluate_bonds(used_bonds["S1"][0], s14s.map{|s| s[0]}, s14s_2.map{|s| s[0]}, "S14") unless s14s.nil?
+        messages << evaluate_bonds(used_bonds["S2"][0], s25s.map{|s| s[0]}, s25s_2.map{|s| s[0]}, "S25") unless s25s.nil?
+        messages << evaluate_bonds(used_bonds["S3"][0], s36s.map{|s| s[0]}, s36s_2.map{|s| s[0]}, "S36") unless s36s.nil?
+        messages << evaluate_bonds(used_bonds["ZU"][0], z_tails, z_tails2, "Z") unless z_tails.nil?
+
+        # byebug
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
 
         # first iterate over sides S1, S2, S3 to assign the bonds
@@ -373,7 +553,7 @@ class BondGenerator
             end
         end
 
-        block_map
+        [block_map, messages]
     end
 
     def build_from_neighbors(neighbor_map, attr_bonds=4, repl_bonds=0, neut_bonds=4, z_bonds=3, min_xy_fe=0, max_xy_fe=100, min_z_fe=0, max_z_fe=140)
