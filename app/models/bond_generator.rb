@@ -137,27 +137,7 @@ class BondGenerator
         bonds
     end
 
-    def best_sides_out_of_w_reference(side, ref_bonds, samples)
-        # Classify bonds into groups
-        # byebug
-        if side == "S14"
-            bonds_list = BondGenerator.s14_sides.flatten
-            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H60', 'H61') }
-            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H56', 'H57') }
-        elsif side == "S25"
-            bonds_list = BondGenerator.s25_sides.flatten
-            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H54', 'H53') }
-            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H50', 'H49') }
-        elsif side == "S36"
-            bonds_list = BondGenerator.s36_sides.flatten
-            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H46', 'H47') }
-            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H42', 'H43') }
-        elsif side == "Z"
-            bonds_list = BondGenerator.tail_z_helices
-            group_a_bonds, group_b_bonds = BondGenerator.tail_groups_2bonds[0], BondGenerator.tail_groups_2bonds[1]
-        end
-        
-        # Generate all possible two-bond combinations with one bond from each group
+    def get_combinations(group_a_bonds, group_b_bonds)
         two_bond_combinations = []
 
         group_a_bonds.each do |bond_a|
@@ -174,10 +154,39 @@ class BondGenerator
         
         # Remove duplicates by converting the array to a set and back to an array
         two_bond_combinations.uniq!
+        two_bond_combinations
+    end
+
+    def best_sides_out_of_w_reference(side, ref_bonds, samples, bond_count)
+        # Classify bonds into groups
+        # byebug
+        if side == "S14"
+            bonds_list = BondGenerator.s14_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H60', 'H61') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H56', 'H57') }
+            combinations = get_combinations(group_a_bonds, group_b_bonds)
+        elsif side == "S25"
+            bonds_list = BondGenerator.s25_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H54', 'H53') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H50', 'H49') }
+            combinations = get_combinations(group_a_bonds, group_b_bonds)
+        elsif side == "S36"
+            bonds_list = BondGenerator.s36_sides.flatten
+            group_a_bonds = bonds_list.select { |bond| bond.start_with?('H46', 'H47') }
+            group_b_bonds = bonds_list.select { |bond| bond.start_with?('H42', 'H43') }
+            combinations = get_combinations(group_a_bonds, group_b_bonds)
+        elsif side == "Z"
+            if bond_count == 1
+                combinations = BondGenerator.tail_z_helices.map {|bond| [bond]}
+            elsif bond_count == 2
+                combinations = get_combinations(BondGenerator.tail_groups_2bonds[0], BondGenerator.tail_groups_2bonds[1])
+            end
+        end
+        # Generate all possible two-bond combinations with one bond from each group
       
         # Calculate overlap with four-bond systems for each two-bond combination
         overlap_with_ref_bonds = {}
-        two_bond_combinations.each do |two_bond|
+        combinations.each do |two_bond|
           total_overlap = 0
           two_bond_set = two_bond.to_set
           ref_bonds.each do |four_bond|
@@ -189,7 +198,7 @@ class BondGenerator
       
         # Initialize selected two-bond systems
         selected_two_bond_systems = []
-        remaining_two_bond_systems = two_bond_combinations.dup
+        remaining_two_bond_systems = combinations.dup
       
         while selected_two_bond_systems.size < samples && !remaining_two_bond_systems.empty?
           # Evaluate each candidate two-bond system
@@ -460,10 +469,10 @@ class BondGenerator
 
         trials = 1
         # byebug
-        s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count) unless s14_side_count == 0
-        s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count) unless s25_side_count == 0
-        s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count) unless s36_side_count == 0
-        z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count) unless z_count == 0
+        s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds/2) unless s14_side_count == 0
+        s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds/2) unless s25_side_count == 0
+        s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds/2) unless s36_side_count == 0
+        z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
         
         
         s14s_2, _ = best_sides_out_of("S14", "handles", trials, [], count=s14_side_count, number=attr_bonds/2, overlap=1/attr_bonds, godmode=false, min_xy_fe, max_xy_fe) unless s14_side_count == 0
