@@ -6,8 +6,47 @@
     <div class="col-md-9">
 
         <div data-controller="docs">
-            <h3>Docs</h3>
-            <pre><code id="preCode" class="language-javascript"></code></pre>
+            <div class="conatiner p-4">
+                <h3>Docs</h3>
+                <p>
+                    Hexoland supports design of assemblies via a graphical user interface and a coding API. When using graphical user interface, the more abstract representation is eventually converted back to coding API, thus the coding API provides a more verbose way to design assemblies.a
+                </p>
+            </div>
+            <div class="conatiner px-4">
+                <h4>Self-Contained Structures</h4>
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <p>
+                        These are strucutres that can be made on one-pot. All the necessary bonds are specified in the JSON format.
+                        </p>
+                        <pre style="max-height:40vh; overflow: scroll;"><code id="preCodeSimple" class="language-javascript"></code></pre>
+                    </div>
+                    <div class="col-md-6 px-2">
+                        <div class="shadow-sm" id="simpleBlockCanvasContainer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="conatiner px-4">
+            <hr>
+            </div>
+            <div class="conatiner px-4">
+                <h4>Hierarchical Structures</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            These are strucutres that are meant to be made hierarchically, often reusing a specific block with slightly modified bonds.
+                        </p>
+                        <pre style="max-height:40vh; overflow: scroll;"><code id="preCodeHierarchical" class="language-javascript"></code></pre>
+                    </div>
+                    <div class="col-md-6 px-2">
+                        <div class="shadow-sm" id="hierarchicalBlockCanvasContainer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
     </div>
 
