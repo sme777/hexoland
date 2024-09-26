@@ -61,6 +61,18 @@ export default class extends Controller {
     animateLoop();  // Start the loop
   }
 
+  onWindowResize(renderer, camera, container) {
+    // Update the camera aspect ratio and projection matrix
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+
+    // Update the renderer size
+    renderer.setSize(container.clientWidth, container.clientHeight);
+
+    // Ensure the renderer's pixel ratio is correct (useful for high-DPI displays)
+    renderer.setPixelRatio(window.devicePixelRatio);
+  }
+
   setupCodeBlocks() {
     let simpleBlock = {
       "2x7M": {

@@ -33,8 +33,29 @@
     </div>
 
     <div class="row mx-1">
+    <nav class="navbar navbar-expand-lg navbar-custom" style="background-color: #C4D7FF;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><strong>Interactive Mode</strong></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto"> <!-- Added ms-auto here -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="btnStart">Draw (P)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="btnPause">Erase (E)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="btnStop">Hide Grid (H)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
         <div class="gui-container shadow-sm p-0 m-0" id="guiContainer" style="width: 100%; min-height: 40vh;">
-
+            
         </div>
     </div>
 </div>

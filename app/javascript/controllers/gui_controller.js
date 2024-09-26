@@ -9,21 +9,26 @@ import {
 export default class extends Controller {
 
     connect() {
-        const guiContainer = document.getElementById('guiContainer');
-        
-        let [scene, camera, renderer, controls] = this.setupCanvas(guiContainer);
-        // Setup Hex Grid 
-        const hexRadius = 1;
-        const hexHeight = Math.sqrt(3) * hexRadius;
-        this.createHexCanvas(hexRadius, hexHeight, scene, camera);
-
-        // Setup Render Loop
-        this.animate(scene, camera, renderer);
-
-        // Handle resizing
-        window.addEventListener('resize', () => {
-            this.onWindowResize(renderer, camera, guiContainer);
-        });
+      const guiContainer = document.getElementById('guiContainer');
+    
+      let [scene, camera, renderer, controls] = this.setupCanvas(guiContainer);
+  
+      const hexRadius = 1;
+      const hexHeight = Math.sqrt(3) * hexRadius;
+      const hexGrid = this.createHexCanvas(hexRadius, hexHeight, scene, camera);
+  
+      // Setup raycaster and mouse
+      let raycaster = new THREE.Raycaster();
+      let mouse = new THREE.Vector2();
+  
+      // Add event listener for mouse click
+      renderer.domElement.addEventListener('click', (event) => this.onHexClick(event, hexGrid, camera));
+  
+      this.animate(scene, camera, renderer);
+  
+      window.addEventListener('resize', () => {
+          this.onWindowResize(renderer, camera, guiContainer);
+      });
     }
 
     createHexCanvas(hexRadius, hexHeight, scene, camera) {
@@ -43,18 +48,36 @@ export default class extends Controller {
               const y = row * hexHeight + (col % 2 === 0 ? 0 : hexHeight / 2);
 
               hexMesh.position.set(x, y, 0);
+              hexMesh.userData = { row, col };
               hexGrid.add(hexMesh);
           }
       }
 
       scene.add(hexGrid);
-
-      const box = new THREE.Box3().setFromObject(hexGrid);
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      camera.lookAt(center);
+      return hexGrid;
+      // const box = new THREE.Box3().setFromObject(hexGrid);
+      // const center = new THREE.Vector3();
+      // box.getCenter(center);
+      // camera.lookAt(center);
       
     }
+
+    create3DHex(position) {
+      const hexHeight = 1;  // The height of the hexagonal prism
+      const hexRadius = 1;  // The radius of the hexagonal prism
+      const hexGeometry = new THREE.CylinderGeometry(hexRadius, hexRadius, hexHeight, 6);
+      const hexMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const hexMesh = new THREE.Mesh(hexGeometry, hexMaterial);
+  
+      // Set the position of the 3D hex to the clicked hex's position
+      hexMesh.position.set(position.x, position.y, 0); // Z-axis is set to 0 to match the 2D plane
+  
+      // Rotate the hexagon so that it's oriented the same way as the 2D hexes
+      hexMesh.rotation.x = Math.PI / 2; // Rotate the hex to be flat on the XZ plane
+  
+      return hexMesh;
+  }
+  
 
     createHexGeometry(radius) {
       const geometry = new THREE.BufferGeometry();
@@ -90,6 +113,13 @@ export default class extends Controller {
         controls.enableZoom = true;
 
         return [scene, camera, renderer, controls];
+    }
+
+
+    onHexClick(event, hexGrid, camera) {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+  
     }
 
     onWindowResize(renderer, camera, container) {
