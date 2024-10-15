@@ -48,24 +48,11 @@
                     </div>
                 </div>
                 <div class="row">
-                    <strong><label for="assemblyVolume" class="form-label">For Bonds</label></strong>
+                    <strong><label for="assemblyVolume" class="form-label">For Community</label></strong>
                     <div class="mb-3">
-                        
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="silverBondsCheckbox" value="silver_bonds" checked>
-                            <label class="form-check-label" for="silverBondsCheckbox">Silver Bonds</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="goldBondsCheckbox" value="gold_bonds" checked>
-                            <label class="form-check-label" for="goldBondsCheckbox">Gold Bonds</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="electrumBondsCheckbox" value="electrum_bonds" checked>
-                            <label class="form-check-label" for="electrumBondsCheckbox">Electrum Bonds</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="copperBondsCheckbox" value="copper_bonds">
-                            <label class="form-check-label" for="copperBondsCheckbox">Copper Bonds</label>
+                        <div class="form-check">
+                            <%= f.label :assembly_public_check, "Public", class: "form-check-label" %>
+                            <%= f.check_box :assembly_public_check, class: "form-check-input", checked: true %>
                         </div>
                     </div>
 
