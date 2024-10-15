@@ -1,0 +1,153 @@
+{
+    "2Z-(2x7M)-3A4R": {
+        "building_blocks": [
+            ["2x7M", 2]
+        ],
+        "ignore_generation": false,
+        "bond_families": {
+            "standard": {
+                "bonds_attractive": 0,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "bonds_z": 2,
+                "min_xy_fe": 0,
+                "max_xy_fe": 100,
+                "min_z_fe": 0,
+                "max_z_fe": 100
+            }
+        },
+        "bond_map": {
+            "2x7M#1-2x7M#2": {
+                "M1B#1": {
+                    "ZU": ["M1A#2", "standard"]
+                },
+                "M3B#1": {
+                    "ZU": ["M3A#2", "standard"]
+                },
+                "M6B#1": {
+                    "ZU": ["M6A#2", "standard"]
+                },
+                "M1A#2": {
+                    "ZD": ["M1B#1", "standard"]
+                },
+                "M3A#2": {
+                    "ZD": ["M3B#1", "standard"]
+                },
+                "M6A#2": {
+                    "ZD": ["M6B#1", "standard"]
+                }
+            }
+        }
+    },
+
+    "2x7M": {
+        "building_blocks": null,
+        "ignore_generation": true,
+        "bond_families": {
+            "standard": {
+                "bonds_attractive": 4,
+                "bonds_neutral": 4,
+                "bonds_repulsive": 0,
+                "bonds_z": 4,
+                "min_xy_fe": 44,
+                "max_xy_fe": 53,
+                "min_z_fe": 90,
+                "max_z_fe": 96
+            }
+        },
+        "bond_map": {
+            "M1A": {
+                "S1": "M5A",
+                "S2": "M4A",
+                "S3": "M2A",
+                "ZU": "M1B"
+
+            },
+            "M2A": {
+                "S1": "M4A",
+                "S2": "M3A",
+                "S6": "M1A",
+                "ZU": "M2B"
+            },
+            "M3A": {
+                "S1": "M7A",
+                "S5": "M2A",
+                "S6": "M4A",
+                "ZU": "M3B"
+            },
+            "M4A": {
+                "S1": "M6A",
+                "S2": "M7A",
+                "S3": "M3A",
+                "S4": "M2A",
+                "S5": "M1A",
+                "S6": "M5A",
+                "ZU": "M4B"
+            },
+            "M5A": {
+                "S2": "M6A",
+                "S3": "M4A",
+                "S4": "M1A",
+                "ZU": "M5B"
+            },
+            "M6A": {
+                "S3": "M7A",
+                "S4": "M4A",
+                "S5": "M5A",
+                "ZU": "M6B"
+            },
+            "M7A": {
+                "S4": "M3A",
+                "S5": "M4A",
+                "S6": "M6A",
+                "ZU": "M7B"
+            },
+            "M1B": {
+                "S1": "M5B",
+                "S2": "M4B",
+                "S3": "M2B",
+                "ZD": "M1A"
+
+            },
+            "M2B": {
+                "S1": "M4B",
+                "S2": "M3B",
+                "S6": "M1B",
+                "ZD": "M2A"
+            },
+            "M3B": {
+                "S1": "M7B",
+                "S5": "M2B",
+                "S6": "M4B",
+                "ZD": "M3A"
+            },
+            "M4B": {
+                "S1": "M6B",
+                "S2": "M7B",
+                "S3": "M3B",
+                "S4": "M2B",
+                "S5": "M1B",
+                "S6": "M5B",
+                "ZD": "M4A"
+            },
+            "M5B": {
+                "S2": "M6B",
+                "S3": "M4B",
+                "S4": "M1B",
+                "ZD": "M5A"
+            },
+            "M6B": {
+                "S3": "M7B",
+                "S4": "M4B",
+                "S5": "M5B",
+                "ZD": "M6A"
+            },
+            "M7B": {
+                "S4": "M3B",
+                "S5": "M4B",
+                "S6": "M6B",
+                "ZD": "M7A"
+            }
+        }
+    }
+}

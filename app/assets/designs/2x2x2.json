@@ -1,0 +1,60 @@
+{
+    "2x2x2M": {
+      "building_blocks": null,
+      "ignore_generation": false,
+      "bonds_attractive": 6,
+      "bonds_neutral": 2,
+      "bonds_repulsive": 0,
+      "bonds_z": 4,
+      "min_xy_fe": 0,
+      "max_xy_fe": 200,
+      "min_z_fe": 90,
+      "max_z_fe": 96,
+      "bond_map": {
+        "M1A": {
+          "S1": "M3A",
+          "S2": "M4A",
+          "S3": "M2A",
+          "ZU": "M1B"
+        },
+        "M2A": {
+          "S1": "M4A",
+          "S6": "M1A",
+          "ZU": "M2B"
+        },
+        "M3A": {
+          "S3": "M4A",
+          "S4": "M1A",
+          "ZU": "M3B"
+        },
+        "M4A": {
+          "S4": "M2A",
+          "S5": "M1A",
+          "S6": "M3A",
+          "ZU": "M4B"
+        },
+        "M1B": {
+          "S1": "M3B",
+          "S2": "M4B",
+          "S3": "M2B",
+          "ZD": "M1A"
+        },
+        "M2B": {
+          "S1": "M4B",
+          "S6": "M1B",
+          "ZD": "M2A"
+        },
+        "M3B": {
+          "S3": "M4B",
+          "S4": "M1B",
+          "ZD": "M3A"
+        },
+        "M4B": {
+          "S4": "M2B",
+          "S5": "M1B",
+          "S6": "M3B",
+          "ZD": "M4A"
+        }
+      }
+    }
+}

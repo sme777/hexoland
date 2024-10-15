@@ -2,41 +2,58 @@
     "2x(2x7M)": {
       "building_blocks": [["2x7M", 2]],
       "ignore_generation": false,
-      "bonds_attractive": 2,
-      "bonds_neutral": 2,
-      "bonds_repulsive": 0,
-      "bonds_z": 0,
-      "min_fe": 0,
-      "max_fe": 100,
+      "bond_families": {
+        "6B0T":  {
+          "bonds_attractive": 2,
+          "bonds_neutral": 6,
+          "bonds_repulsive": 0,
+          "bonds_z": 0,
+          "min_xy_fe": 0,
+          "max_xy_fe": 100,
+          "min_z_fe": 0,
+          "max_z_fe": 100
+        },
+        "4B2T": {
+          "bonds_attractive": 2,
+          "bonds_neutral": 4,
+          "bonds_repulsive": 2,
+          "bonds_z": 0,
+          "min_xy_fe": 0,
+          "max_xy_fe": 100,
+          "min_z_fe": 0,
+          "max_z_fe": 100
+        }
+      },
       "bond_map": {
         "2x7M#1-2x7M#2": {
-          "M6A#1": {
-            "S1": "M1A#2",
-            "S2": "M2A#2"
+          "M2A#1": {
+            "S3": ["M5A#2", "4B2T"]
           },
-          "M7A#1": {
-            "S1": "M2A#2"
+          "M3A#1": {
+            "S3": ["M6A#2", "4B2T"],
+            "S4": ["M5A#2", "6B0T"]
           },
-          "M6B#1": {
-            "S1": "M1B#2",
-            "S2": "M2B#2"
+          "M2B#1": {
+            "S3": ["M5A#2", "4B2T"]
           },
-          "M7B#1": {
-            "S1": "M2B#2"
+          "M3B#1": {
+            "S3": ["M6A#2", "4B2T"],
+            "S4": ["M5A#2", "6B0T"]
           },
-          "M1A#2": {
-            "S4": "M6A#1"
+
+          "M5A#2": {
+            "S1": ["M3A#1", "6B0T"],
+            "S6": ["M2A#1", "6B0T"]
           },
-          "M2A#2": {
-            "S4": "M7A#1",
-            "S5": "M6A#1"
+          "M6A#2": {
+            "S6": ["M3A#1", "6B0T"]
           },
-          "M1B#2": {
-            "S4": "M6B#1"
+          "M5B#2": {
+            "S1": ["M3B#1", "6B0T"],
+            "S6": ["M2B#1", "6B0T"]
           },
-          "M2B#2": {
-            "S4": "M7B#1",
-            "S5": "M6B#1"
+          "M6B#2": {
+            "S6": ["M3B#1", "6B0T"]
           }
         }
       }
@@ -45,12 +62,18 @@
     "2x7M": {
       "building_blocks": null,
       "ignore_generation": true,
-      "bonds_attractive": 4,
-      "bonds_neutral": 4,
-      "bonds_repulsive": 0,
-      "bonds_z": 4,
-      "min_fe": 43,
-      "max_fe": 53,
+      "bond_families": {
+        "standard": {
+          "bonds_attractive": 4,
+          "bonds_neutral": 4,
+          "bonds_repulsive": 0,
+          "bonds_z": 4,
+          "min_xy_fe": 43,
+          "max_xy_fe": 53,
+          "min_z_fe": 60,
+          "max_z_fe": 90
+        }
+      },
       "bond_map": {
         "M1A": {
           "S1": "M5A",
