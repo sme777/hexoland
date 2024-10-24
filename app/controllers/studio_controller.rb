@@ -4,7 +4,7 @@ require 'will_paginate/array'
 
 class StudioController < ApplicationController
     before_action :init_params, only: [:index, :create, :get_picklist]
-    before_action :set_assembly, only: [:delete, :get_picklist, :get_json]
+    before_action :set_assembly, only: [:delete, :get_picklist, :get_json, :make_private, :make_public]
 
     def index
         @assembly_method = "Code"
@@ -57,9 +57,21 @@ class StudioController < ApplicationController
     end
 
     def get_picklist
-        volumes = params[:volumes].gsub(" ", "").split(",")
+        final_volume = params[:final_volume]
         wells = params[:wells].gsub(" ", "").split(",")
-        picklist = @picklist_generator.generate_picklist(JSON.parse(@assembly.design_map), volumes, wells)
+        scaffold_start_concetration = params[:scaffold_start_concetration]
+        scaffold_final_concetration = params[:scaffold_final_concetration]
+        staple_ratio = params[:staple_ratio]
+        staple_concetration = params[:staple_concetration]
+        
+        
+        add_buffer = !!params[:add_buffer]
+        add_scaffold = !!params[:add_scaffold]
+
+        picklist = @picklist_generator.generate_picklist(JSON.parse(@assembly.design_map), 
+                            final_volume, scaffold_start_concetration, staple_ratio,
+                            scaffold_final_concetration, staple_concetration, wells,
+                            add_buffer, add_scaffold)
         temp_file = Tempfile.new(["#{@assembly.name}_picklist.csv", '.csv'])
         
         CSV.open(temp_file.path, 'w') do |csv|
@@ -93,9 +105,19 @@ class StudioController < ApplicationController
         redirect_to '/studio'
     end
 
+    def make_private
+        @assembly.update_column(:public, false)
+        redirect_to '/studio'
+    end
+
+    def make_public
+        @assembly.update_column(:public, true)
+        redirect_to '/studio'
+    end
+
     private
     def assembly_params
-        params.require(:assembly).permit(:author, :name, :design_map, :volumes, :wells)
+        params.require(:assembly).permit(:author, :name, :design_map)
     end
 
 

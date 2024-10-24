@@ -1,7 +1,11 @@
 {
-    "2x(2x7M)": {
+    "2x(2x7M)-VC1": {
       "building_blocks": [["2x7M", 2]],
       "ignore_generation": false,
+      "max_xy_overlap": 0.5,
+      "xy_trials": 1,
+      "max_z_overlap": 0.5,
+      "z_trials": 1,
       "bond_families": {
         "6B0T":  {
           "bonds_attractive": 2,
@@ -34,11 +38,11 @@
             "S4": ["M5A#2", "6B0T"]
           },
           "M2B#1": {
-            "S3": ["M5A#2", "4B2T"]
+            "S3": ["M5B#2", "4B2T"]
           },
           "M3B#1": {
-            "S3": ["M6A#2", "4B2T"],
-            "S4": ["M5A#2", "6B0T"]
+            "S3": ["M6B#2", "4B2T"],
+            "S4": ["M5B#2", "6B0T"]
           },
 
           "M5A#2": {
@@ -62,6 +66,11 @@
     "2x7M": {
       "building_blocks": null,
       "ignore_generation": true,
+      "max_xy_overlap": 0.25,
+      "xy_trials": 20,
+      "max_z_overlap": 0.25,
+      "z_trials": 100,
+      "wells": [],  
       "bond_families": {
         "standard": {
           "bonds_attractive": 4,
@@ -70,8 +79,8 @@
           "bonds_z": 4,
           "min_xy_fe": 43,
           "max_xy_fe": 53,
-          "min_z_fe": 60,
-          "max_z_fe": 90
+          "min_z_fe": 88,
+          "max_z_fe": 94
         }
       },
       "bond_map": {

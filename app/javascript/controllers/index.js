@@ -16,6 +16,7 @@ import CodeController from "../controllers/code_controller"
 import AssemblyController from "../controllers/assembly_controller"
 import DocsController from "../controllers/docs_controller"
 import SimulatorController from "../controllers/simulator_controller"
+import FeedController from "../controllers/feed_controller"
 
 
 application.register("studio", StudioController)
@@ -25,3 +26,5 @@ application.register("gui", GUIController)
 application.register("assembly", AssemblyController)
 application.register("docs", DocsController)
 application.register("simulator", SimulatorController)
+application.register("feed", FeedController)
+

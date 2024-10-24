@@ -19,9 +19,5 @@ export default class extends Controller {
     })
     }
     
-    
-    // picklistGeneratorForm.addEventListener("submit", (e) => {
-    //     e.preventDefault();
-    // })
   }
 }
