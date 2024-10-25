@@ -2,23 +2,23 @@ require 'set'
 require 'csv'
 require 'timeout'
 
-BOND_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-BASIC_Z_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+# BOND_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+# BASIC_Z_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
 
-# BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
-# BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
+BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
     def initialize
         @bond_map = {}
         @basic_zs= []
-        CSV.foreach(BOND_TMP_PATH) do |row|
+        CSV.foreach(BOND_PATH) do |row|
             @bond_map[row[0]] = row[1]
         end
 
-        CSV.foreach(BASIC_Z_TMP_PATH) do |row|
+        CSV.foreach(BASIC_Z_PATH) do |row|
             @basic_zs << row[1]
         end
         @basic_zs = @basic_zs[1..]
