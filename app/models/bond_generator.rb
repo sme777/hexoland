@@ -196,24 +196,31 @@ class BondGenerator
     end
       
 
-    def get_combinations(group_a_bonds, group_b_bonds)
-        two_bond_combinations = []
-
-        group_a_bonds.each do |bond_a|
-          group_b_bonds.each do |bond_b|
-            # Sort the combination to ensure consistent ordering
-            combination = [bond_a, bond_b].sort_by do |x|
-                # Assign a sort order based on class
-                class_order = x.is_a?(String) ? 0 : 1  # Strings first, Arrays last
-                [class_order, x.to_s]  # Sort by class order, then by string representation
-              end
-            two_bond_combinations << combination
-          end
+    def get_combinations(*groups)
+        all_combinations = []
+    
+        # Recursive function to generate combinations for any number of groups
+        def generate_combinations(current_combination, remaining_groups, all_combinations)
+            if remaining_groups.empty?
+                # Sort each combination to ensure consistent ordering
+                sorted_combination = current_combination.sort_by do |x|
+                    class_order = x.is_a?(String) ? 0 : 1  # Strings first, Arrays last
+                    [class_order, x.to_s]  # Sort by class order, then by string representation
+                end
+                all_combinations << sorted_combination
+            else
+                current_group = remaining_groups[0]
+                current_group.each do |bond|
+                    generate_combinations(current_combination + [bond], remaining_groups[1..], all_combinations)
+                end
+            end
         end
+    
+        # Start the recursive combination generation
+        generate_combinations([], groups, all_combinations)
         
         # Remove duplicates by converting the array to a set and back to an array
-        two_bond_combinations.uniq!
-        two_bond_combinations
+        all_combinations.uniq
     end
 
     def best_sides_out_of_w_reference(side, ref_bonds, samples, bond_count)
@@ -251,6 +258,11 @@ class BondGenerator
                 combinations = BondGenerator.tail_z_helices.map {|bond| [bond]}
             elsif bond_count == 2
                 combinations = get_combinations(BondGenerator.tail_groups_2bonds[0], BondGenerator.tail_groups_2bonds[1])
+            elsif bond_count == 4
+                combinations = get_combinations(BondGenerator.tail_groups_4bonds[0], 
+                                                BondGenerator.tail_groups_4bonds[1],
+                                                BondGenerator.tail_groups_4bonds[2],
+                                                BondGenerator.tail_groups_4bonds[3])
             end
         end
         # Generate all possible two-bond combinations with one bond from each group
@@ -566,6 +578,7 @@ class BondGenerator
         s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds) unless s14_side_count == 0
         s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
+        # byebug
         z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
 
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
