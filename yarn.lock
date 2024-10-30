@@ -104,7 +104,7 @@
 
 "@esbuild/darwin-arm64@0.20.0":
   version "0.20.0"
-  resolved "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.20.0.tgz"
+  resolved "https://registry.yarnpkg.com/@esbuild/darwin-arm64/-/darwin-arm64-0.20.0.tgz#5c122ed799eb0c35b9d571097f77254964c276a2"
   integrity sha512-AjEcivGAlPs3UAcJedMa9qYg9eSfU6FnGHJjT8s346HSKkrcWlYezGE8VaO2xKfvvlZkgAhyvl06OJOxiMgOYQ==
 
 "@esbuild/darwin-x64@0.20.0":
@@ -650,7 +650,7 @@ fs-extra@^11.0.0:
 
 fsevents@~2.3.2:
   version "2.3.3"
-  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 get-caller-file@^2.0.5:
@@ -693,9 +693,9 @@ has-flag@^3.0.0:
   integrity sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==
 
 highlight.js@^11.9.0:
-  version "11.9.0"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.9.0.tgz#04ab9ee43b52a41a047432c8103e2158a1b8b5b0"
-  integrity sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==
+  version "11.10.0"
+  resolved "https://registry.npmjs.org/highlight.js/-/highlight.js-11.10.0.tgz"
+  integrity sha512-SYVnVFswQER+zu1laSya563s+F8VDGt7o35d4utbamowvUNLLMovFqwCLSocpZTz3MgaSRA1IbqRWZv97dtErQ==
 
 ignore-by-default@^1.0.1:
   version "1.0.1"
@@ -1112,6 +1112,11 @@ thenby@^1.3.4:
   version "1.3.4"
   resolved "https://registry.npmjs.org/thenby/-/thenby-1.3.4.tgz"
   integrity sha512-89Gi5raiWA3QZ4b2ePcEwswC3me9JIg+ToSgtE0JWeCynLnLxNr/f9G+xfo9K+Oj4AFdom8YNJjibIARTJmapQ==
+
+three-csg-ts@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/three-csg-ts/-/three-csg-ts-3.2.0.tgz"
+  integrity sha512-oTYg8kdal6qgHDbso/6VzA12Udf2ic2uXhf0XlJzuSP+Gs0OUR5gTHSZ7GotAE+M/QcVlw41eOwiWZVnJG5/8w==
 
 three-js@^79.0.0:
   version "79.0.0"
