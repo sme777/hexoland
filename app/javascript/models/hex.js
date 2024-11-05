@@ -1,41 +1,57 @@
-class Hex {
-    constructor(q, r, s) {
-        console.assert(q + r + s === 0);
-        this.q = q;
-        this.r = r;
-        this.s = s;
-    }
+import * as THREE from 'three';
 
-    // Calculate the length (distance to origin) of a hex
-    length() {
-        return Math.floor((Math.abs(this.q) + Math.abs(this.r) + Math.abs(this.s)) / 2);
-    }    
+export class Hex {
+  constructor(radius = 1, height = 2, color = 0xf5e6cb, edgeColor = 0x000000) {
+    this.radius = radius;
+    this.height = height;
+    this.color = color;
+    this.edgeColor = edgeColor;
     
-    // Calculate the distance between this hex and another hex
-    distanceTo(other) {
-        const deltaQ = this.q - other.q;
-        const deltaR = this.r - other.r;
-        const deltaS = this.s - other.s;
-        // Create a new hex with the differences in coordinates
-        const deltaHex = new Hex(deltaQ, deltaR, deltaS);
-        // Return the length (distance to origin) of the deltaHex
-        return deltaHex.length();
+    // Create the geometry for the hexagonal shape
+    const hexShape = new THREE.Shape();
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const x = this.radius * Math.cos(angle);
+      const y = this.radius * Math.sin(angle);
+      if (i === 0) {
+        hexShape.moveTo(x, y);
+      } else {
+        hexShape.lineTo(x, y);
+      }
     }
+    hexShape.closePath();
 
-    static add(hex1, hex2) {
-        return new Hex(hex1.q + hex2.q, hex1.r + hex2.r, hex1.s + hex2.s);
-    }
+    // Extrude the shape to create a prism
+    const extrudeSettings = {
+      depth: this.height,
+      bevelEnabled: false,
+    };
+    this.geometry = new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
 
-    static sub(hex1, hex2) {
-        return new Hex(hex1.q - hex2.q, hex1.r - hex2.r, hex1.s - hex2.s);
-    }
+    // Create the material for the prism faces
+    this.material = new THREE.MeshBasicMaterial({ color: this.color, side: THREE.DoubleSide });
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-    static mul(hex, k) {
-        return new Hex(hex.q * k, hex.r * k, hex.s * k);
-    }
+    // Create black edges for the prism
+    const edgesGeometry = new THREE.EdgesGeometry(this.geometry);
+    const edgesMaterial = new THREE.LineBasicMaterial({ color: this.edgeColor });
+    this.edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
 
-    static eq(hex1, hex2) {
-        return hex1.q === hex2.q && hex1.r === hex2.r && hex1.s === hex2.s
-    }
+    // Create a group to hold both the mesh and the edges
+    this.prism = new THREE.Group();
+    this.prism.add(this.mesh);
+    this.prism.add(this.edges);
+  }
 
+  // Method to get the prism object
+  getObject() {
+    return this.prism;
+  }
+
+  // Method to add rotation (optional)
+  rotate(x, y, z) {
+    this.prism.rotation.x += x;
+    this.prism.rotation.y += y;
+    this.prism.rotation.z += z;
+  }
 }
