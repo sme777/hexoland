@@ -75,17 +75,17 @@ export class Hex {
       let panel;
       // Create a Panel with the exact width and height
       if (idx == 1) {
-        panel = new Panel([centerX - 7.5, centerY - 4.25, centerZ], ["1","0","1","0","1","1","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX - 7.5, centerY - 4.375, centerZ], ["1","0","1","0","1","1","0","0"], faceWidth, faceHeight);
       } else if (idx == 2) {
-        panel = new Panel([centerX, centerY - 8.5, centerZ], ["0","0","0","0","0","0","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX, centerY - 8.625, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
       } else if (idx == 3) {
-        panel = new Panel([centerX + 7.5 , centerY - 4.5, centerZ], ["0","0","0","0","0","0","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX + 7.5 , centerY - 4.5, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
       } else if (idx == 4) {
-        panel = new Panel([centerX + 7.5, centerY + 4.5 , centerZ], ["0","0","0","0","0","0","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX + 7.5, centerY + 4.5 , centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
       } else if (idx == 5) {
-        panel = new Panel([centerX , centerY + 8.75, centerZ], ["0","0","0","0","0","0","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX , centerY + 8.75, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
       } else if (idx == 6) {
-        panel = new Panel([centerX - 7.5 , centerY + 4.5, centerZ], ["0","0","0","0","0","0","0","0"], faceWidth, faceHeight);
+        panel = new Panel([centerX - 7.5 , centerY + 4.5, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
       } 
       
       const panelGroup = panel.createPanel();
@@ -103,6 +103,45 @@ export class Hex {
       // Add the panel to the prism group
       this.prism.add(panelGroup);
       idx += 1
+    });
+  }
+
+  addPanels2() {
+    const { rectangularFaces } = this.computeHexPrismFaces(this.radius, this.height);
+  
+    rectangularFaces.forEach((face, index) => {
+      // Calculate the width and height of each face
+      const faceWidth = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z).length();
+      const faceHeight = this.height;
+  
+      // Calculate the center of the face for panel positioning
+      const centerX = (face[0].x + face[1].x + face[2].x + face[3].x) / 4;
+      const centerY = (face[0].y + face[1].y + face[2].y + face[3].y) / 4;
+      const centerZ = (face[0].z + face[1].z + face[2].z + face[3].z) / 4;
+      const centerPosition = new THREE.Vector3(centerX, centerY, centerZ);
+  
+      // Calculate the face normal for orientation
+      const edge1 = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z);
+      const edge2 = new THREE.Vector3(face[3].x - face[0].x, face[3].y - face[0].y, face[3].z - face[0].z);
+      const faceNormal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
+  
+      // Create the panel with calculated width and height
+      const panel = new Panel([centerPosition.x, centerPosition.y, centerPosition.z], ["0", "0", "0", "0", "0", "0", "0", "0"], faceWidth, faceHeight);
+      const panelGroup = panel.createPanel();
+  
+      // Position the panel at the calculated face center
+      panelGroup.position.copy(centerPosition);
+  
+      // Orient the panel to align with the face normal
+      panelGroup.lookAt(centerPosition.clone().add(faceNormal));
+  
+      // Offset the panel slightly along the normal to prevent z-fighting
+      const offsetDistance = -0.05;  // Small offset to avoid z-fighting
+      panelGroup.position.add(faceNormal.clone().multiplyScalar(offsetDistance));
+      panelGroup.rotateZ(Math.PI / 2);
+      panelGroup.rotateY(Math.PI);
+      // Add the panel to the prism group
+      this.prism.add(panelGroup);
     });
   }
   

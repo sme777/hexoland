@@ -30,11 +30,20 @@ export default class extends Controller {
     };
 
     // Create the hexagonal prism with the specified bond data for each side
-    const hex = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    const hex1 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+
+    const hex2 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+
+    const hex3 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
 
     // Position the hex at the center of the scene
-    // hex.getObject().position.set(0, 0, 0);
-    scene.add(hex.getObject());
+    hex1.getObject().position.set(0, 0, 0);
+    hex2.getObject().position.set(0, 25, 0);
+    hex3.getObject().position.set(20, 12.5, 0);
+
+    scene.add(hex1.getObject());
+    scene.add(hex2.getObject());
+    scene.add(hex3.getObject());
 
     // Ground and lighting setup
     const groundGeometry = new THREE.PlaneGeometry(200, 200);
