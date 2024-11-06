@@ -33,7 +33,7 @@ export default class extends Controller {
     const hex = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
 
     // Position the hex at the center of the scene
-    hex.getObject().position.set(0, 0, 0);
+    // hex.getObject().position.set(0, 0, 0);
     scene.add(hex.getObject());
 
     // Ground and lighting setup
@@ -75,7 +75,7 @@ export default class extends Controller {
     scene.background = new THREE.Color(0xF1D3CE);
 
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
     canvas.appendChild(renderer.domElement);
 
