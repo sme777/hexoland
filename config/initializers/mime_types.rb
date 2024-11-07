@@ -1,0 +1,1 @@
+Mime::Type.register "model/gltf-binary", :glb

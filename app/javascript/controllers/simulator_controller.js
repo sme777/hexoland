@@ -11,13 +11,16 @@ import {
 import {
   Panel
 } from "../models/panel"
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+import { setupCanvas, onWindowResize, animate } from './canvas_utils';
 
 export default class extends Controller {
 
   connect() {
     const guiContainer = document.getElementById('guiContainer');
 
-    let [scene, camera, renderer, controls] = this.setupCanvas(guiContainer);
+    let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
 
     // Define the bond configurations for each side of the hexagon
     const hexBondData = {
@@ -57,8 +60,8 @@ export default class extends Controller {
     scene.add(ground);
 
     // Add lighting to the scene
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 5, 5);
+    const light = new THREE.DirectionalLight(0xffffff, 5);
+    light.position.set(50, 50, 50);
     scene.add(light);
 
     // Set the camera to ensure that it views the hex properly from the front
@@ -68,51 +71,29 @@ export default class extends Controller {
     controls.target.set(0, 0, 0); // Set the OrbitControls to target the center of the scene
     controls.update();
 
-    this.animate(scene, camera, renderer);
+
+    // const loader = new GLTFLoader();
+    // console.log("GLB Loaded")
+    // loader.load(
+    //   hexModelPath, // Path to the exported .glb/.gltf file
+    //   function (gltf) {
+    //     const model = gltf.scene;
+    //     scene.add(model);  // Add the model to your scene
+    //   },
+    //   function (xhr) {
+    //     console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    //   },
+    //   function (error) {
+    //     console.error('An error happened', error);
+    //   }
+    // );
+
+
+    animate(scene, camera, renderer);
 
     window.addEventListener('resize', () => {
-      this.onWindowResize(renderer, camera, guiContainer);
+      onWindowResize(renderer, camera, guiContainer);
     });
   }
 
-  setupCanvas(canvas) {
-    const parentDiv = canvas.parentElement; // Get the parent div (the Bootstrap column)
-    const width = parentDiv.clientWidth;
-    const height = parentDiv.clientHeight;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xF1D3CE);
-
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(width, height);
-    canvas.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = true;
-
-    return [scene, camera, renderer, controls];
-  }
-
-  onWindowResize(renderer, camera, container) {
-    // Update the camera aspect ratio and projection matrix
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-
-    // Update the renderer size
-    renderer.setSize(container.clientWidth, container.clientHeight);
-
-    // Ensure the renderer's pixel ratio is correct (useful for high-DPI displays)
-    renderer.setPixelRatio(window.devicePixelRatio);
-  }
-
-  animate(scene, camera, renderer) {
-    const animateLoop = () => {
-      requestAnimationFrame(animateLoop);
-      renderer.render(scene, camera);
-    };
-    animateLoop(); // Start the loop
-  }
 }

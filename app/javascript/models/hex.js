@@ -89,7 +89,6 @@ export class Hex {
       } 
       
       const panelGroup = panel.createPanel();
-  
       // Align the panel with the outward direction of the face
       panelGroup.position.copy(centerPosition);
       panelGroup.lookAt(centerPosition.clone().add(faceNormal));

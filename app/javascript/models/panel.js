@@ -22,7 +22,9 @@ export class Panel {
             bondNeutral: 0xFDB840,
             bondRepulsive: 0xA91E3B,
             side: 0xDBB5B4,
-            border: 0x6D4E32
+            border: 0x6D4E32,
+            text: 0xFF4081,  // Pink color for helix labels (H numbers)
+            lrText: 0x4285F4  // Blue color for L and R labels
         };
 
         this.BOND_OFFSETS = [
@@ -51,7 +53,48 @@ export class Panel {
         // Add bonds based on bond data
         this.addBonds(panelGroup);
 
+        // Position helix number directly on top of the end bond
+        this.addHelixLabel(panelGroup, `H${this.helixNumber}`);
+
+        // Add "L" label on the top in blue
+        this.addText(panelGroup, "L", 0, this.SIDE_HEIGHT / 5 , this.COLORS.lrText);
+
+        // Add "R" label on the bottom in blue
+        this.addText(panelGroup, "R", 0, -this.SIDE_HEIGHT / 5 , this.COLORS.lrText);
+
         return panelGroup;
+    }
+
+    addHelixLabel(parentGroup, text) {
+        // Calculate the position for the helix label above the end bond
+        const helixEndOffsetY = this.SIDE_HEIGHT / 2 - this.ATTR_BOND_HEIGHT / 2;
+        const helixLabelOffsetX = -this.SIDE_WIDTH / 4; // Assuming helix on the left
+        this.addText(parentGroup, text, helixLabelOffsetX, helixEndOffsetY + 0.3, this.COLORS.text);
+    }
+
+    addText(parentGroup, text, offsetX, offsetY, color) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+
+        // Set font size to twice the original size for larger text
+        context.font = '216px Arial';
+        context.fillStyle = color === this.COLORS.lrText ? 'rgb(66, 133, 244)' : 'rgb(255, 64, 129)'; // Blue for "L" and "R", pink for helix labels
+        context.textAlign = 'center';  // Center align the text horizontally
+        context.textBaseline = 'middle';  // Center align the text vertically
+
+        // Draw the text at the center of the canvas
+        context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const textPlaneGeometry = new THREE.PlaneGeometry(1.5, 0.75); // Scale up the plane size to accommodate the larger text
+        const textMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        const textMesh = new THREE.Mesh(textPlaneGeometry, textMaterial);
+
+        // Position the text on the panel and move it slightly above other elements
+        textMesh.position.set(offsetX, offsetY, 0.2);
+        textMesh.renderOrder = 1; // Ensure it renders on top of other elements
+
+        parentGroup.add(textMesh);
     }
 
     createHelices(parentGroup) {

@@ -104,7 +104,7 @@
 
 "@esbuild/darwin-arm64@0.20.0":
   version "0.20.0"
-  resolved "https://registry.yarnpkg.com/@esbuild/darwin-arm64/-/darwin-arm64-0.20.0.tgz#5c122ed799eb0c35b9d571097f77254964c276a2"
+  resolved "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.20.0.tgz"
   integrity sha512-AjEcivGAlPs3UAcJedMa9qYg9eSfU6FnGHJjT8s346HSKkrcWlYezGE8VaO2xKfvvlZkgAhyvl06OJOxiMgOYQ==
 
 "@esbuild/darwin-x64@0.20.0":
@@ -340,10 +340,25 @@
   resolved "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.2.2.tgz"
   integrity sha512-XExJS3cLqgrmNBIP3bBw6+1oQ1ksGjFh0+oClDKFYpCCqx/hlqwWO5KO/S63fzUo67SxI9dMrF0y5T/Ey7h8Zw==
 
+"@types/draco3d@^1.4.0":
+  version "1.4.10"
+  resolved "https://registry.npmjs.org/@types/draco3d/-/draco3d-1.4.10.tgz"
+  integrity sha512-AX22jp8Y7wwaBgAixaSvkoG4M/+PlAcm3Qs4OW8yT9DM4xUpWKeFhLueTAyZF39pviAdcDdeJoACapiAceqNcw==
+
 "@types/estree@*", "@types/estree@^1.0.0", "@types/estree@^1.0.1":
   version "1.0.5"
   resolved "https://registry.npmjs.org/@types/estree/-/estree-1.0.5.tgz"
   integrity sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==
+
+"@types/offscreencanvas@^2019.6.4":
+  version "2019.7.3"
+  resolved "https://registry.npmjs.org/@types/offscreencanvas/-/offscreencanvas-2019.7.3.tgz"
+  integrity sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==
+
+"@types/webxr@^0.5.2":
+  version "0.5.20"
+  resolved "https://registry.npmjs.org/@types/webxr/-/webxr-0.5.20.tgz"
+  integrity sha512-JGpU6qiIJQKUuVSKx1GtQnHJGxRjtfGIhzO2ilq43VZZS//f1h1Sgexbdk+Lq+7569a6EYhOWrUpIruR/1Enmg==
 
 abbrev@1:
   version "1.1.1"
@@ -553,6 +568,11 @@ diff-sequences@^29.6.3:
   resolved "https://registry.npmjs.org/diff-sequences/-/diff-sequences-29.6.3.tgz"
   integrity sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==
 
+draco3d@^1.4.1:
+  version "1.5.7"
+  resolved "https://registry.npmjs.org/draco3d/-/draco3d-1.5.7.tgz"
+  integrity sha512-m6WCKt/erDXcw+70IJXnG7M3awwQPAsZvJGX5zY7beBqpELw6RDGkYVU0W43AFxye4pDZ5i2Lbyc/NNGqwjUVQ==
+
 electron-to-chromium@^1.4.648:
   version "1.4.665"
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.665.tgz"
@@ -627,6 +647,11 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+fflate@^0.6.9:
+  version "0.6.10"
+  resolved "https://registry.npmjs.org/fflate/-/fflate-0.6.10.tgz"
+  integrity sha512-IQrh3lEPM93wVCEczc9SaAOvkmcoQn/G8Bo1e8ZPlY3X3bnAxWaBdvTdvM1hP62iZp0BXWDy4vTAy4fF0+Dlpg==
+
 fill-range@^7.0.1:
   version "7.0.1"
   resolved "https://registry.npmjs.org/fill-range/-/fill-range-7.0.1.tgz"
@@ -650,7 +675,7 @@ fs-extra@^11.0.0:
 
 fsevents@~2.3.2:
   version "2.3.3"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 get-caller-file@^2.0.5:
@@ -971,6 +996,11 @@ postcss@^8.4.35:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
+potpack@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/potpack/-/potpack-1.0.2.tgz"
+  integrity sha512-choctRBIV9EMT9WGAZHn3V7t0Z2pMQyl0EZE6pFc/6ml3ssw7Dlf/oAOvFwjm1HVsqfQN8GfeFyJ+d8tRzqueQ==
+
 pretty-hrtime@^1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz"
@@ -1122,6 +1152,18 @@ three-js@^79.0.0:
   version "79.0.0"
   resolved "https://registry.npmjs.org/three-js/-/three-js-79.0.0.tgz"
   integrity sha512-/jBULzQlazCXEh1OXFRg9gTcKcPvYYGkEC7ebCJGf4zBS3uHTO7KH3hKFtgYrT0m8jizce5Ews/2jkkmt5xBmw==
+
+three-stdlib@^2.34.0:
+  version "2.34.0"
+  resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.34.0.tgz#bc191d92037ddcc3e4d5a4ae1bd46a199a857b5b"
+  integrity sha512-U5qJYWgUKBFJqr1coMSbczA964uvouzBjQbtJlaI9LfMwy7hr+kc1Mfh0gqi/2872KmGu9utgff6lj8Oti8+VQ==
+  dependencies:
+    "@types/draco3d" "^1.4.0"
+    "@types/offscreencanvas" "^2019.6.4"
+    "@types/webxr" "^0.5.2"
+    draco3d "^1.4.1"
+    fflate "^0.6.9"
+    potpack "^1.0.1"
 
 three@^0.164.1:
   version "0.164.1"
