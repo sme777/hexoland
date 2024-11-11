@@ -2,23 +2,22 @@ require 'set'
 require 'csv'
 require 'timeout'
 
-# BOND_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-# BASIC_Z_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+BOND_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+BASIC_Z_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
-
-BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
-BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
+# BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+# BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
     def initialize
         @bond_map = {}
         @basic_zs= []
-        CSV.foreach(BOND_PATH) do |row|
+        CSV.foreach(BOND_TMP_PATH) do |row|
             @bond_map[row[0]] = row[1]
         end
 
-        CSV.foreach(BASIC_Z_PATH) do |row|
+        CSV.foreach(BASIC_Z_TMP_PATH) do |row|
             @basic_zs << row[1]
         end
         @basic_zs = @basic_zs[1..]
@@ -1722,9 +1721,11 @@ class BondGenerator
     end
 end
 
-# bg = BondGenerator.new
+bg = BondGenerator.new
 
-# # s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 1, [], count=48, number=1, overlap=0.5, godmode=false)
+s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 20, [], count=20, number=1, overlap=0.5, godmode=false)
+
+p s14_handles, s14_handles_score
 # # p s14_handles, s14_handles_score 
 # # p "Handle S14 score: #{s14_handles_score}"
 # # s25_handles, s25_handles_score = bg.best_sides_out_of("S25", "handles", 1, [], count=48, number=1, overlap=0.5, godmode=false)

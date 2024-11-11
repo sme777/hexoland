@@ -11,9 +11,15 @@ import {
 import {
   Panel
 } from "../models/panel"
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {
+  GLTFLoader
+} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { setupCanvas, onWindowResize, animate } from './canvas_utils';
+import {
+  setupCanvas,
+  onWindowResize,
+  animate
+} from './canvas_utils';
 
 export default class extends Controller {
 
@@ -23,71 +29,236 @@ export default class extends Controller {
     let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
 
     // Define the bond configurations for each side of the hexagon
-    const hexBondData = {
-      "S1": ['1', '1', 'x', '1', 'x', '1', '1', '1'],
-      "S2": ['1', '0', '1', '1', '0', '1', '1', '0'],
-      "S3": ['1', '1', '0', '1', '1', '0', '1', '1'],
-      "S4": ['0', 'x', '1', '0', 'x', '1', '0', '1'],
-      "S5": ['x', '1', '1', '0', 'x', '1', '0', '1'],
-      "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
-    };
+    // const hexBondData = {
+    //   "S1": ['1', '1', 'x', '1', 'x', '1', '1', '1'],
+    //   "S2": ['1', '0', '1', '1', '0', '1', '1', '0'],
+    //   "S3": ['1', '1', '0', '1', '1', '0', '1', '1'],
+    //   "S4": ['0', 'x', '1', '0', 'x', '1', '0', '1'],
+    //   "S5": ['x', '1', '1', '0', 'x', '1', '0', '1'],
+    //   "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
+    // };
 
-    // Create the hexagonal prism with the specified bond data for each side
-    const hex1 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    // // Create the hexagonal prism with the specified bond data for each side
+    // const hex1 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
 
-    const hex2 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    // const hex2 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
 
-    const hex3 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    // const hex3 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
 
-    // Position the hex at the center of the scene
-    hex1.getObject().position.set(0, 0, 0);
-    hex2.getObject().position.set(0, 25, 0);
-    hex3.getObject().position.set(20, 12.5, 0);
+    // // Position the hex at the center of the scene
+    // hex1.getObject().position.set(0, 0, 0);
+    // hex2.getObject().position.set(0, 25, 0);
+    // hex3.getObject().position.set(20, 12.5, 0);
 
-    scene.add(hex1.getObject());
-    scene.add(hex2.getObject());
-    scene.add(hex3.getObject());
+    // scene.add(hex1.getObject());
+    // scene.add(hex2.getObject());
+    // scene.add(hex3.getObject());
 
-    // Ground and lighting setup
-    const groundGeometry = new THREE.PlaneGeometry(200, 200);
-    const groundMaterial = new THREE.ShadowMaterial({
-      opacity: 0.2
+    // // Ground and lighting setup
+    // const groundGeometry = new THREE.PlaneGeometry(200, 200);
+    // const groundMaterial = new THREE.ShadowMaterial({
+    //   opacity: 0.2
+    // });
+    // const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    // ground.rotation.x = -Math.PI / 2;
+    // ground.position.y = -20; // Positioned further below the hex to avoid overlap
+    // ground.receiveShadow = true;
+    // scene.add(ground);
+
+    // // Add lighting to the scene
+    // const light = new THREE.DirectionalLight(0xffffff, 5);
+    // light.position.set(50, 50, 50);
+    // scene.add(light);
+
+    // // Set the camera to ensure that it views the hex properly from the front
+    // camera.position.set(0, 0, 60); // Move the camera back and center it on the x and y axes
+    // camera.lookAt(0, 0, 0); // Make sure the camera is looking at the center
+
+    // controls.target.set(0, 0, 0); // Set the OrbitControls to target the center of the scene
+    // controls.update();
+
+    const helixRadius = 1.5;
+    const helixHeight = 50;
+    const halfHelixHeight = helixHeight / 2;
+    const quarterHelixHeight = helixHeight / 4;
+    
+    const ringRadius = helixRadius;
+    const ringTubeRadius = 0.01;
+    const ringCount = 6;
+    const passiveHelixRingCount = 6;
+    const coreBoundHelixRingCount = 4;
+    const sideBoundHelixRingCount = 2;
+
+    const coreBondHelix = new THREE.MeshStandardMaterial({
+      color: 0xFADFA1
     });
-    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -20; // Positioned further below the hex to avoid overlap
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // Add lighting to the scene
-    const light = new THREE.DirectionalLight(0xffffff, 5);
-    light.position.set(50, 50, 50);
-    scene.add(light);
-
-    // Set the camera to ensure that it views the hex properly from the front
-    camera.position.set(0, 0, 60); // Move the camera back and center it on the x and y axes
-    camera.lookAt(0, 0, 0); // Make sure the camera is looking at the center
-
-    controls.target.set(0, 0, 0); // Set the OrbitControls to target the center of the scene
-    controls.update();
+    // const corecoreBondHelix = new THREE.MeshStandardMaterial({ color: 0xFADFA1 }); 
+    const sideBoundHelix = new THREE.MeshStandardMaterial({
+      color: 0xD2E0FB
+    });
+    const passiveHelix = new THREE.MeshStandardMaterial({
+      color: 0xF5F7F8
+    });
+    const ringMaterial = new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa
+    });
 
 
-    // const loader = new GLTFLoader();
-    // console.log("GLB Loaded")
-    // loader.load(
-    //   hexModelPath, // Path to the exported .glb/.gltf file
-    //   function (gltf) {
-    //     const model = gltf.scene;
-    //     scene.add(model);  // Add the model to your scene
-    //   },
-    //   function (xhr) {
-    //     console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    //   },
-    //   function (error) {
-    //     console.error('An error happened', error);
-    //   }
-    // );
+    const coreBoundMask = []
 
+    const sideBoundMask = []
+
+    const coordinates = [
+      [31.67, 22.93],
+      [9.4, 21.07],
+      [22.13, 43.07],
+      [41.13, 21.07],
+      [31.67, 26.6],
+      [12.6, 22.93],
+      [37.93, 22.93],
+      [18.93, 44.93],
+      [22.13, 6.47],
+      [31.67, 37.53],
+      [41.13, 17.4],
+      [9.4, 28.47],
+      [18.93, 37.53],
+      [12.6, 26.6],
+      [9.4, 17.4],
+      [18.93, 4.6],
+      [28.47, 43.07],
+      [9.4, 39.4],
+      [6.2, 26.6],
+      [22.13, 39.4],
+      [6.2, 22.93],
+      [41.13, 28.47],
+      [3.07, 17.4],
+      [3.07, 28.47],
+      [28.47, 17.4],
+      [28.47, 39.4],
+      [31.67, 11.93],
+      [3.07, 21.07],
+      [28.47, 6.47],
+      [37.93, 26.6],
+      [9.4, 10.13],
+      [25.27, 4.6],
+      [31.67, 15.53],
+      [18.93, 15.53],
+      [9.4, 32.13],
+      [3.07, 32.13],
+      [15.73, 10.13],
+      [37.93, 11.93],
+      [25.27, 15.67],
+      [34.73, 10.13],
+      [25.27, 11.93],
+      [15.73, 32.13],
+      [37.93, 15.53],
+      [12.6, 37.53],
+      [6.2, 11.93],
+      [6.2, 33.93],
+      [15.73, 6.47],
+      [6.2, 15.53],
+      [6.2, 37.53],
+      [34.87, 39.4],
+      [28.47, 10.13],
+      [28.47, 32.13],
+      [37.93, 37.53],
+      [34.73, 17.4],
+      [34.87, 32.13],
+      [12.6, 11.93],
+      [12.6, 15.53],
+      [12.6, 33.93],
+      [15.73, 17.4],
+      [15.73, 39.4],
+      [41.13, 32.13],
+      [25.33, 37.53],
+      [34.73, 21.07],
+      [37.93, 33.87],
+      [18.93, 11.93],
+      [18.93, 33.93],
+      [25.27, 33.87],
+      [15.73, 43.07],
+      [25.27, 44.93],
+      [22.13, 10.13],
+      [31.67, 33.87],
+      [34.87, 28.47]
+    ];
+
+    const colors = [
+      passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
+      passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
+      coreBondHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, coreBondHelix, coreBondHelix,
+      passiveHelix, passiveHelix, passiveHelix, coreBondHelix, coreBondHelix, passiveHelix, sideBoundHelix, coreBondHelix,
+      passiveHelix, passiveHelix, passiveHelix, coreBondHelix, passiveHelix, coreBondHelix, passiveHelix, coreBondHelix,
+      passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, sideBoundHelix, passiveHelix,
+      sideBoundHelix, coreBondHelix, passiveHelix, passiveHelix, coreBondHelix, passiveHelix, passiveHelix, passiveHelix,
+      passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix,
+      passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, coreBondHelix, passiveHelix, passiveHelix, passiveHelix
+    ];
+
+    // Create each helix and corresponding rings based on coordinates
+    coordinates.forEach((coord, index) => {
+      const [x, y] = coord;
+
+      // Determine height based on material
+      const iscoreBondHelix = colors[index] === coreBondHelix;
+      const issideBondHelix = colors[index] === sideBoundHelix;
+      const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : helixHeight);
+      const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
+      if (issideBondHelix) {
+        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+        const helix1 = new THREE.Mesh(helixGeometry, colors[index]);
+        const helix2 = new THREE.Mesh(helixGeometry, colors[index]);
+
+        helix1.position.set(x, 3.5 * height, y);
+        helix2.position.set(x, 0.5 * height, y);
+
+        scene.add(helix1);
+        scene.add(helix2);
+
+      } else {
+        // Create the helix (cylinder) with adjusted height
+        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+        const helix = new THREE.Mesh(helixGeometry, colors[index]);
+
+        if (iscoreBondHelix) {
+          helix.position.set(x, height, y); 
+        } else {
+          helix.position.set(x, height / 2, y);
+        }
+
+        scene.add(helix);
+      }
+
+
+      // Create multiple encapsulating rings along the height of the helix
+      for (let i = 0; i < ringCount; i++) {
+        const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+
+        // Distribute rings evenly along the height of the cylinder
+        let ringY;
+        if (iscoreBondHelix) {
+          ringY = (i / (ringCount - 1)) * height + height / 2;
+        } else {
+          ringY = (i / (ringCount - 1)) * height;
+        }
+        
+
+        // Position each ring around the cylinder and rotate to lie in the xz-plane
+        ring.position.set(x, ringY, y);
+        ring.rotation.x = Math.PI / 2; // Rotate to lie in xz-plane
+        scene.add(ring);
+      }
+    });
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
+
+    camera.position.z = 500;
 
     animate(scene, camera, renderer);
 
