@@ -89,6 +89,18 @@ export default class extends Controller {
     const coreBoundHelixRingCount = 4;
     const sideBoundHelixRingCount = 2;
 
+    const side14GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xFFAAAA
+    });
+
+    const side25GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xFADFA1
+    });
+
+    const side36GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xD2E0FB
+    });
+
     const coreBondHelix = new THREE.MeshStandardMaterial({
       color: 0xFADFA1
     });
@@ -183,6 +195,13 @@ export default class extends Controller {
       [34.87, 28.47]
     ];
 
+    const s1Mask = [];
+    const s2Mask = [];
+    const s3Mask = [];
+    const s4Mask = [];
+    const s5Mask = [];
+    const s6Mask = [];
+
     const colors = [
       passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
       passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
@@ -200,10 +219,11 @@ export default class extends Controller {
       const [x, y] = coord;
 
       // Determine height based on material
-      const iscoreBondHelix = colors[index] === coreBondHelix;
-      const issideBondHelix = colors[index] === sideBoundHelix;
+      const iscoreBondHelix = s1Mask[index] === 1 || s3Mask[index] === 1 || s5Mask[index] === 1;
+      const issideBondHelix = s2Mask[index] === 1 || s4Mask[index] === 1 || s6Mask[index] === 1;
       const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : helixHeight);
       const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
+      
       if (issideBondHelix) {
         const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
         const helix1 = new THREE.Mesh(helixGeometry, colors[index]);
