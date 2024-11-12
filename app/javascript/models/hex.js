@@ -2,50 +2,271 @@ import * as THREE from 'three';
 import { Panel } from '../models/panel';
 
 export class Hex {
-  constructor(radius = 1, height = 2, color = 0xf5e6cb, edgeColor = 0x000000) {
-    this.radius = radius;
-    this.height = height;
-    this.color = color;
-    this.edgeColor = edgeColor;
-    
-    // Create the geometry for the hexagonal shape
-    const hexShape = new THREE.Shape();
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const x = this.radius * Math.cos(angle);
-      const y = this.radius * Math.sin(angle);
-      if (i === 0) {
-        hexShape.moveTo(x, y);
+  constructor(x=0, y=0, z=0, bonds={}) {
+    this.hex = new THREE.Group();
+    const helixRadius = 1.5;
+    const helixHeight = 50;
+    const halfHelixHeight = helixHeight / 2;
+    const quarterHelixHeight = helixHeight / 4;
+
+    const ringRadius = helixRadius;
+    const ringTubeRadius = 0.01;
+    const passiveHelixRingCount = 14;
+    const coreBoundHelixRingCount = 8;
+    const sideBoundHelixRingCount = 4;
+
+    const side14GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xB7E0FF
+    });
+
+    const side25GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xFFCFB3
+    });
+
+    const side36GroupMaterial = new THREE.MeshStandardMaterial({
+      color: 0xC1CFA1
+    });
+
+    const passiveHelix = new THREE.MeshStandardMaterial({
+      color: 0xF5F7F8
+    });
+    const ringMaterial = new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa
+    });
+
+    const coordinates = [
+      [31.67, 22.93],
+      [9.4, 21.07],
+      [22.13, 43.07],
+      [41.13, 21.07],
+      [31.67, 26.6],
+      [12.6, 22.93],
+      [37.93, 22.93],
+      [18.93, 44.93],
+      [22.13, 6.47],
+      [31.67, 37.53],
+      [41.13, 17.4],
+      [9.4, 28.47],
+      [18.93, 37.53],
+      [12.6, 26.6],
+      [9.4, 17.4],
+      [18.93, 4.6],
+      [28.47, 43.07],
+      [9.4, 39.4],
+      [6.2, 26.6],
+      [22.13, 39.4],
+      [6.2, 22.93],
+      [41.13, 28.47],
+      [3.07, 17.4],
+      [3.07, 28.47],
+      [28.47, 17.4],
+      [28.47, 39.4],
+      [31.67, 11.93],
+      [3.07, 21.07],
+      [28.47, 6.47],
+      [37.93, 26.6],
+      [9.4, 10.13],
+      [25.27, 4.6],
+      [31.67, 15.53],
+      [18.93, 15.53],
+      [9.4, 32.13],
+      [3.07, 32.13],
+      [15.73, 10.13],
+      [37.93, 11.93],
+      [25.27, 15.67],
+      [34.73, 10.13],
+      [25.27, 11.93],
+      [15.73, 32.13],
+      [37.93, 15.53],
+      [12.6, 37.53],
+      [6.2, 11.93],
+      [6.2, 33.93],
+      [15.73, 6.47],
+      [6.2, 15.53],
+      [6.2, 37.53],
+      [34.87, 39.4],
+      [28.47, 10.13],
+      [28.47, 32.13],
+      [37.93, 37.53],
+      [34.73, 17.4],
+      [34.87, 32.13],
+      [12.6, 11.93],
+      [12.6, 15.53],
+      [12.6, 33.93],
+      [15.73, 17.4],
+      [15.73, 39.4],
+      [41.13, 32.13],
+      [25.33, 37.53],
+      [34.73, 21.07],
+      [37.93, 33.87],
+      [18.93, 11.93],
+      [18.93, 33.93],
+      [25.27, 33.87],
+      [15.73, 43.07],
+      [25.27, 44.93],
+      [22.13, 10.13],
+      [31.67, 33.87],
+      [34.87, 28.47]
+    ];
+
+    const s1Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1,
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+    const s3Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 1,
+      0, 0, 0, 0, 0, 1, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+    const s5Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 0
+    ];
+
+    const s2Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const s4Mask = [
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const s6Mask = [
+      0, 0, 0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0, 0, 0
+    ];
+
+    // Create each helix and corresponding rings based on coordinates
+    coordinates.forEach((coord, index) => {
+      const [x, y] = coord;
+
+      // Determine height based on material
+      const iscoreBondHelix = s1Mask[index] === 1 || s3Mask[index] === 1 || s5Mask[index] === 1;
+      const issideBondHelix = s2Mask[index] === 1 || s4Mask[index] === 1 || s6Mask[index] === 1;
+      const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : helixHeight);
+      const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
+
+      if (issideBondHelix) {
+        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+
+        const color = s2Mask[index] === 1 ? side25GroupMaterial : (s4Mask[index] === 1 ? side14GroupMaterial : side36GroupMaterial);
+
+        const helix1 = new THREE.Mesh(helixGeometry, color);
+        const helix2 = new THREE.Mesh(helixGeometry, color);
+
+        helix1.position.set(x, 3.5 * height, y);
+        helix2.position.set(x, 0.5 * height, y);
+
+        this.hex.add(helix1);
+        this.hex.add(helix2);
+
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          const ringY = (i / (ringCount - 1)) * height
+
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2; 
+          this.hex.add(ring);
+        }
+
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          const ringY = (i / (ringCount - 1)) * height + 3 * height;
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2;
+          this.hex.add(ring);
+        }
+
       } else {
-        hexShape.lineTo(x, y);
+        // Create the helix (cylinder) with adjusted height
+        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+        let color;
+        if (iscoreBondHelix) {
+          color = s1Mask[index] === 1 ? side14GroupMaterial : (s3Mask[index] === 1 ? side36GroupMaterial : side25GroupMaterial);
+        } else {
+          color = passiveHelix;
+        }
+        const helix = new THREE.Mesh(helixGeometry, color);
+
+        if (iscoreBondHelix) {
+          helix.position.set(x, height, y);
+        } else {
+          helix.position.set(x, height / 2, y);
+        }
+
+        this.hex.add(helix);
+
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          // Distribute rings evenly along the height of the cylinder
+          let ringY;
+          if (iscoreBondHelix) {
+            ringY = (i / (ringCount - 1)) * height + height / 2;
+          } else {
+            ringY = (i / (ringCount - 1)) * height;
+          }
+          // Position each ring around the cylinder and rotate to lie in the xz-plane
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2; 
+          this.hex.add(ring);
+        }
       }
-    }
-    hexShape.closePath();
 
-    // Extrude the shape to create a prism
-    const extrudeSettings = {
-      depth: this.height,
-      bevelEnabled: false,
-    };
-    this.geometry = new THREE.ExtrudeGeometry(hexShape, extrudeSettings);
-    this.geometry.center();
-
-    this.material = new THREE.MeshBasicMaterial({ color: this.color, side: THREE.DoubleSide });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-    const edgesGeometry = new THREE.EdgesGeometry(this.geometry);
-    const edgesMaterial = new THREE.LineBasicMaterial({ color: this.edgeColor });
-    this.edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-
-    this.prism = new THREE.Group();
-    this.prism.add(this.mesh);
-    this.prism.add(this.edges);
-
-    this.addPanels();
+    });
+    this.hex.position.set(x, y, z);
   }
 
   getObject() {
-    return this.prism;
+    return this.hex;
   }
 
   rotate(x, y, z) {
@@ -54,122 +275,4 @@ export class Hex {
     this.prism.rotation.z += z;
   }
 
-  addPanels() {
-    const { rectangularFaces } = this.computeHexPrismFaces(this.radius, this.height);
-    let idx = 1
-    rectangularFaces.forEach(face => {
-      // Calculate the width of the panel based on the distance between two adjacent vertices
-      const faceWidth = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z).length();
-      const faceHeight = this.height;
-  
-      // Calculate the center of the face
-      const centerX = (face[0].x + face[1].x + face[2].x + face[3].x) / 4;
-      const centerY = (face[0].y + face[1].y + face[2].y + face[3].y) / 4;
-      const centerZ = (face[0].z + face[1].z + face[2].z + face[3].z) / 4;
-      const centerPosition = new THREE.Vector3(centerX, centerY, centerZ);
-  
-      // Calculate the face normal for alignment
-      const edge1 = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z);
-      const edge2 = new THREE.Vector3(face[3].x - face[0].x, face[3].y - face[0].y, face[3].z - face[0].z);
-      const faceNormal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
-      let panel;
-      // Create a Panel with the exact width and height
-      if (idx == 1) {
-        panel = new Panel([centerX - 7.5, centerY - 4.375, centerZ], ["1","0","1","0","1","1","0","0"], faceWidth, faceHeight);
-      } else if (idx == 2) {
-        panel = new Panel([centerX, centerY - 8.625, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
-      } else if (idx == 3) {
-        panel = new Panel([centerX + 7.5 , centerY - 4.5, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
-      } else if (idx == 4) {
-        panel = new Panel([centerX + 7.5, centerY + 4.5 , centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
-      } else if (idx == 5) {
-        panel = new Panel([centerX , centerY + 8.75, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
-      } else if (idx == 6) {
-        panel = new Panel([centerX - 7.5 , centerY + 4.5, centerZ], ["x","x","x","x","x","x","x","x"], faceWidth, faceHeight);
-      } 
-      
-      const panelGroup = panel.createPanel();
-      // Align the panel with the outward direction of the face
-      panelGroup.position.copy(centerPosition);
-      panelGroup.lookAt(centerPosition.clone().add(faceNormal));
-      // Offset the panel slightly along the normal to avoid z-fighting
-      const offsetDistance = -0.1;  // Adjust this value as needed to reduce shearing
-      panelGroup.position.add(faceNormal.clone().multiplyScalar(offsetDistance));
-
-      // Rotate the panel by π/2 around its Z-axis for proper orientation
-      panelGroup.rotateZ(Math.PI / 2);
-      panelGroup.rotateY(Math.PI);
-      // Add the panel to the prism group
-      this.prism.add(panelGroup);
-      idx += 1
-    });
-  }
-
-  addPanels2() {
-    const { rectangularFaces } = this.computeHexPrismFaces(this.radius, this.height);
-  
-    rectangularFaces.forEach((face, index) => {
-      // Calculate the width and height of each face
-      const faceWidth = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z).length();
-      const faceHeight = this.height;
-  
-      // Calculate the center of the face for panel positioning
-      const centerX = (face[0].x + face[1].x + face[2].x + face[3].x) / 4;
-      const centerY = (face[0].y + face[1].y + face[2].y + face[3].y) / 4;
-      const centerZ = (face[0].z + face[1].z + face[2].z + face[3].z) / 4;
-      const centerPosition = new THREE.Vector3(centerX, centerY, centerZ);
-  
-      // Calculate the face normal for orientation
-      const edge1 = new THREE.Vector3(face[1].x - face[0].x, face[1].y - face[0].y, face[1].z - face[0].z);
-      const edge2 = new THREE.Vector3(face[3].x - face[0].x, face[3].y - face[0].y, face[3].z - face[0].z);
-      const faceNormal = new THREE.Vector3().crossVectors(edge1, edge2).normalize();
-  
-      // Create the panel with calculated width and height
-      const panel = new Panel([centerPosition.x, centerPosition.y, centerPosition.z], ["0", "0", "0", "0", "0", "0", "0", "0"], faceWidth, faceHeight);
-      const panelGroup = panel.createPanel();
-  
-      // Position the panel at the calculated face center
-      panelGroup.position.copy(centerPosition);
-  
-      // Orient the panel to align with the face normal
-      panelGroup.lookAt(centerPosition.clone().add(faceNormal));
-  
-      // Offset the panel slightly along the normal to prevent z-fighting
-      const offsetDistance = -0.05;  // Small offset to avoid z-fighting
-      panelGroup.position.add(faceNormal.clone().multiplyScalar(offsetDistance));
-      panelGroup.rotateZ(Math.PI / 2);
-      panelGroup.rotateY(Math.PI);
-      // Add the panel to the prism group
-      this.prism.add(panelGroup);
-    });
-  }
-  
-  
-
-  computeHexPrismFaces(radius = 1, height = 2) {
-    const topVertices = [];
-    const bottomVertices = [];
-    const rectangularFaces = [];
-  
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-  
-      topVertices.push({ x: x, y: y, z: height / 2 });
-      bottomVertices.push({ x: x, y: y, z: -height / 2 });
-    }
-  
-    for (let i = 0; i < 6; i++) {
-      const nextIndex = (i + 1) % 6;
-      rectangularFaces.push([
-        topVertices[i],
-        topVertices[nextIndex],
-        bottomVertices[nextIndex],
-        bottomVertices[i]
-      ]);
-    }
-  
-    return { topVertices, bottomVertices, rectangularFaces };
-  }
 }
