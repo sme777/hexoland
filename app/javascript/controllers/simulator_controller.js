@@ -53,72 +53,35 @@ export default class extends Controller {
     // scene.add(hex1.getObject());
     // scene.add(hex2.getObject());
     // scene.add(hex3.getObject());
-
-    // // Ground and lighting setup
-    // const groundGeometry = new THREE.PlaneGeometry(200, 200);
-    // const groundMaterial = new THREE.ShadowMaterial({
-    //   opacity: 0.2
-    // });
-    // const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-    // ground.rotation.x = -Math.PI / 2;
-    // ground.position.y = -20; // Positioned further below the hex to avoid overlap
-    // ground.receiveShadow = true;
-    // scene.add(ground);
-
-    // // Add lighting to the scene
-    // const light = new THREE.DirectionalLight(0xffffff, 5);
-    // light.position.set(50, 50, 50);
-    // scene.add(light);
-
-    // // Set the camera to ensure that it views the hex properly from the front
-    // camera.position.set(0, 0, 60); // Move the camera back and center it on the x and y axes
-    // camera.lookAt(0, 0, 0); // Make sure the camera is looking at the center
-
-    // controls.target.set(0, 0, 0); // Set the OrbitControls to target the center of the scene
-    // controls.update();
-
     const helixRadius = 1.5;
     const helixHeight = 50;
     const halfHelixHeight = helixHeight / 2;
     const quarterHelixHeight = helixHeight / 4;
-    
+
     const ringRadius = helixRadius;
     const ringTubeRadius = 0.01;
-    const ringCount = 6;
-    const passiveHelixRingCount = 6;
-    const coreBoundHelixRingCount = 4;
-    const sideBoundHelixRingCount = 2;
+    const passiveHelixRingCount = 14;
+    const coreBoundHelixRingCount = 8;
+    const sideBoundHelixRingCount = 4;
 
     const side14GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xFFAAAA
+      color: 0xB7E0FF
     });
 
     const side25GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xFADFA1
+      color: 0xFFCFB3
     });
 
     const side36GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xD2E0FB
+      color: 0xC1CFA1
     });
 
-    const coreBondHelix = new THREE.MeshStandardMaterial({
-      color: 0xFADFA1
-    });
-    // const corecoreBondHelix = new THREE.MeshStandardMaterial({ color: 0xFADFA1 }); 
-    const sideBoundHelix = new THREE.MeshStandardMaterial({
-      color: 0xD2E0FB
-    });
     const passiveHelix = new THREE.MeshStandardMaterial({
       color: 0xF5F7F8
     });
     const ringMaterial = new THREE.MeshStandardMaterial({
       color: 0xaaaaaa
     });
-
-
-    const coreBoundMask = []
-
-    const sideBoundMask = []
 
     const coordinates = [
       [31.67, 22.93],
@@ -195,23 +158,74 @@ export default class extends Controller {
       [34.87, 28.47]
     ];
 
-    const s1Mask = [];
-    const s2Mask = [];
-    const s3Mask = [];
-    const s4Mask = [];
-    const s5Mask = [];
-    const s6Mask = [];
+    const s1Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1,
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+    const s3Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 1,
+      0, 0, 0, 0, 0, 1, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+    const s5Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 0
+    ];
 
-    const colors = [
-      passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
-      passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix,
-      coreBondHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, coreBondHelix, coreBondHelix,
-      passiveHelix, passiveHelix, passiveHelix, coreBondHelix, coreBondHelix, passiveHelix, sideBoundHelix, coreBondHelix,
-      passiveHelix, passiveHelix, passiveHelix, coreBondHelix, passiveHelix, coreBondHelix, passiveHelix, coreBondHelix,
-      passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, sideBoundHelix, passiveHelix,
-      sideBoundHelix, coreBondHelix, passiveHelix, passiveHelix, coreBondHelix, passiveHelix, passiveHelix, passiveHelix,
-      passiveHelix, passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, passiveHelix, passiveHelix, passiveHelix,
-      passiveHelix, passiveHelix, passiveHelix, sideBoundHelix, coreBondHelix, passiveHelix, passiveHelix, passiveHelix
+    const s2Mask = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 1, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const s4Mask = [
+      0, 0, 0, 1, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    const s6Mask = [
+      0, 0, 0, 0, 0, 0, 0, 1,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0, 0, 0
     ];
 
     // Create each helix and corresponding rings based on coordinates
@@ -223,11 +237,14 @@ export default class extends Controller {
       const issideBondHelix = s2Mask[index] === 1 || s4Mask[index] === 1 || s6Mask[index] === 1;
       const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : helixHeight);
       const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
-      
+
       if (issideBondHelix) {
         const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
-        const helix1 = new THREE.Mesh(helixGeometry, colors[index]);
-        const helix2 = new THREE.Mesh(helixGeometry, colors[index]);
+
+        const color = s2Mask[index] === 1 ? side25GroupMaterial : (s4Mask[index] === 1 ? side14GroupMaterial : side36GroupMaterial);
+
+        const helix1 = new THREE.Mesh(helixGeometry, color);
+        const helix2 = new THREE.Mesh(helixGeometry, color);
 
         helix1.position.set(x, 3.5 * height, y);
         helix2.position.set(x, 0.5 * height, y);
@@ -235,40 +252,64 @@ export default class extends Controller {
         scene.add(helix1);
         scene.add(helix2);
 
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          const ringY = (i / (ringCount - 1)) * height
+
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2; 
+          scene.add(ring);
+        }
+
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          const ringY = (i / (ringCount - 1)) * height + 3 * height;
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2;
+          scene.add(ring);
+        }
+
       } else {
         // Create the helix (cylinder) with adjusted height
         const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
-        const helix = new THREE.Mesh(helixGeometry, colors[index]);
+        let color;
+        if (iscoreBondHelix) {
+          color = s1Mask[index] === 1 ? side14GroupMaterial : (s3Mask[index] === 1 ? side36GroupMaterial : side25GroupMaterial);
+        } else {
+          color = passiveHelix;
+        }
+        const helix = new THREE.Mesh(helixGeometry, color);
 
         if (iscoreBondHelix) {
-          helix.position.set(x, height, y); 
+          helix.position.set(x, height, y);
         } else {
           helix.position.set(x, height / 2, y);
         }
 
         scene.add(helix);
-      }
 
-
-      // Create multiple encapsulating rings along the height of the helix
-      for (let i = 0; i < ringCount; i++) {
-        const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
-        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-
-        // Distribute rings evenly along the height of the cylinder
-        let ringY;
-        if (iscoreBondHelix) {
-          ringY = (i / (ringCount - 1)) * height + height / 2;
-        } else {
-          ringY = (i / (ringCount - 1)) * height;
+        // Create multiple encapsulating rings along the height of the helix
+        for (let i = 0; i < ringCount; i++) {
+          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
+          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+          // Distribute rings evenly along the height of the cylinder
+          let ringY;
+          if (iscoreBondHelix) {
+            ringY = (i / (ringCount - 1)) * height + height / 2;
+          } else {
+            ringY = (i / (ringCount - 1)) * height;
+          }
+          // Position each ring around the cylinder and rotate to lie in the xz-plane
+          ring.position.set(x, ringY, y);
+          ring.rotation.x = Math.PI / 2; 
+          scene.add(ring);
         }
-        
-
-        // Position each ring around the cylinder and rotate to lie in the xz-plane
-        ring.position.set(x, ringY, y);
-        ring.rotation.x = Math.PI / 2; // Rotate to lie in xz-plane
-        scene.add(ring);
       }
+
     });
 
     // Lighting
