@@ -8,6 +8,7 @@
             <div class="conatiner p-4">
             <h2>Simulator</h2>
             <div class="row mx-1">
+                <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_code", style: "display: none;", value: @assembly.design_map %>
                 <div class="simulator-container shadow-sm p-0 m-0" id="guiContainer" style="width: 100%; min-height: 100vh;">
                     
                 </div>

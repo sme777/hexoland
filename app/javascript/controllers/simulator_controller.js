@@ -8,12 +8,6 @@ import * as THREE from "three";
 import {
   Hex
 } from "../models/hex"
-import {
-  Panel
-} from "../models/panel"
-import {
-  GLTFLoader
-} from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import {
   setupCanvas,
@@ -38,41 +32,15 @@ export default class extends Controller {
     //   "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
     // };
 
-    // // Create the hexagonal prism with the specified bond data for each side
-    // const hex1 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);
 
-    // const hex2 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
+    const assemblyBlocks = this.parseDesignMap(assemblyMap);
+    console.log(assemblyBlocks);
+    assemblyBlocks.forEach((block) => {
+      console.log(block)
+      scene.add(block);
+    })
 
-    // const hex3 = new Hex(10, 25, 0xf5e6cb, 0x000000, hexBondData);
-
-    // // Position the hex at the center of the scene
-    // hex1.getObject().position.set(0, 0, 0);
-    // hex2.getObject().position.set(0, 25, 0);
-    // hex3.getObject().position.set(20, 12.5, 0);
-
-    // scene.add(hex1.getObject());
-    // scene.add(hex2.getObject());
-    // scene.add(hex3.getObject());
-    const hex1 = new Hex(25, 0, 0);
-    const hex2 = new Hex(45, 0, 32.5);
-    const hex3 = new Hex(25, 50.5, 0);
-    const hex4 = new Hex(45, 50.5, 32.5);
-    // const hex5 = new Hex(25, 90, 0);
-    // const hex6 = new Hex(45, 90, 32.5);
-    // const hex7 = new Hex(25, 135, 0);
-    // const hex8 = new Hex(45, 135, 32.5);
-    // const hex9 = new Hex(25, 180, 0);
-    // const hex10 = new Hex(45, 180, 32.5);
-    scene.add(hex1.getObject());
-    scene.add(hex2.getObject());
-    scene.add(hex3.getObject());
-    scene.add(hex4.getObject());
-    // scene.add(hex5.getObject());
-    // scene.add(hex6.getObject());
-    // scene.add(hex7.getObject());
-    // scene.add(hex8.getObject());
-    // scene.add(hex9.getObject());
-    // scene.add(hex10.getObject());
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);
@@ -87,6 +55,62 @@ export default class extends Controller {
     window.addEventListener('resize', () => {
       onWindowResize(renderer, camera, guiContainer);
     });
+  }
+
+  parseDesignMap(designMap) {
+    const structures = Object.keys(designMap)
+    const structureAssemblyArray = new Array(structures.length);
+    structures.forEach((key, idx) => {
+      // console.log(key, designMap[key])
+      structureAssemblyArray[idx] = this.assembleDesignMap(designMap[key]);
+    });
+    return structureAssemblyArray;
+  }
+
+  assembleDesignMap(assemblyMap) {
+    // console.log(assemblyMap)
+    const assemblyBlock = new THREE.Group();
+
+    const startHex = Object.keys(assemblyMap)[0];
+
+    // console.log(assemblyMap[startHex]);
+
+    const startPos = new THREE.Vector3(0, 0, 0);
+    const startObject = new Hex(startPos);
+    const { horiz, vert, depth } = startObject.getSpacings();
+    console.log(horiz, vert)
+    assemblyBlock.add(startObject.getObject());
+
+    let lastVisitedMonomer;
+    Object.keys(assemblyMap[startHex]).forEach((side) => {
+      // console.log(side)
+      if (side == "S1") {
+        const s1NeighborXPos = startPos.x + vert * 3/4;
+        const s1NeighborYPos = startPos.y + horiz * 1/2;
+        console.log(startPos.z)
+        const s1NeighborZPos = startPos.z;
+        const s1Neighbor = new Hex(new THREE.Vector3(s1NeighborXPos, s1NeighborYPos, s1NeighborZPos));
+        assemblyBlock.add(s1Neighbor.getObject());
+      } else if (side == "S2") {
+
+      } else if (side == "S3") {
+
+      } else if (side == "S4") {
+
+      } else if (side == "S5") {
+
+      } else if (side == "S6") {
+
+      } else if (side == "ZU") {
+        
+      } else if (side == "ZD") {
+
+      } else {
+        console.log("Unknown side!")
+      }
+    })
+    // console.log(assemblyBlock)
+    return assemblyBlock;
   }
 
 }

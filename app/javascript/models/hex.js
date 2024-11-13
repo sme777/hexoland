@@ -2,14 +2,15 @@ import * as THREE from 'three';
 import { Panel } from '../models/panel';
 
 export class Hex {
-  constructor(x=0, y=0, z=0, bonds={}) {
+  constructor(pos, bonds={}) {
     this.hex = new THREE.Group();
-    const helixRadius = 1.5;
-    const helixHeight = 50;
-    const halfHelixHeight = helixHeight / 2;
-    const quarterHelixHeight = helixHeight / 4;
+    this.helixRadius = 1.5;
+    this.helixHeight = 50;
 
-    const ringRadius = helixRadius;
+    const halfHelixHeight = this.helixHeight / 2;
+    const quarterHelixHeight = this.helixHeight / 4;
+
+    const ringRadius = this.helixRadius;
     const ringTubeRadius = 0.01;
     const passiveHelixRingCount = 14;
     const coreBoundHelixRingCount = 8;
@@ -20,7 +21,7 @@ export class Hex {
     });
 
     const side25GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xFFCFB3
+      color: 0xE8BCB9
     });
 
     const side36GroupMaterial = new THREE.MeshStandardMaterial({
@@ -186,11 +187,11 @@ export class Hex {
       // Determine height based on material
       const iscoreBondHelix = s1Mask[index] === 1 || s3Mask[index] === 1 || s5Mask[index] === 1;
       const issideBondHelix = s2Mask[index] === 1 || s4Mask[index] === 1 || s6Mask[index] === 1;
-      const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : helixHeight);
+      const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : this.helixHeight);
       const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
 
       if (issideBondHelix) {
-        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+        const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, height, 32);
 
         const color = s2Mask[index] === 1 ? side25GroupMaterial : (s4Mask[index] === 1 ? side14GroupMaterial : side36GroupMaterial);
 
@@ -226,7 +227,7 @@ export class Hex {
 
       } else {
         // Create the helix (cylinder) with adjusted height
-        const helixGeometry = new THREE.CylinderGeometry(helixRadius, helixRadius, height, 32);
+        const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, height, 32);
         let color;
         if (iscoreBondHelix) {
           color = s1Mask[index] === 1 ? side14GroupMaterial : (s3Mask[index] === 1 ? side36GroupMaterial : side25GroupMaterial);
@@ -262,11 +263,20 @@ export class Hex {
       }
 
     });
-    this.hex.position.set(x, y, z);
+    this.hex.position.set(pos.x, pos.y, pos.z);
   }
 
   getObject() {
     return this.hex;
+  }
+
+  getSpacings() {
+    const width = Math.sqrt(3) * this.helixRadius * 25;
+    const height = 2 * this.helixRadius * 25;
+    const depth = this.helixHeight;
+    const horiz = width;
+    const vert = 3 / 4 * height;
+    return {horiz, vert, depth };
   }
 
   rotate(x, y, z) {

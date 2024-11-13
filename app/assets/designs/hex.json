@@ -1,7 +1,7 @@
 {
-    "Z-5": {
+    "hex": {
         "building_blocks": null,
-        "ignore_generation": false,
+        "ignore_generation": true,
         "max_xy_overlap": 0.0,
         "xy_trials": 1,
         "max_z_overlap": 0.0,
@@ -19,25 +19,7 @@
             }
         },
         "bond_map": {
-            "M1": {
-                "ZU": "M2"
 
-            },
-            "M2": {
-                "ZD": "M1",
-                "ZU": "M3"
-            },
-            "M3": {
-                "ZD": "M2",
-                "ZU": "M4"
-            },
-            "M4": {
-                "ZD": "M3",
-                "ZU": "M5"
-            },
-            "M5": {
-                "ZD": "M4"
-            }
         }
     }
 }

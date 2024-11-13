@@ -1,15 +1,24 @@
 {
-    "2x7M": {
+  "2x7M": {
       "building_blocks": null,
       "ignore_generation": false,
-      "bonds_attractive": 4,
-      "bonds_neutral": 4,
-      "bonds_repulsive": 0,
-      "bonds_z": 4,
-      "min_xy_fe": 45,
-      "max_xy_fe": 53,
-      "min_z_fe": 90,
-      "max_z_fe": 96,
+      "max_xy_overlap": 0.25,
+      "xy_trials": 20,
+      "max_z_overlap": 0.25,
+      "z_trials": 100,
+      "wells": [],  
+      "bond_families": {
+        "standard": {
+          "bonds_attractive": 4,
+          "bonds_neutral": 4,
+          "bonds_repulsive": 0,
+          "bonds_z": 4,
+          "min_xy_fe": 43,
+          "max_xy_fe": 53,
+          "min_z_fe": 88,
+          "max_z_fe": 94
+        }
+      },
       "bond_map": {
         "M1A": {
           "S1": "M5A",
