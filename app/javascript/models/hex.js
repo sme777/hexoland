@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { Panel } from '../models/panel';
 
 export class Hex {
   constructor(pos, bonds={}) {

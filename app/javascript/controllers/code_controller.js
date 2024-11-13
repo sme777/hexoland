@@ -10,9 +10,45 @@ export default class extends Controller {
     let content = {
       text: undefined,
       json: {
-        greeting: 'Hello World'
+        "Z-4": {
+          "building_blocks": null,
+          "ignore_generation": false,
+          "max_xy_overlap": 0.0,
+          "xy_trials": 1,
+          "max_z_overlap": 0.0,
+          "z_trials": 5,
+          "bond_families": {
+            "standard": {
+              "bonds_attractive": 0,
+              "bonds_neutral": 0,
+              "bonds_repulsive": 0,
+              "bonds_z": 4,
+              "min_xy_fe": 0,
+              "max_xy_fe": 200,
+              "min_z_fe": 86,
+              "max_z_fe": 98
+            }
+          },
+          "bond_map": {
+            "M1": {
+              "ZU": "M2"
+            },
+            "M2": {
+              "ZD": "M1",
+              "ZU": "M3"
+            },
+            "M3": {
+              "ZD": "M2",
+              "ZU": "M4"
+            },
+            "M4": {
+              "ZD": "M3"
+            }
+          }
+        }
       }
-    }
+    };
+    
 
     const editor = new JSONEditor({
       target: document.getElementById('jsoneditor'),
