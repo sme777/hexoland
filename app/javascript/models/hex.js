@@ -271,11 +271,9 @@ export class Hex {
   }
 
   getSpacings() {
-    const width = Math.sqrt(3) * this.helixRadius * 25;
-    const height = 2 * this.helixRadius * 25;
     const depth = this.helixHeight;
-    const horiz = width;
-    const vert = 3 / 4 * height;
+    const horiz = 3.0 / 2.0 * this.helixRadius * 24;
+    const vert = Math.sqrt(3) * this.helixRadius * 24;
     return {horiz, vert, depth };
   }
 
