@@ -11,11 +11,11 @@
                 "bonds_attractive": 0,
                 "bonds_neutral": 0,
                 "bonds_repulsive": 0,
-                "bonds_z": 4,
+                "bonds_z": 3,
                 "min_xy_fe": 0,
                 "max_xy_fe": 200,
-                "min_z_fe": 86,
-                "max_z_fe": 98
+                "min_z_fe": 55,
+                "max_z_fe": 70
             }
         },
         "bond_map": {

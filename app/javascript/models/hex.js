@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Panel } from '../models/panel';
 
 export class Hex {
   constructor(pos, bonds={}) {
@@ -270,6 +271,8 @@ export class Hex {
   }
 
   getSpacings() {
+    // const width = 2 * this.helixRadius * 32;
+    // const height = Math.sqrt(3) * this.helixRadius * 32;
     const depth = this.helixHeight;
     const horiz = 3.0 / 2.0 * this.helixRadius * 24;
     const vert = Math.sqrt(3) * this.helixRadius * 24;
