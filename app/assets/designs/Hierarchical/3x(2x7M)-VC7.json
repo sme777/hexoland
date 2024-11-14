@@ -19,8 +19,8 @@
         },
         "2B4T": {
           "bonds_attractive": 2,
-          "bonds_neutral": 3,
-          "bonds_repulsive": 3,
+          "bonds_neutral": 2,
+          "bonds_repulsive": 4,
           "bonds_z": 0,
           "min_xy_fe": 0,
           "max_xy_fe": 100,

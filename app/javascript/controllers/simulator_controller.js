@@ -31,22 +31,23 @@ export default class extends Controller {
     //   "S5": ['x', '1', '1', '0', 'x', '1', '0', '1'],
     //   "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
     // };
-
-    const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);
-
-    const assemblyBlocks = this.parseDesignMap(assemblyMap);
-    const hexGroup = new THREE.Group();
-    assemblyBlocks.forEach((block) => {
-      hexGroup.add(block);
+    const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);    
+    const hexBlockGroup = new THREE.Group();
+    assemblyMap.forEach((block) => {
+      const hexGroup = new THREE.Group();
+      block.forEach((monomer) => {
+        hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z))).getObject());
+      })
+      hexBlockGroup.add(hexGroup);
     })
 
-    const boundingBox = new THREE.Box3().setFromObject(hexGroup);
+    const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
 
     const center = new THREE.Vector3();
     boundingBox.getCenter(center);
 
-    hexGroup.position.sub(center);
-    scene.add(hexGroup);
+    hexBlockGroup.position.sub(center);
+    scene.add(hexBlockGroup);
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);

@@ -24,7 +24,7 @@ export default class extends Controller {
     for (let i = 0; i < assemblyIds.length; i++) {
 
       // Set up Code Controller
-      const jsonData = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_code`).value);
+      const jsonData = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_design_code`).value);
       const editor = new JSONEditor({
         target: document.getElementById(`assembly_${assemblyIds[i]}_editor`),
         props: {
@@ -37,38 +37,34 @@ export default class extends Controller {
 
       let guiContainer = document.getElementById(`assembly_${assemblyIds[i]}_gui`)
       let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
+      // console.log(assemblyMap)
+      const assemblyMap = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_assembly_code`).value);    
+      
+      const hexBlockGroup = new THREE.Group();
+      assemblyMap.forEach((block) => {
+        const hexGroup = new THREE.Group();
+        block.forEach((monomer) => {
+          hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z))).getObject());
+        })
+        hexBlockGroup.add(hexGroup);
+      })
 
-      const worker = new HexWorker();
-      const spacings = this.getSpacings();
+      const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
 
-      worker.computeNeighbors(jsonData, spacings).then((assemblyBlocks) => {
-        const hexBlockGroup = new THREE.Group();
-        // console.log(assemblyBlocks)
-        assemblyBlocks.forEach((block) => {
-          // console.log(block)
-          const hexGroup = new THREE.Group();
-          block.forEach((monomer) => {
-            const hex = (new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z))).getObject();
-            hexGroup.add(hex);
-          })
-          hexBlockGroup.add(hexGroup);
-        });
+      const center = new THREE.Vector3();
+      boundingBox.getCenter(center);
 
-        const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
-        const center = new THREE.Vector3();
-        boundingBox.getCenter(center);
-        hexBlockGroup.position.sub(center);
-        scene.add(hexBlockGroup);
+      hexBlockGroup.position.sub(center);
+      scene.add(hexBlockGroup);
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+      directionalLight.position.set(10, 10, 10);
+      scene.add(directionalLight);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-        directionalLight.position.set(10, 10, 10);
-        scene.add(directionalLight);
+      camera.position.z = 200;
 
-        camera.position.z = 200;
-        
-      });
       animate(scene, camera, renderer);
       window.addEventListener('resize', () => {
         onWindowResize(renderer, camera, guiContainer);

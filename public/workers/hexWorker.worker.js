@@ -8,6 +8,7 @@ self.onmessage = (event) => {
 
 function computeNeighbors(designMap, spacings) {
   const structures = Object.keys(designMap);
+  console.log(structures);
   const structureAssemblyArray = new Array(structures.length);
 
   for (let i = 0; i < structures.length; i++) {

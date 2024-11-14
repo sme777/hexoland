@@ -43,7 +43,7 @@ class StudioController < ApplicationController
         # begin
             bond_map, messages = @bond_generator.configure_blocks(JSON.parse(assembly_params[:design_map]))
             assembly[:design_map] = bond_map.to_json
-
+            assembly[:assembly_map] = assembly.compute_neighbors
             if assembly.save
                 flash[:success] = ["Successfully designed assembly #{assembly[:name]}"] + messages.flatten
             else
