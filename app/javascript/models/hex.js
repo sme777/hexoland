@@ -16,16 +16,33 @@ export class Hex {
     const coreBoundHelixRingCount = 8;
     const sideBoundHelixRingCount = 4;
 
+    const repulsiveEnd = new THREE.MeshStandardMaterial({
+
+    })
+
+    const neutralEnd = new THREE.MeshStandardMaterial({
+
+    })
+
+    const attractiveOutEnd = new THREE.MeshStandardMaterial({
+
+    })
+
+
+    const attractiveInEnd = new THREE.MeshStandardMaterial({
+      
+    })
+
     const side14GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xB7E0FF
+      color: 0xD1E9F6
     });
 
     const side25GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xE8BCB9
+      color: 0xF6EACB
     });
 
     const side36GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xC1CFA1
+      color: 0xF1D3CE
     });
 
     const passiveHelix = new THREE.MeshStandardMaterial({

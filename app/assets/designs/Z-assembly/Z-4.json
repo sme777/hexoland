@@ -1,5 +1,5 @@
 {
-    "Z-4": {
+    "Z-4-12H": {
         "building_blocks": null,
         "ignore_generation": false,
         "max_xy_overlap": 0.0,
@@ -11,11 +11,11 @@
                 "bonds_attractive": 0,
                 "bonds_neutral": 0,
                 "bonds_repulsive": 0,
-                "bonds_z": 3,
+                "bonds_z": 6,
                 "min_xy_fe": 0,
                 "max_xy_fe": 200,
-                "min_z_fe": 55,
-                "max_z_fe": 70
+                "min_z_fe": 125,
+                "max_z_fe": 160
             }
         },
         "bond_map": {

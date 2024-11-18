@@ -2,22 +2,22 @@ require 'set'
 require 'csv'
 require 'timeout'
 
-# BOND_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-# BASIC_Z_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+BOND_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+BASIC_Z_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
-BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
-BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
+# BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+# BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
     def initialize
         @bond_map = {}
         @basic_zs= []
-        CSV.foreach(BOND_PATH) do |row|
+        CSV.foreach(BOND_TMP_PATH) do |row|
             @bond_map[row[0]] = row[1]
         end
 
-        CSV.foreach(BASIC_Z_PATH) do |row|
+        CSV.foreach(BASIC_Z_TMP_PATH) do |row|
             @basic_zs << row[1]
         end
         @basic_zs = @basic_zs[1..]
@@ -50,7 +50,16 @@ class BondGenerator
     end
 
     def randomize_sides(side, count, number, type="handles",godmode=false)
-        if number == 1
+        if number == 0.5
+            if side == "S14"
+                # p BondGenerator.single_s14_sides[0] + BondGenerator.single_s14_sides[1]
+                return group_randomizer(BondGenerator.single_s14_sides[0] + BondGenerator.single_s14_sides[1], number * 2)
+            elsif side == "S25"
+                return group_randomizer(BondGenerator.single_s25_sides[0] + BondGenerator.single_s25_sides[1], number * 2)
+            elsif side == "S36"
+                return group_randomizer(BondGenerator.single_s36_sides[0] + BondGenerator.single_s36_sides[1], number * 2)
+            end
+        elsif number == 1
             if side == "S14"
                 return group_randomizer(BondGenerator.single_s14_sides[0], number) + group_randomizer(BondGenerator.single_s14_sides[1], number)
             elsif side == "S25"
@@ -869,6 +878,8 @@ class BondGenerator
         current_count = reference.size
         capacity = count > 25 ? 10000 : 500
         while sides.size < count
+            # byebug
+            # p face, count, number, type, godmode
             candidate = randomize_sides(face, count, number, type, godmode)
             # p max_overlap
             next unless (min_strength < sum_fes_of(candidate) && sum_fes_of(candidate) < max_strength)
@@ -1143,6 +1154,8 @@ class BondGenerator
                 random_helices = BondGenerator.tail_groups_4bonds.map {|group| group.sample }
             elsif count == 5
                 random_helices = BondGenerator.tail_groups_5bonds.map {|group| group.sample }
+            elsif count == 6
+                random_helices = BondGenerator.tail_groups_6bonds.map {|group| group.sample }
             else
                 random_helices = BondGenerator.tail_z_helices.sample(count)
             end
@@ -1413,6 +1426,18 @@ class BondGenerator
             ["H10_H11", "H8_H9", "H44_H45", "H12_H13"],
             ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]],
             ["H48_H49", "H16_H17", "H50_H51"]
+        ]
+    end
+
+    def self.tail_groups_6bonds
+        [
+            ["H1_H2", "H34_H3", "H4_H5"],
+            [["H35_H36", "H37_H38"], "H8_H9", "H44_H45"],
+            ["H10_H11", "H12_H13", "H48_H49"],
+            ["H50_H51", "H16_H17", ["H55", "H53_H54"]],
+            [["H18", "H19_H20"], "H58_H59", ["H21_H22", "H23_H24"]],
+            ["H62_H63", "H66_H67", ["H27", "H25_H26"]]
+
         ]
     end
 
@@ -1723,7 +1748,7 @@ end
 
 bg = BondGenerator.new
 
-s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 20, [], count=20, number=1, overlap=0.5, godmode=false)
+s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 10, [], count=256, number=0.5, overlap=1.0, godmode=false)
 
 p s14_handles, s14_handles_score
 # # p s14_handles, s14_handles_score 

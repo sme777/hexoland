@@ -9,7 +9,7 @@ export function setupCanvas(canvas) {
     const height = parentDiv.clientHeight;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xF1D3CE);
+    scene.background = new THREE.Color(0xFFFFFF); // F8EDE3
 
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({

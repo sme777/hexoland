@@ -1,6 +1,6 @@
 <div class="py-2">
     <div class="row g-0 border rounded flex-md-row mb-4 shadow-sm position-relative" >
-        <div class="col-md-4 p-4" style="height: 40vh; overflow-y: scroll;">
+        <div class="col-md-4 p-4" style="height: 80vh; overflow-y: scroll;">
             <div class="row">
                 <div class="col-md-6">
                     <strong class="d-inline-block mb-2 text-primary-emphasis"><%= assembly.author %></strong>
@@ -145,7 +145,7 @@
 
             </div>
         </div>
-        <div class="col-md-8" style="height: 40vh;">
+        <div class="col-md-8" style="height: 80vh;">
             <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
             <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_design_code", style: "display: none;", value: assembly.design_map %>
             <%= hidden_field_tag :assembly_map, "", type: "text", id: "assembly_#{assembly.id}_assembly_code", style: "display: none;", value: assembly.assembly_map.to_json %>
