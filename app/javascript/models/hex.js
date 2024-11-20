@@ -1,8 +1,17 @@
 import * as THREE from 'three';
-import { hexCoordinates, helixTypeCount, s1Mask, s3Mask, s5Mask, s2Mask, s4Mask, s6Mask } from './constants.js';
+import {
+  hexCoordinates,
+  helixTypeCount,
+  s1Mask,
+  s3Mask,
+  s5Mask,
+  s2Mask,
+  s4Mask,
+  s6Mask
+} from './constants.js';
 
 export class Hex {
-  constructor(pos, bonds={}) {
+  constructor(pos, bonds = {}) {
     this.hex = new THREE.Group();
     this.helixRadius = 1.5;
     this.helixHeight = 50;
@@ -16,11 +25,21 @@ export class Hex {
     const sideBoundHelixRingCount = 4;
 
     const materials = {
-      side14: new THREE.MeshStandardMaterial({ color: 0xD1E9F6 }),
-      side25: new THREE.MeshStandardMaterial({ color: 0xF6EACB }),
-      side36: new THREE.MeshStandardMaterial({ color: 0xF1D3CE }),
-      passiveHelix: new THREE.MeshStandardMaterial({ color: 0xF5F7F8 }),
-      ring: new THREE.MeshStandardMaterial({ color: 0xaaaaaa }),
+      side14: new THREE.MeshStandardMaterial({
+        color: 0xD1E9F6
+      }),
+      side25: new THREE.MeshStandardMaterial({
+        color: 0xF6EACB
+      }),
+      side36: new THREE.MeshStandardMaterial({
+        color: 0xF1D3CE
+      }),
+      passiveHelix: new THREE.MeshStandardMaterial({
+        color: 0xF5F7F8
+      }),
+      ring: new THREE.MeshStandardMaterial({
+        color: 0xaaaaaa
+      }),
       repulsiveBond: new THREE.MeshStandardMaterial({}),
       neutralBond: new THREE.MeshStandardMaterial({}),
       attractiveSocketBond: new THREE.MeshStandardMaterial({}),
@@ -103,7 +122,7 @@ export class Hex {
         for (let i = 0; i < ringCount; i++) {
           const ringMatrix = new THREE.Matrix4();
           const rotationMatrix = new THREE.Matrix4();
-          const ringY = (i / (ringCount - 1)) * height + height *1.5;
+          const ringY = (i / (ringCount - 1)) * height + height * 1.5;
           ringMatrix.setPosition(x, ringY, y);
           rotationMatrix.makeRotationX(Math.PI / 2);
           ringMatrix.multiply(rotationMatrix);
@@ -114,7 +133,7 @@ export class Hex {
         const helixMatrix1 = new THREE.Matrix4();
         helixMatrix1.setPosition(x, height * 0.5 + this.helixHeight * 0.5, y);
         mesh.setMatrixAt(meshIndex, helixMatrix1);
-  
+
         const helixMatrix2 = new THREE.Matrix4();
         helixMatrix2.setPosition(x, height * 3.5 + this.helixHeight * 0.5, y);
         mesh.setMatrixAt(meshIndex + 4, helixMatrix2);
@@ -137,7 +156,7 @@ export class Hex {
           rotationMatrix.makeRotationX(Math.PI / 2);
           ringMatrix2.multiply(rotationMatrix);
           ringMesh.setMatrixAt(ringIndex++, ringMatrix2);
-          }
+        }
       } else {
         const helixMatrix = new THREE.Matrix4();
         helixMatrix.setPosition(x, height, y);
@@ -151,7 +170,7 @@ export class Hex {
           rotationMatrix.makeRotationX(Math.PI / 2);
           ringMatrix.multiply(rotationMatrix);
           ringMesh.setMatrixAt(ringIndex++, ringMatrix);
-          }
+        }
       }
 
     });
@@ -178,7 +197,11 @@ export class Hex {
     const depth = this.helixHeight;
     const horiz = 3.0 / 2.0 * this.helixRadius * 24;
     const vert = Math.sqrt(3) * this.helixRadius * 24;
-    return {horiz, vert, depth };
+    return {
+      horiz,
+      vert,
+      depth
+    };
   }
 
   rotate(x, y, z) {
