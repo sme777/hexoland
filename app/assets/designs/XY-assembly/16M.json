@@ -3,20 +3,20 @@
         "building_blocks": null,
         "ignore_generation": false,
         "max_xy_overlap": 0.25,
-        "xy_trials": 1,
+        "xy_trials": 4,
         "max_z_overlap": 0.0,
         "z_trials": 0,
-        "wells": ["E2", "E4", "E6", "E8", "E10", "E12", "E14", "E16", "F2", "F4", "F6", "F8", "F10", "F12", "F14", "F16"],
+        "wells": [],
         "bond_families": {
             "standard": {
                 "bonds_attractive": 4,
                 "bonds_neutral": 4,
                 "bonds_repulsive": 0,
-                "bonds_z": 4,
+                "bonds_z": 0,
                 "min_xy_fe": 0,
                 "max_xy_fe": 200,
-                "min_z_fe": 90,
-                "max_z_fe": 96
+                "min_z_fe": 0,
+                "max_z_fe": 200
             }
         },
         "bond_map": {

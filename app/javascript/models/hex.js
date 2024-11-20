@@ -1,286 +1,173 @@
 import * as THREE from 'three';
-import { Panel } from '../models/panel';
+import { hexCoordinates, helixTypeCount, s1Mask, s3Mask, s5Mask, s2Mask, s4Mask, s6Mask } from './constants.js';
 
 export class Hex {
   constructor(pos, bonds={}) {
     this.hex = new THREE.Group();
     this.helixRadius = 1.5;
     this.helixHeight = 50;
-
     const halfHelixHeight = this.helixHeight / 2;
     const quarterHelixHeight = this.helixHeight / 4;
 
     const ringRadius = this.helixRadius;
-    const ringTubeRadius = 0.01;
+    const ringTubeRadius = 0.02;
     const passiveHelixRingCount = 14;
     const coreBoundHelixRingCount = 8;
     const sideBoundHelixRingCount = 4;
 
-    const repulsiveEnd = new THREE.MeshStandardMaterial({
+    const materials = {
+      side14: new THREE.MeshStandardMaterial({ color: 0xD1E9F6 }),
+      side25: new THREE.MeshStandardMaterial({ color: 0xF6EACB }),
+      side36: new THREE.MeshStandardMaterial({ color: 0xF1D3CE }),
+      passiveHelix: new THREE.MeshStandardMaterial({ color: 0xF5F7F8 }),
+      ring: new THREE.MeshStandardMaterial({ color: 0xaaaaaa }),
+      repulsiveBond: new THREE.MeshStandardMaterial({}),
+      neutralBond: new THREE.MeshStandardMaterial({}),
+      attractiveSocketBond: new THREE.MeshStandardMaterial({}),
+      attractivePlugBond: new THREE.MeshStandardMaterial({})
+    }
+    // Geometries
+    const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, this.helixHeight, 32);
+    const halfHelixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, this.helixHeight * 0.50, 32);
+    const quartHelixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, this.helixHeight * 0.25, 32);
 
-    })
+    const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
 
-    const neutralEnd = new THREE.MeshStandardMaterial({
+    // InstancedMeshes for each type of helix
+    const passiveHelixMesh = new THREE.InstancedMesh(helixGeometry, materials.passiveHelix, helixTypeCount.passive);
+    const side1Mesh = new THREE.InstancedMesh(quartHelixGeometry, materials.side14, helixTypeCount.s1);
+    const side2Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side25, helixTypeCount.s2);
+    const side3Mesh = new THREE.InstancedMesh(quartHelixGeometry, materials.side36, helixTypeCount.s3);
+    const side4Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side14, helixTypeCount.s4);
+    const side5Mesh = new THREE.InstancedMesh(quartHelixGeometry, materials.side25, helixTypeCount.s5);
+    const side6Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side36, helixTypeCount.s6);
 
-    })
+    // InstancedMesh for rings (shared among all helices)
+    const ringMesh = new THREE.InstancedMesh(ringGeometry, materials.ring, helixTypeCount.ring);
 
-    const attractiveOutEnd = new THREE.MeshStandardMaterial({
+    // Counters for each instanced mesh
+    let passiveIndex = 0;
 
-    })
+    let side1Index = 0;
+    let side2Index = 0;
+    let side3Index = 0;
+    let side4Index = 0;
+    let side5Index = 0;
+    let side6Index = 0;
 
-
-    const attractiveInEnd = new THREE.MeshStandardMaterial({
-      
-    })
-
-    const side14GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xD1E9F6
-    });
-
-    const side25GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xF6EACB
-    });
-
-    const side36GroupMaterial = new THREE.MeshStandardMaterial({
-      color: 0xF1D3CE
-    });
-
-    const passiveHelix = new THREE.MeshStandardMaterial({
-      color: 0xF5F7F8
-    });
-    const ringMaterial = new THREE.MeshStandardMaterial({
-      color: 0xaaaaaa
-    });
-
-    const coordinates = [
-      [31.67, 22.93],
-      [9.4, 21.07],
-      [22.13, 43.07],
-      [41.13, 21.07],
-      [31.67, 26.6],
-      [12.6, 22.93],
-      [37.93, 22.93],
-      [18.93, 44.93],
-      [22.13, 6.47],
-      [31.67, 37.53],
-      [41.13, 17.4],
-      [9.4, 28.47],
-      [18.93, 37.53],
-      [12.6, 26.6],
-      [9.4, 17.4],
-      [18.93, 4.6],
-      [28.47, 43.07],
-      [9.4, 39.4],
-      [6.2, 26.6],
-      [22.13, 39.4],
-      [6.2, 22.93],
-      [41.13, 28.47],
-      [3.07, 17.4],
-      [3.07, 28.47],
-      [28.47, 17.4],
-      [28.47, 39.4],
-      [31.67, 11.93],
-      [3.07, 21.07],
-      [28.47, 6.47],
-      [37.93, 26.6],
-      [9.4, 10.13],
-      [25.27, 4.6],
-      [31.67, 15.53],
-      [18.93, 15.53],
-      [9.4, 32.13],
-      [3.07, 32.13],
-      [15.73, 10.13],
-      [37.93, 11.93],
-      [25.27, 15.67],
-      [34.73, 10.13],
-      [25.27, 11.93],
-      [15.73, 32.13],
-      [37.93, 15.53],
-      [12.6, 37.53],
-      [6.2, 11.93],
-      [6.2, 33.93],
-      [15.73, 6.47],
-      [6.2, 15.53],
-      [6.2, 37.53],
-      [34.87, 39.4],
-      [28.47, 10.13],
-      [28.47, 32.13],
-      [37.93, 37.53],
-      [34.73, 17.4],
-      [34.87, 32.13],
-      [12.6, 11.93],
-      [12.6, 15.53],
-      [12.6, 33.93],
-      [15.73, 17.4],
-      [15.73, 39.4],
-      [41.13, 32.13],
-      [25.33, 37.53],
-      [34.73, 21.07],
-      [37.93, 33.87],
-      [18.93, 11.93],
-      [18.93, 33.93],
-      [25.27, 33.87],
-      [15.73, 43.07],
-      [25.27, 44.93],
-      [22.13, 10.13],
-      [31.67, 33.87],
-      [34.87, 28.47]
-    ];
-
-    const s1Mask = [
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 1, 1,
-      0, 0, 0, 1, 0, 0, 0, 0,
-      0, 0, 0, 1, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0
-    ];
-    const s3Mask = [
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 0, 0, 1,
-      0, 0, 0, 0, 0, 1, 0, 1,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0
-    ];
-    const s5Mask = [
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      1, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 1, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 0, 0, 0
-    ];
-
-    const s2Mask = [
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 1,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 1, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 0, 1, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0
-    ];
-
-    const s4Mask = [
-      0, 0, 0, 1, 0, 0, 0, 0,
-      0, 0, 1, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 1, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 1, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0
-    ];
-
-    const s6Mask = [
-      0, 0, 0, 0, 0, 0, 0, 1,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      1, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 1, 0, 0, 0, 0
-    ];
-
+    let ringIndex = 0;
     // Create each helix and corresponding rings based on coordinates
-    coordinates.forEach((coord, index) => {
+    hexCoordinates.forEach((coord, index) => {
       const [x, y] = coord;
 
-      // Determine height based on material
-      const iscoreBondHelix = s1Mask[index] === 1 || s3Mask[index] === 1 || s5Mask[index] === 1;
-      const issideBondHelix = s2Mask[index] === 1 || s4Mask[index] === 1 || s6Mask[index] === 1;
-      const height = iscoreBondHelix ? halfHelixHeight : (issideBondHelix ? quarterHelixHeight : this.helixHeight);
-      const ringCount = iscoreBondHelix ? coreBoundHelixRingCount : (issideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
+      const isSideBondHelix = s1Mask[index] || s3Mask[index] || s5Mask[index];
+      const isCoreBondHelix = s2Mask[index] || s4Mask[index] || s6Mask[index];
+      const height = isCoreBondHelix ? halfHelixHeight : (isSideBondHelix ? quarterHelixHeight : this.helixHeight);
+      const ringCount = isCoreBondHelix ? coreBoundHelixRingCount : (isSideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
 
-      if (issideBondHelix) {
-        const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, height, 32);
+      let mesh, meshIndex;
 
-        const color = s2Mask[index] === 1 ? side25GroupMaterial : (s4Mask[index] === 1 ? side14GroupMaterial : side36GroupMaterial);
-
-        const helix1 = new THREE.Mesh(helixGeometry, color);
-        const helix2 = new THREE.Mesh(helixGeometry, color);
-
-        helix1.position.set(x, 3.5 * height, y);
-        helix2.position.set(x, 0.5 * height, y);
-
-        this.hex.add(helix1);
-        this.hex.add(helix2);
-
-        // Create multiple encapsulating rings along the height of the helix
-        for (let i = 0; i < ringCount; i++) {
-          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
-          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-          const ringY = (i / (ringCount - 1)) * height
-
-          ring.position.set(x, ringY, y);
-          ring.rotation.x = Math.PI / 2; 
-          this.hex.add(ring);
+      if (isCoreBondHelix) {
+        if (s2Mask[index]) {
+          mesh = side2Mesh;
+          meshIndex = side2Index++;
+        } else if (s4Mask[index]) {
+          mesh = side4Mesh;
+          meshIndex = side4Index++;
+        } else if (s6Mask[index]) {
+          mesh = side6Mesh;
+          meshIndex = side6Index++;
         }
-
-        // Create multiple encapsulating rings along the height of the helix
-        for (let i = 0; i < ringCount; i++) {
-          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
-          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-          const ringY = (i / (ringCount - 1)) * height + 3 * height;
-          ring.position.set(x, ringY, y);
-          ring.rotation.x = Math.PI / 2;
-          this.hex.add(ring);
+      } else if (isSideBondHelix) {
+        if (s1Mask[index]) {
+          mesh = side1Mesh;
+          meshIndex = side1Index++;
+        } else if (s3Mask[index]) {
+          mesh = side3Mesh;
+          meshIndex = side3Index++;
+        } else if (s5Mask[index]) {
+          mesh = side5Mesh;
+          meshIndex = side5Index++;
         }
-
       } else {
-        // Create the helix (cylinder) with adjusted height
-        const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, height, 32);
-        let color;
-        if (iscoreBondHelix) {
-          color = s1Mask[index] === 1 ? side14GroupMaterial : (s3Mask[index] === 1 ? side36GroupMaterial : side25GroupMaterial);
-        } else {
-          color = passiveHelix;
-        }
-        const helix = new THREE.Mesh(helixGeometry, color);
+        mesh = passiveHelixMesh;
+        meshIndex = passiveIndex++;
+      }
 
-        if (iscoreBondHelix) {
-          helix.position.set(x, height, y);
-        } else {
-          helix.position.set(x, height / 2, y);
-        }
+      if (isCoreBondHelix) {
+        const helixMatrix = new THREE.Matrix4();
+        helixMatrix.setPosition(x, height + this.helixHeight * 0.5, y);
+        mesh.setMatrixAt(meshIndex, helixMatrix);
 
-        this.hex.add(helix);
-
-        // Create multiple encapsulating rings along the height of the helix
+        // Add Divisions
         for (let i = 0; i < ringCount; i++) {
-          const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
-          const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-          // Distribute rings evenly along the height of the cylinder
-          let ringY;
-          if (iscoreBondHelix) {
-            ringY = (i / (ringCount - 1)) * height + height / 2;
-          } else {
-            ringY = (i / (ringCount - 1)) * height;
-          }
-          // Position each ring around the cylinder and rotate to lie in the xz-plane
-          ring.position.set(x, ringY, y);
-          ring.rotation.x = Math.PI / 2; 
-          this.hex.add(ring);
+          const ringMatrix = new THREE.Matrix4();
+          const rotationMatrix = new THREE.Matrix4();
+          const ringY = (i / (ringCount - 1)) * height + height *1.5;
+          ringMatrix.setPosition(x, ringY, y);
+          rotationMatrix.makeRotationX(Math.PI / 2);
+          ringMatrix.multiply(rotationMatrix);
+          ringMesh.setMatrixAt(ringIndex++, ringMatrix);
         }
+
+      } else if (isSideBondHelix) {
+        const helixMatrix1 = new THREE.Matrix4();
+        helixMatrix1.setPosition(x, height * 0.5 + this.helixHeight * 0.5, y);
+        mesh.setMatrixAt(meshIndex, helixMatrix1);
+  
+        const helixMatrix2 = new THREE.Matrix4();
+        helixMatrix2.setPosition(x, height * 3.5 + this.helixHeight * 0.5, y);
+        mesh.setMatrixAt(meshIndex + 4, helixMatrix2);
+
+        for (let i = 0; i < ringCount; i++) {
+          const ringMatrix1 = new THREE.Matrix4();
+          const rotationMatrix = new THREE.Matrix4();
+          const ringY1 = (i / (ringCount - 1)) * height + height * 5;
+          ringMatrix1.setPosition(x, ringY1, y);
+          rotationMatrix.makeRotationX(Math.PI / 2);
+          ringMatrix1.multiply(rotationMatrix);
+          ringMesh.setMatrixAt(ringIndex++, ringMatrix1);
+        }
+
+        for (let i = 0; i < ringCount; i++) {
+          const ringMatrix2 = new THREE.Matrix4();
+          const rotationMatrix = new THREE.Matrix4();
+          const ringY2 = (i / (ringCount - 1)) * height + height * 2;
+          ringMatrix2.setPosition(x, ringY2, y);
+          rotationMatrix.makeRotationX(Math.PI / 2);
+          ringMatrix2.multiply(rotationMatrix);
+          ringMesh.setMatrixAt(ringIndex++, ringMatrix2);
+          }
+      } else {
+        const helixMatrix = new THREE.Matrix4();
+        helixMatrix.setPosition(x, height, y);
+        mesh.setMatrixAt(meshIndex, helixMatrix);
+
+        for (let i = 0; i < ringCount; i++) {
+          const ringMatrix = new THREE.Matrix4();
+          const rotationMatrix = new THREE.Matrix4();
+          const ringY = (i / (ringCount - 1)) * height + height * 0.5;
+          ringMatrix.setPosition(x, ringY, y);
+          rotationMatrix.makeRotationX(Math.PI / 2);
+          ringMatrix.multiply(rotationMatrix);
+          ringMesh.setMatrixAt(ringIndex++, ringMatrix);
+          }
       }
 
     });
+
+    // Center the hex group at the provided position
     this.hex.position.set(pos.x, pos.y, pos.z);
+
+    // Add each instanced mesh to the hex group
+    this.hex.add(passiveHelixMesh);
+    this.hex.add(side1Mesh);
+    this.hex.add(side2Mesh);
+    this.hex.add(side3Mesh);
+    this.hex.add(side4Mesh);
+    this.hex.add(side5Mesh);
+    this.hex.add(side6Mesh);
+    this.hex.add(ringMesh);
   }
 
   getObject() {
@@ -288,8 +175,6 @@ export class Hex {
   }
 
   getSpacings() {
-    // const width = 2 * this.helixRadius * 32;
-    // const height = Math.sqrt(3) * this.helixRadius * 32;
     const depth = this.helixHeight;
     const horiz = 3.0 / 2.0 * this.helixRadius * 24;
     const vert = Math.sqrt(3) * this.helixRadius * 24;
