@@ -81,7 +81,7 @@ export const helixTypeCount = {
     s5: 8,
     s6: 4,
     passive: 48,
-    ring: 8*4*3+4*8*3+14*48
+    ring: 8 * 4 * 3 + 4 * 8 * 3 + 14 * 48
 }
 
 export const s1Mask = [
