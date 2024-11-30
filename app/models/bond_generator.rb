@@ -579,6 +579,7 @@ class BondGenerator
         # s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds) unless s14_side_count == 0
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
+        # byebug
         s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
@@ -714,7 +715,7 @@ class BondGenerator
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
         ### Generate the Sides
-        byebug
+        # byebug
         s14s, s14_score = best_sides_out_of("S14", "handles", xy_trails, [], count=s14_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         s25s, _ = best_sides_out_of("S25", "handles", xy_trails, [], count=s25_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         s36s, _ = best_sides_out_of("S36", "handles", xy_trails, [], count=s36_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
@@ -852,7 +853,7 @@ class BondGenerator
                     all_seqs += add_z_bonds("HEAD", [])
                 end
                 if all_seqs.size != 112
-                  byebug
+                  raise StandardError, "Sequences is not the right number!"
                 end
                 bonding[block]["Sequences"] = all_seqs
             end

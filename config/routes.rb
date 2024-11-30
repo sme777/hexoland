@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   get '/studio' => 'studio#index', as: :studio
   get '/feed' => redirect('/feed/1'), as: :feed
   get '/docs' => 'docs#index', as: :docs
-  get '/simulator' => 'simulator#index', as: :simulator
+  get '/inspector' => 'inspector#index', as: :inspector
 
   post '/studio/' => 'studio#create', as: :create_assembly
   

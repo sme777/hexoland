@@ -1,8 +1,8 @@
 {
-    "16M": {
+    "16M-T2": {
         "building_blocks": null,
         "ignore_generation": false,
-        "max_xy_overlap": 0.25,
+        "max_xy_overlap": 0.5,
         "xy_trials": 4,
         "max_z_overlap": 0.0,
         "z_trials": 0,

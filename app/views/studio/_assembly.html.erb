@@ -149,7 +149,7 @@
             <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
             <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_design_code", style: "display: none;", value: assembly.design_map %>
             <%= hidden_field_tag :assembly_map, "", type: "text", id: "assembly_#{assembly.id}_assembly_code", style: "display: none;", value: assembly.assembly_map.to_json %>
-
+            <%= hidden_field_tag :bond_map, "", type: "text", id: "assembly_#{assembly.id}_bonds", style: "display: none;", value: assembly.normalize_bonds.to_json%>
             <div class="row h-100">
                 <div class="col-md-6">
                     <div id=<%= "assembly_#{assembly.id}_editor" %> style="height: 100%">

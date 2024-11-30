@@ -7,15 +7,16 @@ import {
   s5Mask,
   s2Mask,
   s4Mask,
-  s6Mask
+  s6Mask,
+  Zhelices
 } from './constants.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 export class Hex {
-  constructor(pos, bonds = {}) {
-    // console.log(bonds);
+  constructor(title, pos, bonds = {}) {
     this.bonds = this.fillBonds(bonds);
     this.hex = new THREE.Group();
+    this.hex.userData.title = title;
     this.helixRadius = 1.5;
     this.helixHeight = 50;
     const halfHelixHeight = this.helixHeight / 2;
@@ -131,8 +132,11 @@ export class Hex {
           this.hex.add(bondGroup);
         }
       } else {
-        mesh = passiveHelixMesh;
-        meshIndex = passiveIndex++;
+        if (!Zhelices[index]) {
+          mesh = passiveHelixMesh;
+          meshIndex = passiveIndex++;
+        }
+
       }
 
       if (isCoreBondHelix) {
@@ -321,7 +325,6 @@ export class Hex {
         helixBondsLeft = helixBonds[6];
         helixBondsRight = helixBonds[7];
     }
-    console.log(helixBondsLeft, helixBondsRight)
     // Create bonds based on helixBondsLeft and helixBondsRight
     let leftBond, rightBond;
 
@@ -374,9 +377,10 @@ export class Hex {
   }
 
   createNeutralBond() {
-    const baseRadius = 2; // Radius of the cylinder base
-    const baseHeight = 1; // Height of the cylinder base
+    const baseRadius = 1.5;
+    const baseHeight = 1;
     const baseGeometry = new THREE.CylinderGeometry(baseRadius, baseRadius, baseHeight, 32);
+    baseGeometry.translate(0, 0.1, 0);
     const material = new THREE.MeshStandardMaterial({ color: 0xFDB840 });
     return new THREE.Mesh(baseGeometry, material);
   }
@@ -403,9 +407,9 @@ export class Hex {
   }
 
   createAttractiveSocketBond() {
-    const baseRadius = 1.5; // Radius of the base cylinder
-    const baseHeight = 1; // Height of the base cylinder
-    const holeRadius = 0.75; // Radius of the hole
+    const baseRadius = 1.5;
+    const baseHeight = 1;
+    const holeRadius = 0.75;
     const outerShape = new THREE.Shape();
 
     // Outer circle (base of the cylinder)

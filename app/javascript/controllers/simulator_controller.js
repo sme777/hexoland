@@ -8,48 +8,72 @@ import * as THREE from "three";
 import {
   Hex
 } from "../models/hex"
-
+import {
+  JSONEditor
+} from "vanilla-jsoneditor"
 import {
   setupCanvas,
-  onWindowResize,
-  animate
+  onWindowResize
+  // animate
 } from './canvas_utils';
 
 export default class extends Controller {
 
   connect() {
+
+    const jsonData = JSON.parse(document.getElementById(`assembly_design_code`).value);
+    const editor = new JSONEditor({
+      target: document.getElementById(`assembly_editor`),
+      props: {
+        content: {
+          json: jsonData,
+          mode: 'view' // Set the mode to 'view' to disable editing
+        }
+      }
+    })
+
     const guiContainer = document.getElementById('guiContainer');
 
     let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
 
-    // Define the bond configurations for each side of the hexagon
-    // const hexBondData = {
-    //   "S1": ['1', '1', 'x', '1', 'x', '1', '1', '1'],
-    //   "S2": ['1', '0', '1', '1', '0', '1', '1', '0'],
-    //   "S3": ['1', '1', '0', '1', '1', '0', '1', '1'],
-    //   "S4": ['0', 'x', '1', '0', 'x', '1', '0', '1'],
-    //   "S5": ['x', '1', '1', '0', 'x', '1', '0', '1'],
-    //   "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
-    // };
-    const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);    
+    // set up raycasting
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+    this.camera = camera;
+    this.scene = scene;
+    this.renderer = renderer;
+
+    this.titleElement = document.createElement('div');
+    this.titleElement.style.position = 'absolute';
+    this.titleElement.style.padding = '5px 10px';
+    this.titleElement.style.background = 'rgba(0, 0, 0, 0.7)';
+    this.titleElement.style.color = 'white';
+    this.titleElement.style.borderRadius = '5px';
+    this.titleElement.style.display = 'none';
+    document.body.appendChild(this.titleElement);
+
+
+    const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);
     const hexBondData = JSON.parse(document.getElementById('bond_map').value);
-    const hexBlockGroup = new THREE.Group();
+
+
+    this.hexBlockGroup = new THREE.Group();
+    this.hexBlockGroup.userData.title = "Sam's World";
     assemblyMap.forEach((block) => {
       const hexGroup = new THREE.Group();
       block.forEach((monomer) => {
-        // console.log(monomer.monomer)
-        hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])).getObject());
+        hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])).getObject());
       })
-      hexBlockGroup.add(hexGroup);
+      this.hexBlockGroup.add(hexGroup);
     })
 
-    const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
+    const boundingBox = new THREE.Box3().setFromObject(this.hexBlockGroup);
 
     const center = new THREE.Vector3();
     boundingBox.getCenter(center);
 
-    hexBlockGroup.position.sub(center);
-    scene.add(hexBlockGroup);
+    this.hexBlockGroup.position.sub(center);
+    scene.add(this.hexBlockGroup);
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);
@@ -59,11 +83,61 @@ export default class extends Controller {
 
     camera.position.z = 500;
 
-    animate(scene, camera, renderer);
+    this.animate();
 
     window.addEventListener('resize', () => {
       onWindowResize(renderer, camera, guiContainer);
     });
+
+    window.addEventListener('mousemove', (event) => {
+      // Convert mouse position to normalized device coordinates
+      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      // Update the title position
+      this.titleElement.style.left = `${event.clientX + 10}px`;
+      this.titleElement.style.top = `${event.clientY + 10}px`;
+    });
+  }
+
+  onHover() {
+    // Cast a ray from the camera to the mouse position
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // Check intersections with the hexes
+    const intersects = this.raycaster.intersectObjects(this.hexBlockGroup.children, true); // 'true' checks all descendants
+
+    if (intersects.length > 0) {
+      let object = intersects[0].object;
+
+      while (object.parent && object.parent !== this.hexBlockGroup) {
+        object = object.parent;
+    }
+
+      // If the object is a direct child of the top group, it's the second-level group
+      if (object.parent === this.hexBlockGroup) {
+          // Display the title
+          this.titleElement.style.display = 'block';
+          this.titleElement.textContent = object.userData.title || 'Unknown';
+
+          // Highlight all children of the second-level group
+          object.traverse((child) => {
+              if (child.isMesh) {
+                  console.log(child)
+                  child.material.emissive = new THREE.Color(0xffa500); // Highlight color
+              }
+          });
+      }
+    } else {
+      // Hide the title and remove highlights
+      this.titleElement.style.display = 'none';
+
+      this.scene.traverse((child) => {
+        if (child.isMesh && child.material.emissive) {
+          child.material.emissive = new THREE.Color(0x000000); // Reset highlight
+        }
+      });
+    }
   }
 
   parseDesignMap(designMap) {
@@ -73,6 +147,17 @@ export default class extends Controller {
       structureAssemblyArray[idx] = this.assembleDesignMap(designMap[key]);
     });
     return structureAssemblyArray;
+  }
+
+  animate() {
+    const animateLoop = () => {
+        requestAnimationFrame(animateLoop);
+        
+        this.onHover();
+
+        this.renderer.render(this.scene, this.camera);
+    };
+    animateLoop(); // Start the loop
   }
 
   assembleDesignMap(assemblyMap) {

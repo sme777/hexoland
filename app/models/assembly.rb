@@ -5,29 +5,50 @@ class Assembly < ApplicationRecord
     def compute_neighbors()
       assembly_map = JSON.parse(self.design_map)
       structures = assembly_map.keys
-      structure_assembly_array = []
-  
-      structures.each do |key|
-        structure_assembly_array << assemble_design_map(assembly_map[key], get_spacings)
-      end
-  
-      structure_assembly_array
+      normalized_assembly_map = normalize_assembly_map(assembly_map)
+      [assemble_design_map(normalized_assembly_map, get_spacings)]
     end
   
     def normalize_bonds
-      # byebug
-      monomer_bonds = JSON.parse(design_map).values.first
+      monomer_bonds = normalize_assembly_map(JSON.parse(design_map))
       normalize_bonds_map = {}
       monomer_bonds.each do |monomer, sides|
         normalize_bonds_map[monomer] = {}
         # byebug
         sides.each do |side, bonds|
           unless side == "Sequences"
-            normalize_bonds_map[monomer][side] = send("#{side}_order", bonds)
+            if bonds[0].is_a?(Array)
+              normalize_bonds_map[monomer][side] = send("#{side}_order", [bonds[0][0], bonds[1]])
+            else
+              normalize_bonds_map[monomer][side] = send("#{side}_order", bonds)
+            end
+            
           end
         end
       end
       normalize_bonds_map
+    end
+
+    def normalize_assembly_map(assembly_map)
+      return assembly_map.values.first if assembly_map.size == 1
+      normalized_assembly_map = {}
+      assembly_map.each do |structure, local_map|
+        local_map.each do |monomer, bonds|
+          normalized_assembly_map["#{monomer}#{structure[-2..-1]}"] = add_self_reference(bonds.dup, structure[-2..-1])
+        end
+      end
+      normalized_assembly_map
+    end
+
+    def add_self_reference(bonds, number)
+      bonds.each do |monomer, bds|
+        if !bds[0].include?("#") && !bds[0].is_a?(Array)
+          bds[0] = "#{bds[0]}#{number}"
+        else
+          bds[0] = bds[0][0]
+        end
+      end
+      bonds
     end
 
     private
@@ -37,7 +58,7 @@ class Assembly < ApplicationRecord
       horiz3_4 = horiz * 3 / 4.0
       horiz3_8 = horiz * 3 / 8.0
       vert_div_sqrt3 = vert / Math.sqrt(3)
-  
+      # byebug
       monomer_map = construct_monomer_map(assembly_map)
       start_pos = { x: 0, y: 0, z: 0 }
   
@@ -49,24 +70,24 @@ class Assembly < ApplicationRecord
         assembly_block[monomer] ||= { position: monomer_map[monomer].dup, monomer: monomer }
   
         hex_pos = monomer_map[monomer]
-  
+        # byebug
         sides.each do |side, neighbors|
           neighbor = neighbors.first
-          next if monomer_map[neighbor]
+          next if monomer_map[neighbor] || side == "Sequences"
   
           neighbor_pos = case side
                          when "S1"
                            { x: hex_pos[:x] + horiz3_4, y: hex_pos[:y], z: hex_pos[:z] }
                          when "S2"
-                           { x: hex_pos[:x] + horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
+                           { x: hex_pos[:x] + horiz3_8, y: hex_pos[:y], z: hex_pos[:z] + vert_div_sqrt3 }
                          when "S3"
-                           { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
+                           { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] + vert_div_sqrt3 }
                          when "S4"
                            { x: hex_pos[:x] - horiz3_4, y: hex_pos[:y], z: hex_pos[:z] }
                          when "S5"
-                           { x: hex_pos[:x] + horiz3_8, y: hex_pos[:y], z: hex_pos[:z] + vert_div_sqrt3 }
+                           { x: hex_pos[:x] + horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "S6"
-                           { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] + vert_div_sqrt3 }
+                           { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "ZU"
                            { x: hex_pos[:x], y: hex_pos[:y] + depth + 0.5, z: hex_pos[:z] }
                          when "ZD"
@@ -79,7 +100,6 @@ class Assembly < ApplicationRecord
           end
         end
       end
-  
       # Convert the hash to an array to match the original return format
       assembly_block.values
     end

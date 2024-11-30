@@ -39,12 +39,12 @@ export default class extends Controller {
       let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
       // console.log(assemblyMap)
       const assemblyMap = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_assembly_code`).value);    
-      
+      const bondMap = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_bonds`).value);  
       const hexBlockGroup = new THREE.Group();
       assemblyMap.forEach((block) => {
         const hexGroup = new THREE.Group();
         block.forEach((monomer) => {
-          hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z))).getObject());
+          hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), bondMap)).getObject());
         })
         hexBlockGroup.add(hexGroup);
       })
