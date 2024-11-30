@@ -437,6 +437,7 @@ class BondGenerator
             z_bonds = find_common_attr_bonds(bond_families, "bonds_z")
             # byebug
             pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
+            
             messages << block_messages
             pairing_map.each do |pairing, bonds|
                 pair1, pair2 = pairing.split('-')
@@ -463,7 +464,37 @@ class BondGenerator
                 structure_map.delete(block_name)
             end
         end
+        
+        structure_map = adjust_repulsive_bonds(structure_map)
+        # byebug
       [generate_sequences(structure_map), messages]
+    end
+
+
+    def adjust_repulsive_bonds(structure_map)
+        structure_map.each do |structure, bond_map|
+            bond_map.each do |block, side_map|
+                side_map.each do |side, bds|
+                    # bds.each do |item|
+                        # byebug
+                    if bds[0].is_a?(Array)
+                        bond_type = bds[0][1]
+                        b_count, t_count = bond_type.match(/(\d+)B(\d+)T/).captures.map(&:to_i)
+                        t_bonds = []
+                        
+                        BondGenerator.orbitals[side].each do |orbital|
+                            break if t_bonds.size == t_count
+                            next unless !bds[1][0].any? { |bond| bond.include?(orbital) }
+                            if !BondGenerator.exception_pairs.keys.include?(orbital)
+                                t_bonds << "#{orbital}_B"
+                            end
+                        end 
+                        bds[1][0] = bds[1][0] + t_bonds                       
+                    end
+                end
+            end
+        end
+        structure_map
     end
 
     def find_common_attr_bonds(bond_families, keyword)
@@ -982,24 +1013,35 @@ class BondGenerator
             if hex[side].nil?
                 seq_arr << add_blockers(side)
             else
-                # byebug
                 seq_arr << add_bonds(side, hex[side][1][0], "BS") # hex[side][1][1] this will always be BS since we don't want poly-T right next to a sticky end
-                seq_arr << add_neutrals(side, hex[side][1][0], hex[side][1][1])
+                seq_arr << add_repulsive(side, hex[side][1][0])
+                seq_arr << add_neutrals(side, hex[side][1][0], "BS")
             end
         end
         seq_arr.flat_map { |sublist| Array(sublist) }.uniq
     end
 
+
+    def add_repulsive(side, bonds)
+        seqs = []
+        bonds.each do |bond|
+            if bond.end_with?("_B")
+                seqs << @bond_map[bond]
+            end
+        end
+        seqs
+    end
+
     def add_neutrals(side, bonds, type)
         neutral_seqs = []
-        multi = false
-        # byebug
-        if !(type == "BS" || type == "T")
-          multi = true
-          b_count, t_count = type.match(/(\d+)B(\d+)T/).captures.map(&:to_i)
-          t_bonds_assigned = 0
-          type = "BS"
-        end
+        # multi = false
+        # # byebug
+        # if !(type == "BS" || type == "T")
+        #   multi = true
+        #   b_count, t_count = type.match(/(\d+)B(\d+)T/).captures.map(&:to_i)
+        #   t_bonds_assigned = 0
+        #   type = "BS"
+        # end
         # Parse the 'type' argument to dynamically assign bonds like '4B2T'
         
         # Initialize bond type index
@@ -1008,12 +1050,12 @@ class BondGenerator
         BondGenerator.orbitals[side].each do |orbital|
             next unless !bonds.any? { |bond| bond.include?(orbital) }
             if !BondGenerator.exception_pairs.keys.include?(orbital)
-                if multi && (t_bonds_assigned < t_count)
-                    neutral_seqs << @bond_map["#{orbital}_B"]
-                    t_bonds_assigned += 1
-                else
-                    neutral_seqs << @bond_map["#{orbital}_#{type}"]
-                end
+                # if multi && (t_bonds_assigned < t_count)
+                #     neutral_seqs << @bond_map["#{orbital}_B"]
+                #     t_bonds_assigned += 1
+                # else
+                neutral_seqs << @bond_map["#{orbital}_#{type}"]
+                # end
             else
                 pair = BondGenerator.exception_pairs[orbital.slice(0, 5)]
                 next if bonds.any? { |bond| bond.include?(pair) }
@@ -1765,37 +1807,3 @@ p s14_handles, s14_handles_score
 # basic_zs = bg.get_basic_zs
 # p z_8h_tail_bonds, z_8h_head_bonds, z_score
 
-
-# m1 = bg.sequence_generator({
-#     "S3" => [[], "BS"],
-#     "S6" => [[], "BS"]
-# })
-
-# m2 = bg.sequence_generator({
-#     "S3" => [[], "BS"],
-#     "S6" => [[], "BS"]
-# })
-
-# m3 = bg.sequence_generator({
-#     "S3" => [[], "BS"],
-#     "S6" => [[], "BS"]
-# })
-
-# m4 = bg.sequence_generator({
-#     "S3" => [[], "BS"],
-#     "S6" => [[], "BS"]
-# })
-
-# m5 = bg.sequence_generator({
-#     "S3" => [[], "BS"],
-#     "S6" => [[], "BS"]
-# })
-
-# m1_z = bg.add_z_bonds("TAIL", z_8h_tail_bonds[0]) + bg.add_z_bonds("HEAD", [])
-# m2_z = bg.add_z_bonds("TAIL", z_8h_tail_bonds[1]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[0])
-# m3_z = bg.add_z_bonds("TAIL", z_8h_tail_bonds[2]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[1])
-# m4_z = bg.add_z_bonds("TAIL", z_8h_tail_bonds[3]) + bg.add_z_bonds("HEAD", z_8h_head_bonds[2])
-# m5_z = bg.add_z_bonds("TAIL", []) + bg.add_z_bonds("HEAD", z_8h_head_bonds[3])
-
-
-# bg.to_csv(["Sequence"] + m1 + m1_z + basic_zs, "#{MAC_SAVE_PATH}vDw/1Zx5_.csv")
