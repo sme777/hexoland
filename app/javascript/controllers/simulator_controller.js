@@ -32,11 +32,13 @@ export default class extends Controller {
     //   "S6": ['x', '1', '0', '1', 'x', '0', '1', '1']
     // };
     const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);    
+    const hexBondData = JSON.parse(document.getElementById('bond_map').value);
     const hexBlockGroup = new THREE.Group();
     assemblyMap.forEach((block) => {
       const hexGroup = new THREE.Group();
       block.forEach((monomer) => {
-        hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z))).getObject());
+        // console.log(monomer.monomer)
+        hexGroup.add((new Hex(new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])).getObject());
       })
       hexBlockGroup.add(hexGroup);
     })

@@ -14,6 +14,22 @@ class Assembly < ApplicationRecord
       structure_assembly_array
     end
   
+    def normalize_bonds
+      # byebug
+      monomer_bonds = JSON.parse(design_map).values.first
+      normalize_bonds_map = {}
+      monomer_bonds.each do |monomer, sides|
+        normalize_bonds_map[monomer] = {}
+        # byebug
+        sides.each do |side, bonds|
+          unless side == "Sequences"
+            normalize_bonds_map[monomer][side] = send("#{side}_order", bonds)
+          end
+        end
+      end
+      normalize_bonds_map
+    end
+
     private
   
     def assemble_design_map(assembly_map, spacings)
@@ -74,6 +90,201 @@ class Assembly < ApplicationRecord
   
     def get_spacings
       { horiz: 3.0 / 2.0 * 1.5 * 24, vert: Math.sqrt(3) * 1.5 * 24, depth: 50 }
+    end
+
+    ####
+    # 0 -- socket; 1 -- plug, '-' -- absent/neutral, 'x' -- repulsive
+    # Example:
+    # [0, '-', 1, 'x', 'x', 1, 0, '-']
+    ####
+    def configure_bond_type(bond)
+      case bond[6..]
+      when "P"
+        1
+      when "S"
+        0
+      when "BS"
+        '-'
+      when "B"
+        'x'
+      else
+        raise "Unknown type of bond"
+      end
+    end
+
+    def S1_order(bonds)
+      helix_order = ["H61", "H60", "H57", "H56"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H61_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H61_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H60_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H60_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H57_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H57_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H56_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H56_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def S2_order(bonds)
+      helix_order = ["H54", "H53", "H50", "H49"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H54_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H54_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H53_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H53_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H50_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H50_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H49_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H49_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def S3_order(bonds)
+      helix_order = ["H47", "H46", "H43", "H42"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H47_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H47_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H46_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H46_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H43_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H43_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H42_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H42_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def S4_order(bonds)
+      helix_order = ["H40", "H39", "H36", "H35"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H40_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H40_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H39_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H39_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H36_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H36_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H35_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H35_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def S5_order(bonds)
+      helix_order = ["H33", "H32", "H71", "H70"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H33_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H33_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H32_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H32_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H71_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H71_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H70_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H70_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def S6_order(bonds)
+      helix_order = ["H68", "H67", "H64", "H63"]
+      bond_arr = Array.new(8, '-')
+      bonds[1][0].each do |bond|
+        case bond[0, 5]
+        when "H68_L"
+          bond_arr[0] = configure_bond_type(bond)
+        when "H68_R"
+          bond_arr[1] = configure_bond_type(bond)
+        when "H67_L"
+          bond_arr[2] = configure_bond_type(bond)
+        when "H67_R"
+          bond_arr[3] = configure_bond_type(bond)
+        when "H64_L"
+          bond_arr[4] = configure_bond_type(bond)
+        when "H64_R"
+          bond_arr[5] = configure_bond_type(bond)
+        when "H63_L"
+          bond_arr[6] = configure_bond_type(bond)
+        when "H63_R"
+          bond_arr[7] = configure_bond_type(bond)
+        else
+        end
+      end
+      bond_arr
+    end
+
+    def ZU_order(bonds)
+      helix_order = (0..71).map { |i| "H#{i}" }
+      bond_arr = Array.new(72, 'x')
+    end
+
+    def ZD_order(bonds)
+      helix_order = (0..71).map { |i| "H#{i}" }
+      bond_arr = Array.new(72, 'x')
+      bonds.each do |bond|
+      end
+
     end
 end
   
