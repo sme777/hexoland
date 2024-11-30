@@ -32,9 +32,9 @@ export default class extends Controller {
       }
     })
 
-    const guiContainer = document.getElementById('guiContainer');
+    this.container = document.getElementById('guiContainer');
 
-    let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
+    let [scene, camera, renderer, controls] = setupCanvas(this.container);
 
     // set up raycasting
     this.raycaster = new THREE.Raycaster();
@@ -57,23 +57,24 @@ export default class extends Controller {
     const hexBondData = JSON.parse(document.getElementById('bond_map').value);
 
 
-    this.hexBlockGroup = new THREE.Group();
-    this.hexBlockGroup.userData.title = "Sam's World";
+    this.hexBlockGroup = []
+    // this.hexBlockGroup.userData.title = "Sam's World";
     assemblyMap.forEach((block) => {
-      const hexGroup = new THREE.Group();
+      // const hexGroup = new THREE.Group();
       block.forEach((monomer) => {
-        hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])).getObject());
+        this.hexBlockGroup.push((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])));
       })
-      this.hexBlockGroup.add(hexGroup);
+      // this.hexBlockGroup.push(hexGroup);
     })
 
-    const boundingBox = new THREE.Box3().setFromObject(this.hexBlockGroup);
+    // const boundingBox = new THREE.Box3().setFromObject(this.hexBlockGroup);
 
-    const center = new THREE.Vector3();
-    boundingBox.getCenter(center);
+    // const center = new THREE.Vector3();
+    // boundingBox.getCenter(center);
 
-    this.hexBlockGroup.position.sub(center);
-    scene.add(this.hexBlockGroup);
+    // this.hexBlockGroup.position.sub(center);
+    // scene.add(this.hexBlockGroup);
+    this.hexBlockGroup.forEach(hex => scene.add(hex.getObject()));
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);
@@ -86,13 +87,14 @@ export default class extends Controller {
     this.animate();
 
     window.addEventListener('resize', () => {
-      onWindowResize(renderer, camera, guiContainer);
+      onWindowResize(renderer, camera, this.container);
     });
 
     window.addEventListener('mousemove', (event) => {
+      const rect = this.container.getBoundingClientRect();
       // Convert mouse position to normalized device coordinates
-      this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
       // Update the title position
       this.titleElement.style.left = `${event.clientX + 10}px`;
@@ -104,40 +106,69 @@ export default class extends Controller {
     // Cast a ray from the camera to the mouse position
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    // Check intersections with the hexes
-    const intersects = this.raycaster.intersectObjects(this.hexBlockGroup.children, true); // 'true' checks all descendants
+    let hoverHex = null;
+    let hexTitle = null;
+    this.hexBlockGroup.forEach((hex) => {
+      const instancedMesh = hex.getCoreHex();
+      const intersects = this.raycaster.intersectObject(instancedMesh, true);
 
-    if (intersects.length > 0) {
-      let object = intersects[0].object;
-
-      while (object.parent && object.parent !== this.hexBlockGroup) {
-        object = object.parent;
-    }
-
-      // If the object is a direct child of the top group, it's the second-level group
-      if (object.parent === this.hexBlockGroup) {
-          // Display the title
-          this.titleElement.style.display = 'block';
-          this.titleElement.textContent = object.userData.title || 'Unknown';
-
-          // Highlight all children of the second-level group
-          object.traverse((child) => {
-              if (child.isMesh) {
-                  console.log(child)
-                  child.material.emissive = new THREE.Color(0xffa500); // Highlight color
-              }
-          });
+      if (intersects.length > 0) {
+        hoverHex = instancedMesh
+        hexTitle = hex.title;
       }
-    } else {
-      // Hide the title and remove highlights
-      this.titleElement.style.display = 'none';
+    });
 
-      this.scene.traverse((child) => {
-        if (child.isMesh && child.material.emissive) {
-          child.material.emissive = new THREE.Color(0x000000); // Reset highlight
-        }
-      });
+    if (hoverHex) {
+      this.highlightAllInstances(hoverHex);
+      this.titleElement.style.display = 'block';
+      this.titleElement.textContent = `${hexTitle}`;
+
     }
+
+    this.hexBlockGroup.forEach((hex) => {
+      const instancedMesh = hex.getCoreHex();
+
+      if (instancedMesh != hoverHex) {
+        this.resetAllInstances(instancedMesh);
+      }
+    });
+
+  }
+
+  resetAllInstances(instancedMesh) {
+    const count = instancedMesh.count;
+    const defaultColor = new THREE.Color(0xF5F7F8); // Default color (green)
+
+    // Reset all instance colors
+    for (let i = 0; i < count; i++) {
+        instancedMesh.instanceColor.setXYZ(i, defaultColor.r, defaultColor.g, defaultColor.b);
+    }
+
+    instancedMesh.instanceColor.needsUpdate = true;
+
+    // Remove emissive glow
+    instancedMesh.material.emissive = new THREE.Color(0x000000); // No emissive color
+    instancedMesh.material.emissiveIntensity = 0;
+    instancedMesh.material.needsUpdate = true;
+  }
+
+  highlightAllInstances(instancedMesh) {
+    // Ensure the material supports emissive property
+    instancedMesh.material.emissive = new THREE.Color(0xF6F7C4); // Emissive highlight color
+    instancedMesh.material.emissiveIntensity = 0.3;
+    
+    const count = instancedMesh.count; // Number of instances
+    const highlightColor = new THREE.Color(0xF6F7C4); // Highlight color
+
+    for (let i = 0; i < count; i++) {
+      instancedMesh.instanceColor.setXYZ(i, highlightColor.r, highlightColor.g, highlightColor.b);
+    }
+
+    // Mark the instanceColor buffer for update
+    instancedMesh.instanceColor.needsUpdate = true;
+
+    // Ensure the material updates
+    instancedMesh.material.needsUpdate = true;
   }
 
   parseDesignMap(designMap) {
@@ -151,11 +182,11 @@ export default class extends Controller {
 
   animate() {
     const animateLoop = () => {
-        requestAnimationFrame(animateLoop);
-        
-        this.onHover();
+      requestAnimationFrame(animateLoop);
 
-        this.renderer.render(this.scene, this.camera);
+      this.onHover();
+
+      this.renderer.render(this.scene, this.camera);
     };
     animateLoop(); // Start the loop
   }

@@ -16,7 +16,7 @@ export class Hex {
   constructor(title, pos, bonds = {}) {
     this.bonds = this.fillBonds(bonds);
     this.hex = new THREE.Group();
-    this.hex.userData.title = title;
+    this.title = title;
     this.helixRadius = 1.5;
     this.helixHeight = 50;
     const halfHelixHeight = this.helixHeight / 2;
@@ -58,7 +58,17 @@ export class Hex {
     const ringGeometry = new THREE.TorusGeometry(ringRadius, ringTubeRadius, 16, 100);
 
     // InstancedMeshes for each type of helix
-    const passiveHelixMesh = new THREE.InstancedMesh(helixGeometry, materials.passiveHelix, helixTypeCount.passive);
+    this.passiveHelixMesh = new THREE.InstancedMesh(helixGeometry, materials.passiveHelix, helixTypeCount.passive);
+    const passiveColor = new THREE.Color(0xF5F7F8)
+    // Enable per-instance colors
+    const colors = new Float32Array(helixTypeCount.passive * 3); // RGB for each instance
+    for (let i = 0; i < helixTypeCount.passive; i++) {
+        colors[i * 3 + 0] = passiveColor.r; // R
+        colors[i * 3 + 1] = passiveColor.g; // G
+        colors[i * 3 + 2] = passiveColor.b; // B
+    }
+    this.passiveHelixMesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
+
     const side1Mesh = new THREE.InstancedMesh(quartHelixGeometry, materials.side14, helixTypeCount.s1);
     const side2Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side25, helixTypeCount.s2);
     const side3Mesh = new THREE.InstancedMesh(quartHelixGeometry, materials.side36, helixTypeCount.s3);
@@ -133,7 +143,7 @@ export class Hex {
         }
       } else {
         if (!Zhelices[index]) {
-          mesh = passiveHelixMesh;
+          mesh = this.passiveHelixMesh;
           meshIndex = passiveIndex++;
         }
 
@@ -206,7 +216,7 @@ export class Hex {
 
     // Add each instanced mesh to the hex group
     // this.
-    this.hex.add(passiveHelixMesh);
+    this.hex.add(this.passiveHelixMesh);
     this.hex.add(side1Mesh);
     this.hex.add(side2Mesh);
     this.hex.add(side3Mesh);
@@ -220,6 +230,10 @@ export class Hex {
     return this.hex;
   }
 
+  getCoreHex() {
+    return this.passiveHelixMesh;
+  }
+
   getSpacings() {
     const depth = this.helixHeight;
     const horiz = 3.0 / 2.0 * this.helixRadius * 24;
@@ -228,7 +242,7 @@ export class Hex {
       horiz,
       vert,
       depth
-    };
+    };r
   }
 
   fillBonds(bonds) {

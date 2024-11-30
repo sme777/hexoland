@@ -14,8 +14,7 @@ import {
   animate
 } from './canvas_utils';
 
-import HexWorker from "../workers/hexWorker";
-console.log(HexWorker)
+
 export default class extends Controller {
   connect() {
     const assemblyIds = document.getElementById("assembly_ids").value.split(/\s+/);
