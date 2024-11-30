@@ -2,22 +2,22 @@ require 'set'
 require 'csv'
 require 'timeout'
 
-BOND_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-BASIC_Z_TMP_PATH = "/home/spetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+# BOND_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+# BASIC_Z_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
-# BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
-# BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
+BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
     def initialize
         @bond_map = {}
         @basic_zs= []
-        CSV.foreach(BOND_TMP_PATH) do |row|
+        CSV.foreach(BOND_PATH) do |row|
             @bond_map[row[0]] = row[1]
         end
 
-        CSV.foreach(BASIC_Z_TMP_PATH) do |row|
+        CSV.foreach(BASIC_Z_PATH) do |row|
             @basic_zs << row[1]
         end
         @basic_zs = @basic_zs[1..]
@@ -50,25 +50,17 @@ class BondGenerator
     end
 
     def randomize_sides(side, count, number, type="handles",godmode=false)
-        if number == 0.5
+        
+        if (number == 0.5 || number == 1.5) || (number * 2 > 4)
             if side == "S14"
-                # p BondGenerator.single_s14_sides[0] + BondGenerator.single_s14_sides[1]
                 return group_randomizer(BondGenerator.single_s14_sides[0] + BondGenerator.single_s14_sides[1], number * 2)
             elsif side == "S25"
                 return group_randomizer(BondGenerator.single_s25_sides[0] + BondGenerator.single_s25_sides[1], number * 2)
             elsif side == "S36"
                 return group_randomizer(BondGenerator.single_s36_sides[0] + BondGenerator.single_s36_sides[1], number * 2)
             end
-        elsif number == 1
-            if side == "S14"
-                return group_randomizer(BondGenerator.single_s14_sides[0], number) + group_randomizer(BondGenerator.single_s14_sides[1], number)
-            elsif side == "S25"
-                return group_randomizer(BondGenerator.single_s25_sides[0], number) + group_randomizer(BondGenerator.single_s25_sides[1], number)
-            elsif side == "S36"
-                return group_randomizer(BondGenerator.single_s36_sides[0], number) + group_randomizer(BondGenerator.single_s36_sides[1], number)
-            end
         end
-
+        # p "we should not be here"
         if godmode
             if side == "S14"
                 return group_randomizer(BondGenerator.s14_sides[0] + BondGenerator.s14_sides[1], number*2) 
@@ -98,10 +90,13 @@ class BondGenerator
 
     def group_randomizer(elements, number)
         random_samples = []
+        # p number
         while random_samples.size != number
             random_element = elements.sample
             ### Only filter out poral bonds when number is equal to 2 ###
-            if number == 2
+            ### By doing this we disallow any two band directly next to each other ###
+            ### NOTE this is only possible with bonds less than 5 ###
+            if number < 5
                 variant1 = random_element[0] + (random_element[1, 3].to_i + 1).to_s + random_element.slice(3) + random_element.slice(4)
                 variant2 = random_element[0] + (random_element[1, 3].to_i - 1).to_s + random_element.slice(3) + random_element.slice(4)
             else
@@ -576,8 +571,6 @@ class BondGenerator
             end
         end
         ### Set S14, S25, S36 side count 
-        #bye
-        # byebug
         s14_side_count, last_s14_idx = [s1_side_count, s4_side_count].max, [s1_side_count, s4_side_count].min
         s25_side_count, last_s25_idx = [s2_side_count, s5_side_count].max, [s2_side_count, s5_side_count].min
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
@@ -586,11 +579,9 @@ class BondGenerator
         # s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds) unless s14_side_count == 0
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
-        s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.5, godmode=false, 0, 200)
-        s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.5, godmode=false, 0, 200)
-        s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.5, godmode=false, 0, 200)
-        byebug
-        # byebug
+        s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
 
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
@@ -723,7 +714,8 @@ class BondGenerator
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
         ### Generate the Sides
-        s14s, _ = best_sides_out_of("S14", "handles", xy_trails, [], count=s14_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
+        byebug
+        s14s, s14_score = best_sides_out_of("S14", "handles", xy_trails, [], count=s14_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         s25s, _ = best_sides_out_of("S25", "handles", xy_trails, [], count=s25_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         s36s, _ = best_sides_out_of("S36", "handles", xy_trails, [], count=s36_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         
@@ -1752,9 +1744,12 @@ end
 
 bg = BondGenerator.new
 
-s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 10, [], count=256, number=0.5, overlap=1.0, godmode=false)
+s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 1, [], count=1, number=4, overlap=0.0, godmode=false)
 
 p s14_handles, s14_handles_score
+
+# p bg.group_randomizer(BondGenerator.s14_sides[0] + BondGenerator.s14_sides[1], 5)
+
 # # p s14_handles, s14_handles_score 
 # # p "Handle S14 score: #{s14_handles_score}"
 # # s25_handles, s25_handles_score = bg.best_sides_out_of("S25", "handles", 1, [], count=48, number=1, overlap=0.5, godmode=false)

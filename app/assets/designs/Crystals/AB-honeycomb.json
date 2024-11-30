@@ -1,0 +1,35 @@
+{
+    "AB-Honeycomb": {
+        "building_blocks": null,
+        "ignore_generation": false,
+        "max_xy_overlap": 0.0,
+        "xy_trials": 1,
+        "max_z_overlap": 0.0,
+        "z_trials": 1,
+        "bond_families": {
+            "standard": {
+                "bonds_attractive": 8,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "bonds_z": 0,
+                "min_xy_fe": 94,
+                "max_xy_fe": 100,
+                "min_z_fe": 0,
+                "max_z_fe": 200
+            }
+        },
+        "bond_map": {
+            "A": {
+                "S1": "B",
+                "S3": "B",
+                "S5": "B"
+            },
+
+            "B": {
+                "S2": "A",
+                "S4": "A",
+                "S6": "A"
+            }
+        }
+    }
+}
