@@ -85,7 +85,7 @@ class Assembly < ApplicationRecord
                          when "S4"
                            { x: hex_pos[:x] - horiz3_4, y: hex_pos[:y], z: hex_pos[:z] }
                          when "S5"
-                           { x: hex_pos[:x] + horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
+                           { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "S6"
                            { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "ZU"

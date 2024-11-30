@@ -56,25 +56,24 @@ export default class extends Controller {
     const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);
     const hexBondData = JSON.parse(document.getElementById('bond_map').value);
 
-
-    this.hexBlockGroup = []
-    // this.hexBlockGroup.userData.title = "Sam's World";
+    this.hexBlocks = []
     assemblyMap.forEach((block) => {
       // const hexGroup = new THREE.Group();
       block.forEach((monomer) => {
-        this.hexBlockGroup.push((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])));
+        this.hexBlocks.push((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])));
       })
-      // this.hexBlockGroup.push(hexGroup);
+      // this.hexBlocks.push(hexGroup);
     })
 
-    // const boundingBox = new THREE.Box3().setFromObject(this.hexBlockGroup);
+    const hexBlockGroup = new THREE.Group()
+    this.hexBlocks.forEach(hex => hexBlockGroup.add(hex.getObject()));
 
-    // const center = new THREE.Vector3();
-    // boundingBox.getCenter(center);
+    const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    hexBlockGroup.position.sub(center);
+    scene.add(hexBlockGroup);
 
-    // this.hexBlockGroup.position.sub(center);
-    // scene.add(this.hexBlockGroup);
-    this.hexBlockGroup.forEach(hex => scene.add(hex.getObject()));
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     scene.add(ambientLight);
@@ -108,7 +107,7 @@ export default class extends Controller {
 
     let hoverHex = null;
     let hexTitle = null;
-    this.hexBlockGroup.forEach((hex) => {
+    this.hexBlocks.forEach((hex) => {
       const instancedMesh = hex.getCoreHex();
       const intersects = this.raycaster.intersectObject(instancedMesh, true);
 
@@ -125,7 +124,7 @@ export default class extends Controller {
 
     }
 
-    this.hexBlockGroup.forEach((hex) => {
+    this.hexBlocks.forEach((hex) => {
       const instancedMesh = hex.getCoreHex();
 
       if (instancedMesh != hoverHex) {
