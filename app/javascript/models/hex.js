@@ -108,18 +108,30 @@ export class Hex {
           bondGroup = this.addSideBonds(mesh, "S2", s2Mask[index])
           bondGroup.position.set(x, height * 1.5, y)
           this.hex.add(bondGroup);
+
+          const zBonds = this.addZBonds(mesh, s2Mask[index], true);
+          zBonds.position.set(x, height * 1.5, y);
+          this.hex.add(zBonds);
         } else if (s4Mask[index]) {
           mesh = side4Mesh;
           meshIndex = side4Index++;
           bondGroup = this.addSideBonds(mesh, "S4", s4Mask[index])
           bondGroup.position.set(x, height * 1.5, y)
           this.hex.add(bondGroup);
+
+          const zBonds = this.addZBonds(mesh, s4Mask[index], true);
+          zBonds.position.set(x, height * 1.5, y);
+          this.hex.add(zBonds);
         } else if (s6Mask[index]) {
           mesh = side6Mesh;
           meshIndex = side6Index++;
           bondGroup = this.addSideBonds(mesh, "S6", s6Mask[index])
           bondGroup.position.set(x, height * 1.5, y)
           this.hex.add(bondGroup);
+
+          const zBonds = this.addZBonds(mesh, s6Mask[index], true);
+          zBonds.position.set(x, height * 1.5, y);
+          this.hex.add(zBonds);
         }
       } else if (isCoreBondHelix) {
         if (s1Mask[index]) {
@@ -142,7 +154,13 @@ export class Hex {
           this.hex.add(bondGroup);
         }
       } else {
-        if (!Zhelices[index]) {
+        if (typeof Zhelices[index] === "string") {
+          mesh = this.passiveHelixMesh;
+          meshIndex = passiveIndex++;
+          bondGroup = this.addZBonds(mesh, s5Mask[index]);
+          bondGroup.position.set(x, height * 1.5, y);
+          this.hex.add(bondGroup);
+        } else if (Zhelices[index]) {
           mesh = this.passiveHelixMesh;
           meshIndex = passiveIndex++;
         }
@@ -261,6 +279,32 @@ export class Hex {
     return bonds;
   }
 
+  addZBonds(mesh, helix, sideBound=false) {
+    const zBondGroup = new THREE.Group();
+
+    let helixTopBond, helixBottomBond;
+    
+    helixTopBond = this.createAttractivePlugBond(0x7ED4AD); // attractive color 7ED4AD
+    helixBottomBond = this.createNeutralBond(0xFCF596);
+
+    const height = mesh.geometry.parameters.height;
+    if (sideBound) {
+      helixTopBond.position.set(mesh.position.x, mesh.position.y +  height * 4.5 + 0.4, mesh.position.z); // Top
+      helixBottomBond.position.set(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z); // Bottom
+    } else {
+      helixTopBond.position.set(mesh.position.x, mesh.position.y + 0.4, mesh.position.z); // Top
+      helixBottomBond.position.set(mesh.position.x, mesh.position.y -height - 0.4, mesh.position.z); // Bottom
+    }
+    // Rotate the right bond to face downward
+    helixBottomBond.rotation.x = Math.PI; // 180 degrees around the X-axis
+
+    // Add bonds to the group
+    zBondGroup.add(helixTopBond);
+    zBondGroup.add(helixBottomBond);
+
+    return zBondGroup;
+  } 
+
   addSideBonds(mesh, side, helix) {
     const helixBonds = this.bonds[side];
     const sideBondGroup = new THREE.Group();
@@ -377,7 +421,7 @@ export class Hex {
     return sideBondGroup;
   }
 
-  createRepulsiveBond() {
+  createRepulsiveBond(color=0xA91E3B) {
     const spikeRadius = 1.5; // Radius of the spike
     const spikeHeight = 1.5; // Height of the spike
     const baseRadius = 1.5; 
@@ -386,20 +430,20 @@ export class Hex {
     const spikeGeometry = new THREE.ConeGeometry(spikeRadius, spikeHeight, 16);
     spikeGeometry.translate(0, baseHeight / 2 + spikeHeight / 2, 0); 
     const repulsiveBondGeometry = mergeGeometries([baseGeometry, spikeGeometry]);
-    const material = new THREE.MeshStandardMaterial({ color: 0xA91E3B });
+    const material = new THREE.MeshStandardMaterial({ color: color });
     return new THREE.Mesh(repulsiveBondGeometry, material);
   }
-
-  createNeutralBond() {
+  
+  createNeutralBond(color=0xFDB840) {
     const baseRadius = 1.5;
     const baseHeight = 1;
     const baseGeometry = new THREE.CylinderGeometry(baseRadius, baseRadius, baseHeight, 32);
     baseGeometry.translate(0, 0.1, 0);
-    const material = new THREE.MeshStandardMaterial({ color: 0xFDB840 });
+    const material = new THREE.MeshStandardMaterial({ color: color });
     return new THREE.Mesh(baseGeometry, material);
   }
 
-  createAttractivePlugBond() {
+  createAttractivePlugBond(color=0x808836) {
     const baseRadius = 1.5; 
     const baseHeight = 0.75; 
     const keyRadius = 0.75;
@@ -415,12 +459,12 @@ export class Hex {
 
     const keyAndBase = mergeGeometries([baseGeometry, keyGeometry]);
 
-    const material = new THREE.MeshStandardMaterial({ color: 0x808836 }); 
+    const material = new THREE.MeshStandardMaterial({ color: color }); 
 
     return new THREE.Mesh(keyAndBase, material);
   }
 
-  createAttractiveSocketBond() {
+  createAttractiveSocketBond(color=0x808836) {
     const baseRadius = 1.5;
     const baseHeight = 1;
     const holeRadius = 0.75;
@@ -448,7 +492,7 @@ export class Hex {
     geometry.rotateX(Math.PI / 2);
     geometry.translate(0, 0.6, 0);
     // Create the material and mesh
-    const material = new THREE.MeshStandardMaterial({ color: 0x808836 }); // Greenish color for the bond
+    const material = new THREE.MeshStandardMaterial({ color: color }); // Greenish color for the bond
     const socket = new THREE.Mesh(geometry, material);
     return socket;
   }

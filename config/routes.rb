@@ -24,4 +24,6 @@ Rails.application.routes.draw do
   get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
 
   get '/feed/:page' => 'feed#index', as: :feed_page
+
+  get '/inspector/:id' => 'inspector#inspect', as: :inspect_assembly
 end

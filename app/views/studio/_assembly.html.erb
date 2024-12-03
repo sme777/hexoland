@@ -23,7 +23,8 @@
                     <% end %>
                 </div>
             </div>
-            <h3 class="mb-0"><%= assembly.name %></h3>
+            
+            <h3 class="mb-0"><%= link_to assembly.name , inspect_assembly_path(assembly.id), data: { turbo: false } %></h3>
 
             <div class="row">
 

@@ -81,7 +81,7 @@ export default class extends Controller {
     directionalLight.position.set(10, 10, 10);
     scene.add(directionalLight);
 
-    camera.position.z = 500;
+    camera.position.z = 150;
 
     this.animate();
 

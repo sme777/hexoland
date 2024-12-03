@@ -1,0 +1,33 @@
+<div data-controller="simulator">
+
+    <div class="row">
+        <div class="col-md-3">
+            <%= render partial: "layouts/sidebar", locals: {tab: "Inspector"} %>
+        </div>
+        <div class="col-md-9 px-4 py-4">
+            <div class="conatiner">
+            <h1>Inspector</h1>
+
+            <hr>
+            <div class="row">
+                
+                <h3 class="mb-0"><%= @assembly.name %></h3>
+            </div>
+            <div class="row mx-1">
+                <%= hidden_field_tag :bond_map, "", type: "text", id: "bond_map", style: "display: none;", value: @assembly.normalize_bonds.to_json  %>
+                <%= hidden_field_tag :assembly_map, "", type: "text", id: "assembly_code", style: "display: none;", value: @assembly[:assembly_map].to_json %>
+                <div class="simulator-container p-0 m-0" id="guiContainer" style="width: 100%; min-height: 100vh;">
+                    
+                </div>
+            </div>
+            <div class="row mx-1">
+                <%= hidden_field_tag :assembly_design_code, "", type: "text", id: "assembly_design_code", style: "display: none;", value: @assembly.design_map  %>
+                <div id="assembly_editor">
+                </div>
+            </div>
+            </div>
+            <%= render partial: "layouts/footer" %>
+        </div>
+        
+    </div>
+</div>
