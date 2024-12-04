@@ -304,14 +304,14 @@ class Assembly < ApplicationRecord
             helices = sub_bond.split("_")
             helices.each do |helix|
               # byebug
-              bond_arr[zBondToIndex[helix]] = 1
+              bond_arr[zBondToIndex[helix]] = bond2code("ZU", helix)
             end
           end
         else
           helices = bond.split("_")
           helices.each do |helix|
             # byebug
-            bond_arr[zBondToIndex[helix]] = 1
+            bond_arr[zBondToIndex[helix]] = bond2code("ZU", helix)
           end
         end
       end
@@ -325,17 +325,26 @@ class Assembly < ApplicationRecord
           bond.each do |sub_bond|
             helices = sub_bond.split("_")
             helices.each do |helix|
-              bond_arr[zBondToIndex[helix]] = 1
+              bond_arr[zBondToIndex[helix]] = bond2code("ZD", helix)
             end
           end
         else
           helices = bond.split("_")
           helices.each do |helix|
-            bond_arr[zBondToIndex[helix]] = 1
+            bond_arr[zBondToIndex[helix]] = bond2code("ZD", helix)
           end
         end
       end
       bond_arr
+    end
+
+
+    def bond2code(side, helix)
+      if side == "ZU"
+        return ZU_types()[helix] == "P" ? 1 : (ZU_types()[helix] == "S" ? 0 : "-")
+      elsif side == "ZD"
+        return ZD_types()[helix] == "P" ? 1 : (ZU_types()[helix] == "S" ? 0 : "-")
+      end
     end
 
     def zBondToIndex
@@ -349,7 +358,48 @@ class Assembly < ApplicationRecord
         "H42" => 48, "H53" => 49, "H66" => 50, "H16" => 51, "H54" => 52, "H23" => 53, "H18" => 54, "H31" => 55,
         "H2" => 56, "H9" => 57, "H1" => 58, "H45" => 59, "H56" => 60, "H14" => 61, "H22" => 62, "H55" => 63,
         "H29" => 64, "H11" => 65, "H15" => 66, "H46" => 67, "H49" => 68, "H28" => 69, "H17" => 70, "H19" => 71
-    } end
+    } 
+    end
+
+
+    def ZU_types
+      {
+        "H1" => "P",
+        "H2" => "P",
+        "H16" => "P",
+        "H17" => "S",
+        "H36" => "S",
+        "H37" => "S",
+        "H44" => "S",
+        "H45" => "P",
+        "H58" => "P",
+        "H59" => "S",
+        "H65" => "BS",
+        "H66" => "P",
+        "H67" => "P",
+        "H68" => "BS",
+
+      }
+    end
+
+    def ZD_types
+      {
+        "H1" => "S",
+        "H2" => "S",
+        "H16" => "S",
+        "H17" => "P",
+        "H35" => "BS",
+        "H36" => "P",
+        "H37" => "P",
+        "H38" => "BS",
+        "H44" => "P",
+        "H45" => "S",
+        "H58" => "S",
+        "H59" => "P",
+        "H66" => "S",
+        "H67" => "S"
+      }
+    end
 
     def z_attractive_bonds
       
