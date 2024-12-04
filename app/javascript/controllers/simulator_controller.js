@@ -61,6 +61,7 @@ export default class extends Controller {
       // const hexGroup = new THREE.Group();
       block.forEach((monomer) => {
         this.hexBlocks.push((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), hexBondData[monomer.monomer])));
+        // console.log(hexBondData[monomer.monomer]);
       })
       // this.hexBlocks.push(hexGroup);
     })

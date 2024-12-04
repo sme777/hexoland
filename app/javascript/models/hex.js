@@ -154,16 +154,13 @@ export class Hex {
           this.hex.add(bondGroup);
         }
       } else {
-        if (typeof Zhelices[index] === "string") {
-          mesh = this.passiveHelixMesh;
-          meshIndex = passiveIndex++;
-          bondGroup = this.addZBonds(mesh, s5Mask[index]);
-          bondGroup.position.set(x, height * 1.5, y);
-          this.hex.add(bondGroup);
-        } else if (Zhelices[index]) {
-          mesh = this.passiveHelixMesh;
-          meshIndex = passiveIndex++;
-        }
+        mesh = this.passiveHelixMesh;
+        meshIndex = passiveIndex++;
+        if (typeof Zhelices[index] !== 0) {
+          const zBonds = this.addZBonds(mesh, Zhelices[index]);
+          zBonds.position.set(x, height * 1.5, y);
+          this.hex.add(zBonds);
+        } 
 
       }
 
@@ -281,11 +278,31 @@ export class Hex {
 
   addZBonds(mesh, helix, sideBound=false) {
     const zBondGroup = new THREE.Group();
-
     let helixTopBond, helixBottomBond;
     
-    helixTopBond = this.createAttractivePlugBond(0x7ED4AD); // attractive color 7ED4AD
-    helixBottomBond = this.createNeutralBond(0xFCF596);
+    if (this.bonds["ZU"][this.zBondToIndex(helix)] === 1) {
+      helixTopBond = this.createAttractivePlugBond(0x7ED4AD);
+    } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === 0) {
+      helixTopBond = this.createAttractiveSocketBond(0x7ED4AD);
+    } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === "-") {
+      helixTopBond = this.createNeutralBond(0xFCF596);
+    } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === "x") {
+      helixTopBond = this.createRepulsiveBond(0xD76C82);
+    }
+
+    if (this.bonds["ZD"][this.zBondToIndex(helix)] === 1) {
+      helixBottomBond = this.createAttractivePlugBond(0x7ED4AD);
+    } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === 0) {
+      helixBottomBond = this.createAttractiveSocketBond(0x7ED4AD);
+    } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === "-") {
+      helixBottomBond = this.createNeutralBond(0xFCF596);
+    } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === "x") {
+      helixBottomBond = this.createRepulsiveBond(0xD76C82);
+    }
+    // console.log(helix)
+    // console.log(helixBottomBond, helixTopBond)
+    // helixTopBond = this.createAttractivePlugBond(0x7ED4AD); // attractive color 7ED4AD
+    // helixBottomBond = this.createNeutralBond(0xFCF596);
 
     const height = mesh.geometry.parameters.height;
     if (sideBound) {
@@ -497,7 +514,22 @@ export class Hex {
     return socket;
   }
   
-  
+  zBondToIndex(zBond) {
+    const indexMap = {
+      "H21": 0, "H4": 1, "H48": 2, "H60": 3, "H20": 4, "H5": 5, "H59": 6, "H47": 7,
+      "H69": 8, "H52": 9, "H61": 10, "H7": 11, "H12": 12, "H6": 13, "H3": 14, "H70": 15,
+      "H50": 16, "H43": 17, "H38": 18, "H13": 19, "H37": 20, "H57": 21, "H35": 22, "H39": 23,
+      "H25": 24, "H51": 25, "H65": 26, "H36": 27, "H67": 28, "H58": 29, "H32": 30, "H68": 31,
+      "H24": 32, "H0": 33, "H8": 34, "H40": 35, "H30": 36, "H33": 37, "H26": 38, "H71": 39,
+      "H27": 40, "H10": 41, "H62": 42, "H44": 43, "H63": 44, "H41": 45, "H64": 46, "H34": 47,
+      "H42": 48, "H53": 49, "H66": 50, "H16": 51, "H54": 52, "H23": 53, "H18": 54, "H31": 55,
+      "H2": 56, "H9": 57, "H1": 58, "H45": 59, "H56": 60, "H14": 61, "H22": 62, "H55": 63,
+      "H29": 64, "H11": 65, "H15": 66, "H46": 67, "H49": 68, "H28": 69, "H17": 70, "H19": 71
+  };
+
+    // Return the index if the zBond exists in the map, otherwise return undefined or handle the error as needed
+    return indexMap[zBond] !== undefined ? indexMap[zBond] : undefined;
+}
   rotate(x, y, z) {
     this.prism.rotation.x += x;
     this.prism.rotation.y += y;

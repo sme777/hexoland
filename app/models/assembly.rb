@@ -89,9 +89,9 @@ class Assembly < ApplicationRecord
                          when "S6"
                            { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "ZU"
-                           { x: hex_pos[:x], y: hex_pos[:y] + depth + 0.5, z: hex_pos[:z] }
+                           { x: hex_pos[:x], y: hex_pos[:y] + depth + 4.5, z: hex_pos[:z] }
                          when "ZD"
-                           { x: hex_pos[:x], y: hex_pos[:y] - (depth + 0.5), z: hex_pos[:z] }
+                           { x: hex_pos[:x], y: hex_pos[:y] - (depth + 4.5), z: hex_pos[:z] }
                          end
   
           if neighbor_pos
@@ -295,16 +295,64 @@ class Assembly < ApplicationRecord
     end
 
     def ZU_order(bonds)
-      helix_order = (0..71).map { |i| "H#{i}" }
-      bond_arr = Array.new(72, 'x')
+      # helix_order = (0..71).map { |i| "H#{i}" }
+      # bond_arr = Array.new(72, 'x')
+      bond_arr = Array.new(72, 'x') 
+      bonds[1].each do |bond|
+        if bond.is_a?(Array)
+          bond.each do |sub_bond|
+            helices = sub_bond.split("_")
+            helices.each do |helix|
+              # byebug
+              bond_arr[zBondToIndex[helix]] = 1
+            end
+          end
+        else
+          helices = bond.split("_")
+          helices.each do |helix|
+            # byebug
+            bond_arr[zBondToIndex[helix]] = 1
+          end
+        end
+      end
+      bond_arr
     end
 
     def ZD_order(bonds)
-      helix_order = (0..71).map { |i| "H#{i}" }
-      bond_arr = Array.new(72, 'x')
-      bonds.each do |bond|
+      bond_arr = Array.new(72, 'x') 
+      bonds[1].each do |bond|
+        if bond.is_a?(Array)
+          bond.each do |sub_bond|
+            helices = sub_bond.split("_")
+            helices.each do |helix|
+              bond_arr[zBondToIndex[helix]] = 1
+            end
+          end
+        else
+          helices = bond.split("_")
+          helices.each do |helix|
+            bond_arr[zBondToIndex[helix]] = 1
+          end
+        end
       end
+      bond_arr
+    end
 
+    def zBondToIndex
+      {
+        "H21" => 0, "H4" => 1, "H48" => 2, "H60" => 3, "H20" => 4, "H5" => 5, "H59" => 6, "H47" => 7,
+        "H69" => 8, "H52" => 9, "H61" => 10, "H7" => 11, "H12" => 12, "H6" => 13, "H3" => 14, "H70" => 15,
+        "H50" => 16, "H43" => 17, "H38" => 18, "H13" => 19, "H37" => 20, "H57" => 21, "H35" => 22, "H39" => 23,
+        "H25" => 24, "H51" => 25, "H65" => 26, "H36" => 27, "H67" => 28, "H58" => 29, "H32" => 30, "H68" => 31,
+        "H24" => 32, "H0" => 33, "H8" => 34, "H40" => 35, "H30" => 36, "H33" => 37, "H26" => 38, "H71" => 39,
+        "H27" => 40, "H10" => 41, "H62" => 42, "H44" => 43, "H63" => 44, "H41" => 45, "H64" => 46, "H34" => 47,
+        "H42" => 48, "H53" => 49, "H66" => 50, "H16" => 51, "H54" => 52, "H23" => 53, "H18" => 54, "H31" => 55,
+        "H2" => 56, "H9" => 57, "H1" => 58, "H45" => 59, "H56" => 60, "H14" => 61, "H22" => 62, "H55" => 63,
+        "H29" => 64, "H11" => 65, "H15" => 66, "H46" => 67, "H49" => 68, "H28" => 69, "H17" => 70, "H19" => 71
+    } end
+
+    def z_attractive_bonds
+      
     end
 end
   
