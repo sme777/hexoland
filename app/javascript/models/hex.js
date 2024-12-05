@@ -15,6 +15,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 export class Hex {
   constructor(title, pos, bonds = {}) {
     this.bonds = this.fillBonds(bonds);
+    console.log(this.bonds)
     this.hex = new THREE.Group();
     this.title = title;
     this.helixRadius = 1.5;
