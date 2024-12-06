@@ -1,0 +1,24 @@
+<% assembly_block.each_slice(2) do |elements| %>
+<div class="row">
+    <div class="col-md-6">
+        <%= render partial: "assembly", locals: {assembly: elements[0]} unless elements[0].nil? %>
+    </div>
+    <div class="col-md-6">
+        <%= render partial: "assembly", locals: {assembly: elements[1]} unless elements[1].nil? %>
+    </div>
+</div>
+<% end %>
+<nav>
+    <ul class="pagination justify-content-center">
+        <% if page_count < 5 %>
+        <% page_count.times do |idx| %>
+        <li class="page-item">
+
+            <%= link_to (idx + 1), feed_page_path(idx + 1), class: "page-link #{"active" if page.to_i == idx + 1}" %>
+
+        </li>
+        <% end %>
+
+        <% end %>
+    </ul>
+</nav>

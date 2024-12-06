@@ -6,23 +6,21 @@
         <div class="col-md-9 px-4 py-4">
                 <h1>Feed</h1>
                 <hr>
-                <% @feed.each do |feed_element| %>
-                    <%= render partial: "assembly", locals: {assembly: feed_element} %>
-                <% end %>
-                        <nav>
-            <ul class="pagination justify-content-center">
-                <% if @page_count < 5 %>
-                    <% @page_count.times do |idx| %>
-                    <li class="page-item">
-                        
-                        <%= link_to (idx + 1), feed_page_path(idx + 1), class: "page-link #{"active" if @current_page.to_i == idx + 1}" %>
 
-                      </li>
-                    <% end %>
+                <div class="popular-assemblies-controller">
+                    <h3>Recent Assemblies</h3>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @feed, page: @feed_current_page, page_count: @feed_page_count} %>
+                </div>
 
-                <% end %>
-            </ul>
-        </nav>
+                <div class="recent-assemblies-controller">
+                    <h3>Popular Assemblies</h3>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @popular_assemblies, page: @popular_assemblies_current_page, page_count: @popular_assemblies_page_count} %>
+                </div>
+                
+                <div class="experimental-assemblies-controller">
+                    <h3>Experimental Assemblies</h3>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @experimental_assemblies, page: @experimental_assemblies_current_page, page_count: @experimental_assemblies_page_count} %>
+                </div>
 
             <%= render partial: "layouts/footer" %>
         </div>

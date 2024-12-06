@@ -2,9 +2,8 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Defines the root path route ("/")
-  get '/' => 'user#index', as: :home
+  get '/' => 'feed#index', as: :feed
   get '/studio' => 'studio#index', as: :studio
-  get '/feed' => redirect('/feed/1'), as: :feed
   get '/docs' => 'docs#index', as: :docs
   get '/inspector' => 'inspector#index', as: :inspector
 

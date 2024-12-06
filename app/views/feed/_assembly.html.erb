@@ -25,31 +25,11 @@
                 <div class="row">
                     <div class="mb-3">
                         <label for="assemblyDescriptionField" class="form-label">Assembly Description</label>
-                        <textarea class="form-control" id="assemblyDescriptionField" placeholder="No Description"
-                            rows="3"></textarea>
+                        <textarea class="form-control" id="assemblyDescriptionField" rows="3" <%= "disabled" if @current_user != assembly.author %>>
+                            <%= (assembly.description == "" || assembly.description.nil?) ? "This item has no description" : assembly.description %>
+                        </textarea>
                     </div>
                 </div>
-
-                <%= form_with url: get_picklist_path(assembly.id), id: "picklistGeneratorForm", method: :get, data: {turbo: false} do |f| %>
-                <div class="row py-2">
-                    <div class="input-group">
-                        <span class="input-group-text">Volumes</span>
-                        <%= f.text_field :volumes, type: "text", id: "itemAssemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
-                    </div>
-                </div>
-                <div class="row py-2">
-                    <div class="input-group">
-                        <span class="input-group-text">Wells</span>
-                        <%= f.text_field :wells, type: "text", id: "itemAssemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
-                    </div>
-                </div>
-
-                <%= f.button class: "btn bg-primary-subtle w-100", type: "submit" do %>
-                    <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 384 512">
-                        <path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM216 232l0 102.1 31-31c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0l-72-72c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l31 31L168 232c0-13.3 10.7-24 24-24s24 10.7 24 24z"/></svg>
-                    Picklist
-                <% end %>
-                <% end %>
 
                 <div class="row">
                     <%= form_with url: get_json_path(assembly.id), method: :get, data: {turbo: false} do |f| %>
