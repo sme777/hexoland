@@ -26,4 +26,5 @@ Rails.application.routes.draw do
   get '/feed/:page' => 'feed#index', as: :feed_page
 
   get '/inspector/:id' => 'inspector#inspect', as: :inspect_assembly
+  post '/inspector/:id' => 'inspector#update', as: :update_assembly
 end

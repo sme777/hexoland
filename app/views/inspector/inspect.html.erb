@@ -26,6 +26,11 @@
                 </div>
             </div>
             </div>
+            <div class="edit-container">
+                <%= form_with url: update_assembly_path(@assembly.id), id: "updateAssemblyForm", method: :post, data: {tubro: false} do |f| %>
+                    <%= f.text_field "Description", value: @assembly.public %>
+                <% end %>
+            </div>
             <%= render partial: "layouts/footer" %>
         </div>
         
