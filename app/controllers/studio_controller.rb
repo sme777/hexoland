@@ -102,9 +102,9 @@ class StudioController < ApplicationController
         # description
         # design_map
         # visibility
-        # byebug
         @assembly.update_column(:name, params[:name])
         @assembly.update_column(:description, params[:description])
+        @assembly.update_column(:public, params[:assembly_public_check] == "1" ? true : false)
         @assembly.update_column(:design_map, params[:design_map]) unless params[:design_map] == ""
         flash[:success] = "Successfully updated Assembly #{@assembly.name} with id #{@assembly.id}"
         redirect_to "/inspector/#{@assembly.id}"
