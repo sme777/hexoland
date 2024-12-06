@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   get '/inspector' => 'inspector#index', as: :inspector
 
   post '/studio/' => 'studio#create', as: :create_assembly
-  
+  post '/studio/:id/update' => 'studio#update', as: :update_assembly
+
   get '/studio/code_assembly' => 'studio#code', as: :code_assembly
   get '/studio/model_assembly' => 'studio#model', as: :model_assembly
   get '/studio/gui_assembly' => 'studio#gui', as: :gui_assembly
@@ -26,5 +27,5 @@ Rails.application.routes.draw do
   get '/feed/:page' => 'feed#index', as: :feed_page
 
   get '/inspector/:id' => 'inspector#inspect', as: :inspect_assembly
-  post '/inspector/:id' => 'inspector#update', as: :update_assembly
+  
 end

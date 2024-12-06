@@ -30,7 +30,8 @@ export default class extends Controller {
           content: {
             json: jsonData,
             mode: 'view' // Set the mode to 'view' to disable editing
-          }
+          },
+          expanded: false
         }
       })
 

@@ -1,6 +1,6 @@
 <div class="py-2">
     <div class="row g-0 border rounded flex-md-row mb-4 shadow-sm position-relative" >
-        <div class="col-md-4 p-4" style="height: 80vh; overflow-y: scroll;">
+        <div class="col-md-4 p-4" style="height: 50vh; overflow-y: scroll;">
             <div class="row">
                 <div class="col-md-6">
                     <strong class="d-inline-block mb-2 text-primary-emphasis"><%= assembly.author %></strong>
@@ -138,7 +138,12 @@
                     <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
                     <div class="px-0 mx-0">
                         <div class="pt-2">
-                            <%= f.submit "Delete", class: "btn bg-danger-subtle w-100"%>
+                            <%= f.button class: "btn bg-danger-subtle w-100", type: "submit" do %>
+                                <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 448 512">
+                                    <path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                                </svg>
+                            Delete
+                            <% end %>
                         </div>
                     </div>
                     <% end %>
@@ -146,14 +151,14 @@
 
             </div>
         </div>
-        <div class="col-md-8" style="height: 80vh;">
+        <div class="col-md-8" style="height: 50vh;">
             <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
             <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_design_code", style: "display: none;", value: assembly.design_map %>
             <%= hidden_field_tag :assembly_map, "", type: "text", id: "assembly_#{assembly.id}_assembly_code", style: "display: none;", value: assembly.assembly_map.to_json %>
             <%= hidden_field_tag :bond_map, "", type: "text", id: "assembly_#{assembly.id}_bonds", style: "display: none;", value: assembly.normalize_bonds.to_json%>
             <div class="row h-100">
                 <div class="col-md-6">
-                    <div id=<%= "assembly_#{assembly.id}_editor" %> style="height: 100%">
+                    <div id=<%= "assembly_#{assembly.id}_editor" %> class="border overflow-auto" style="height: 50vh;">
                     </div>
                 </div>
                 <div class="col-md-6">

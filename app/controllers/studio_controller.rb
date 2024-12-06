@@ -4,7 +4,7 @@ require 'will_paginate/array'
 
 class StudioController < ApplicationController
     before_action :init_params, only: [:index, :create, :get_picklist]
-    before_action :set_assembly, only: [:delete, :get_picklist, :get_json, :make_private, :make_public]
+    before_action :set_assembly, only: [:delete, :update, :get_picklist, :get_json, :make_private, :make_public]
 
     def index
         @assembly_method = "Code"
@@ -40,7 +40,7 @@ class StudioController < ApplicationController
     def create
         assembly = Assembly.new(assembly_params)
         
-        # begin
+        begin
             bond_map, messages = @bond_generator.configure_blocks(JSON.parse(assembly_params[:design_map]))
             assembly[:design_map] = bond_map.to_json
             assembly[:assembly_map] = assembly.compute_neighbors
@@ -49,9 +49,9 @@ class StudioController < ApplicationController
             else
                 flash[:danger] = assembly.errors.full_messages
             end
-        # rescue => e
-        #     flash[:danger] = "An error was encountered while trying to parse assembly code, please double-check!"
-        # end
+        rescue => e
+            flash[:danger] = "An error was encountered while trying to parse assembly code, please double-check!"
+        end
 
         redirect_to '/studio'
     end
@@ -96,6 +96,21 @@ class StudioController < ApplicationController
             filename: "#{@assembly.name}_design_map.json", :disposition => 'attachment')
     end
 
+    def update
+        # columns that need updating
+        # name
+        # description
+        # design_map
+        # visibility
+        # byebug
+        @assembly.update_column(:name, params[:name])
+        @assembly.update_column(:description, params[:description])
+        @assembly.update_column(:design_map, params[:design_map]) unless params[:design_map] == ""
+        flash[:success] = "Successfully updated Assembly #{@assembly.name} with id #{@assembly.id}"
+        redirect_to "/inspector/#{@assembly.id}"
+        # @assembly.update_column(:visibility, params[:visibility])
+    end
+
     def delete
         if @assembly.delete
             flash[:success] = "Successfully deleted assembly ##{@assembly.name}"
@@ -117,7 +132,7 @@ class StudioController < ApplicationController
 
     private
     def assembly_params
-        params.require(:assembly).permit(:author, :name, :design_map)
+        params.require(:assembly).permit(:author, :name, :description, :visibility, :design_map)
     end
 
 

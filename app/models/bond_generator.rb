@@ -467,7 +467,8 @@ class BondGenerator
         
         structure_map = adjust_repulsive_bonds(structure_map)
         # byebug
-      [generate_sequences(structure_map), messages]
+        [structure_map, messages]
+    #   [generate_sequences(structure_map), messages] includes Sequences
     end
 
 

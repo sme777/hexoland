@@ -22,16 +22,28 @@ export default class extends Controller {
   connect() {
 
     const jsonData = JSON.parse(document.getElementById(`assembly_design_code`).value);
+    let content = {
+      text: undefined,
+      json: jsonData
+    }
+    const designMapField = document.getElementById("designMap");
+    // let content = 
     const editor = new JSONEditor({
       target: document.getElementById(`assembly_editor`),
       props: {
-        content: {
-          json: jsonData,
-          mode: 'view' // Set the mode to 'view' to disable editing
+        content,
+        onChange: (updatedContent, previousContent, { contentErrors, patchResult }) => {
+          // content is an object { json: JSONData } | { text: string }
+          if (editor.get()["text"] !== undefined) {
+            designMapField.value = editor.get()["text"];
+          } else if ((editor.get()["json"] !== undefined)) {
+            designMapField.value = JSON.stringify(editor.get()["json"]);
+          }
+          
+          content = updatedContent
         }
       }
     })
-
     this.container = document.getElementById('guiContainer');
 
     let [scene, camera, renderer, controls] = setupCanvas(this.container);
@@ -100,6 +112,9 @@ export default class extends Controller {
       this.titleElement.style.left = `${event.clientX + 10}px`;
       this.titleElement.style.top = `${event.clientY + 10}px`;
     });
+
+    // form submission
+    
   }
 
   onHover() {
