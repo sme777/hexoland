@@ -89,9 +89,9 @@ class Assembly < ApplicationRecord
                          when "S6"
                            { x: hex_pos[:x] - horiz3_8, y: hex_pos[:y], z: hex_pos[:z] - vert_div_sqrt3 }
                          when "ZU"
-                           { x: hex_pos[:x], y: hex_pos[:y] + depth + 4.5, z: hex_pos[:z] }
+                           { x: hex_pos[:x], y: hex_pos[:y] + depth + 9.5, z: hex_pos[:z] }
                          when "ZD"
-                           { x: hex_pos[:x], y: hex_pos[:y] - (depth + 4.5), z: hex_pos[:z] }
+                           { x: hex_pos[:x], y: hex_pos[:y] - (depth + 9.5), z: hex_pos[:z] }
                          end
   
           if neighbor_pos
@@ -304,14 +304,14 @@ class Assembly < ApplicationRecord
             helices = sub_bond.split("_")
             helices.each do |helix|
               # byebug
-              bond_arr[zBondToIndex[helix]] = 1
+              bond_arr[zBondToIndex[helix]] = bond2code("tail", helix)
             end
           end
         else
           helices = bond.split("_")
           helices.each do |helix|
             # byebug
-            bond_arr[zBondToIndex[helix]] = 1
+            bond_arr[zBondToIndex[helix]] = bond2code("tail", helix)
           end
         end
       end
@@ -325,17 +325,26 @@ class Assembly < ApplicationRecord
           bond.each do |sub_bond|
             helices = sub_bond.split("_")
             helices.each do |helix|
-              bond_arr[zBondToIndex[helix]] = 1
+              bond_arr[zBondToIndex[helix]] = bond2code("head", helix)
             end
           end
         else
           helices = bond.split("_")
           helices.each do |helix|
-            bond_arr[zBondToIndex[helix]] = 1
+            bond_arr[zBondToIndex[helix]] = bond2code("head", helix)
           end
         end
       end
       bond_arr
+    end
+
+
+    def bond2code(side, helix)
+      if side == "head"
+        return ZU_types()[helix] == "P" ? 1 : (ZU_types()[helix] == "S" ? 0 : ZU_types()[helix] == "BS" ? "-" : "?")
+      elsif side == "tail"
+        return ZD_types()[helix] == "P" ? 1 : (ZD_types()[helix] == "S" ? 0 : ZD_types()[helix] == "BS" ? "-" : "?")
+      end
     end
 
     def zBondToIndex
@@ -349,7 +358,104 @@ class Assembly < ApplicationRecord
         "H42" => 48, "H53" => 49, "H66" => 50, "H16" => 51, "H54" => 52, "H23" => 53, "H18" => 54, "H31" => 55,
         "H2" => 56, "H9" => 57, "H1" => 58, "H45" => 59, "H56" => 60, "H14" => 61, "H22" => 62, "H55" => 63,
         "H29" => 64, "H11" => 65, "H15" => 66, "H46" => 67, "H49" => 68, "H28" => 69, "H17" => 70, "H19" => 71
-    } end
+    } 
+    end
+
+
+    def ZU_types
+      {
+        "H1" => "P",
+        "H2" => "P",
+        "H16" => "P",
+        "H17" => "S",
+        "H36" => "S",
+        "H37" => "S",
+        "H44" => "S",
+        "H45" => "P",
+        "H58" => "P",
+        "H59" => "S",
+        "H65" => "BS",
+        "H66" => "P",
+        "H67" => "P",
+        "H68" => "BS",
+        "H50" => "P",
+        "H51" => "S",
+        "H18" => "P",
+        "H19" => "P",
+        "H20" => "BS",
+        "H21" => "BS",
+        "H24" => "BS",
+        "H23" => "P",
+        "H22" => "P",
+        "H54" => "S",
+        "H55" => "S",
+        "H62" => "P",
+        "H63" => "P",
+        "H64" => "BS",
+        "H48" => "P",
+        "H49" => "S",
+        "H12" => "P",
+        "H13" => "S",
+        "H10" => "S",
+        "H11" => "P",
+        "H8" => "S",
+        "H9" => "P",
+        "H4" => "S",
+        "H5" => "P",
+        "H34" => "P",
+        "H3" => "P",
+        "H26" => "P",
+        "H27" => "P"
+      }
+    end
+
+    def ZD_types
+      {
+        "H1" => "S",
+        "H2" => "S",
+        "H16" => "S",
+        "H17" => "P",
+        "H35" => "BS",
+        "H36" => "P",
+        "H37" => "P",
+        "H38" => "BS",
+        "H44" => "P",
+        "H45" => "S",
+        "H58" => "S",
+        "H59" => "P",
+        "H66" => "S",
+        "H67" => "S",
+        "H50" => "S",
+        "H51" => "P",
+        "H18" => "S",
+        "H19" => "S",
+        "H20" => "BS",
+        "H24" => "BS",
+        "H23" => "S",
+        "H22" => "S",
+        "H53" => "BS",
+        "H54" => "P",
+        "H55" => "P",
+        "H62" => "S",
+        "H63" => "S",
+        "H48" => "S",
+        "H49" => "P",
+        "H12" => "S",
+        "H13" => "P",
+        "H10" => "P",
+        "H11" => "S",
+        "H8" => "P",
+        "H9" => "S",
+        "H4" => "P",
+        "H5" => "S",
+        "H34" => "S",
+        "H3" => "S",
+        "H25" => "BS",
+        "H26" => "S",
+        "H27" => "S",
+        "H21" => "BS"
+      }
+    end
 
     def z_attractive_bonds
       

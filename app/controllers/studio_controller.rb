@@ -10,7 +10,7 @@ class StudioController < ApplicationController
         @assembly_method = "Code"
         @current_page = 1
         @page_count = (Assembly.all.size.to_f / 3).ceil
-        @assemblies = Assembly.paginate(page: @current_page, per_page: 3)
+        @assemblies = Assembly.order(updated_at: :desc).paginate(page: @current_page, per_page: 3)
         @page_assembly_ids = @assemblies.map {|asm| asm.id }
     end
 

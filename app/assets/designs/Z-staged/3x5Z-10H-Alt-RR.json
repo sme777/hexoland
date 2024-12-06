@@ -1,0 +1,127 @@
+{
+    "3x5Z-10H-ALT-RR": {
+        "building_blocks": [["5Z", 3]],
+        "ignore_generation": false,
+        "bond_families": {
+            "4B0T": {
+                "bonds_attractive": 4,
+                "bonds_neutral": 4,
+                "bonds_repulsive": 0,
+                "bonds_z": 0,
+                "min_xy_fe": 0,
+                "max_xy_fe": 200,
+                "min_z_fe": 0,
+                "max_z_fe": 200,
+                "max_xy_overlap": 0.34,
+                "xy_trials": 100,
+                "max_z_overlap": 0.0,
+                "z_trials": 1
+            }
+        },
+        "bond_map": {
+            "5Z#1-5Z#2" : {
+                "M1#1": {
+                    "S4": ["M1#2", "4B0T"]
+                },
+                "M3#1": {
+                    "S4": ["M3#2", "4B0T"]
+                },
+                "M5#1": {
+                    "S4": ["M5#2", "4B0T"]
+                },
+                "M1#2": {
+                    "S1": ["M1#1", "4B0T"]
+                },
+                "M3#2": {
+                    "S1": ["M3#1", "4B0T"]
+                },
+                "M5#2": {
+                    "S1": ["M5#1", "4B0T"]
+                }
+            },
+            "5Z#1-5Z#3" : {
+                "M1#1": {
+                    "S5": ["M1#3", "4B0T"]
+                },
+                "M3#1": {
+                    "S5": ["M3#3", "4B0T"]
+                },
+                "M5#1": {
+                    "S5": ["M5#3", "4B0T"]
+                },
+                "M1#3": {
+                    "S2": ["M1#1", "4B0T"]
+                },
+                "M3#3": {
+                    "S2": ["M3#1", "4B0T"]
+                },
+                "M5#3": {
+                    "S2": ["M5#1", "4B0T"]
+                }
+            },
+            "5Z#2-5Z#3" : {
+                "M1#2": {
+                    "S6": ["M1#3", "4B0T"]
+                },
+                "M3#2": {
+                    "S6": ["M3#3", "4B0T"]
+                },
+                "M5#2": {
+                    "S6": ["M5#3", "4B0T"]
+                },
+                "M1#3": {
+                    "S3": ["M1#2", "4B0T"]
+                },
+                "M3#3": {
+                    "S3": ["M3#2", "4B0T"]
+                },
+                "M5#3": {
+                    "S3": ["M5#2", "4B0T"]
+                }
+            }
+        }
+            
+    },
+
+    "5Z": {
+        "building_blocks": null,
+        "ignore_generation": true,
+        "max_xy_overlap": 0.0,
+        "xy_trials": 1,
+        "max_z_overlap": 0.21,
+        "z_trials": 10,
+        "bond_families": {
+            "standard": {
+                "bonds_attractive": 0,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "bonds_z": 5,
+                "min_xy_fe": 0,
+                "max_xy_fe": 200,
+                "min_z_fe": 105,
+                "max_z_fe": 130
+            }
+        },
+        "bond_map": {
+            "M1": {
+                "ZU": "M2"
+
+            },
+            "M2": {
+                "ZD": "M1",
+                "ZU": "M3"
+            },
+            "M3": {
+                "ZD": "M2",
+                "ZU": "M4"
+            },
+            "M4": {
+                "ZD": "M3",
+                "ZU": "M5"
+            },
+            "M5": {
+                "ZD": "M4"
+            }
+        }
+    }
+}
