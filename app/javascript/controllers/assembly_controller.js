@@ -18,10 +18,7 @@ import {
 export default class extends Controller {
   connect() {
     const assemblyIds = document.getElementById("assembly_ids").value.split(/\s+/);
-    const picklistGeneratorForm = document.getElementById("picklistGeneratorForm");
-    // console.log(assemblyIds.length)
     for (let i = 0; i < assemblyIds.length; i++) {
-
       // Set up Code Controller
       const jsonData = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_design_code`).value);
       const editor = new JSONEditor({
@@ -35,7 +32,7 @@ export default class extends Controller {
         }
       })
 
-      let guiContainer = document.getElementById(`assembly_${assemblyIds[i]}_gui`)
+      let guiContainer = document.getElementById(`assembly_${assemblyIds[i]}_gui`);
       let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
       // console.log(assemblyMap)
       const assemblyMap = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_assembly_code`).value);    
@@ -71,11 +68,6 @@ export default class extends Controller {
         onWindowResize(renderer, camera, guiContainer);
       });
     }
-  }
-
-  getSpacings() {
-    const startObject = new Hex(new THREE.Vector3(0, 0, 0));
-    return startObject.getSpacings();
   }
 
 }

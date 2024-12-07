@@ -1,10 +1,10 @@
 <% assembly_block.each_slice(2) do |elements| %>
 <div class="row">
     <div class="col-md-6">
-        <%= render partial: "assembly", locals: {assembly: elements[0]} unless elements[0].nil? %>
+        <%= render partial: "assembly", locals: {assembly: elements[0], assembly_type: assembly_type} unless elements[0].nil? %>
     </div>
     <div class="col-md-6">
-        <%= render partial: "assembly", locals: {assembly: elements[1]} unless elements[1].nil? %>
+        <%= render partial: "assembly", locals: {assembly: elements[1], assembly_type: assembly_type} unless elements[1].nil? %>
     </div>
 </div>
 <% end %>

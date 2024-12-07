@@ -9,17 +9,20 @@
 
                 <div class="popular-assemblies-controller">
                     <h3>Recent Assemblies</h3>
-                    <%= render partial: "assembly_block", locals: {assembly_block: @feed, page: @feed_current_page, page_count: @feed_page_count} %>
+                    <%= hidden_field_tag :feed_assembly_ids, "", type: "text", id: "feed_assembly_ids", style: "display: none;", value: @feed_assembly_ids %>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @feed, page: @feed_current_page, page_count: @feed_page_count, assembly_type: "feed"} %>
                 </div>
 
                 <div class="recent-assemblies-controller">
                     <h3>Popular Assemblies</h3>
-                    <%= render partial: "assembly_block", locals: {assembly_block: @popular_assemblies, page: @popular_assemblies_current_page, page_count: @popular_assemblies_page_count} %>
+                    <%= hidden_field_tag :popular_assembly_ids, "", type: "text", id: "popular_assembly_ids", style: "display: none;", value: @popular_assembly_ids %>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @popular_assemblies, page: @popular_assemblies_current_page, page_count: @popular_assemblies_page_count, assembly_type: "popular"} %>
                 </div>
                 
                 <div class="experimental-assemblies-controller">
                     <h3>Experimental Assemblies</h3>
-                    <%= render partial: "assembly_block", locals: {assembly_block: @experimental_assemblies, page: @experimental_assemblies_current_page, page_count: @experimental_assemblies_page_count} %>
+                    <%= hidden_field_tag :experimental_assembly_ids, "", type: "text", id: "experimental_assembly_ids", style: "display: none;", value: @experimental_assembly_ids %>
+                    <%= render partial: "assembly_block", locals: {assembly_block: @experimental_assemblies, page: @experimental_assemblies_current_page, page_count: @experimental_assemblies_page_count, assembly_type: "experimental"} %>
                 </div>
 
             <%= render partial: "layouts/footer" %>

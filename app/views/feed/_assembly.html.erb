@@ -7,7 +7,9 @@
                 </div>
                 <div class="col-md-6 text-end">
                     <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 512 512">
-                        <path d="M57.7 193l9.4 16.4c8.3 14.5 21.9 25.2 38 29.8L163 255.7c17.2 4.9 29 20.6 29 38.5l0 39.9c0 11 6.2 21 16 25.9s16 14.9 16 25.9l0 39c0 15.6 14.9 26.9 29.9 22.6c16.1-4.6 28.6-17.5 32.7-33.8l2.8-11.2c4.2-16.9 15.2-31.4 30.3-40l8.1-4.6c15-8.5 24.2-24.5 24.2-41.7l0-8.3c0-12.7-5.1-24.9-14.1-33.9l-3.9-3.9c-9-9-21.2-14.1-33.9-14.1L257 256c-11.1 0-22.1-2.9-31.8-8.4l-34.5-19.7c-4.3-2.5-7.6-6.5-9.2-11.2c-3.2-9.6 1.1-20 10.2-24.5l5.9-3c6.6-3.3 14.3-3.9 21.3-1.5l23.2 7.7c8.2 2.7 17.2-.4 21.9-7.5c4.7-7 4.2-16.3-1.2-22.8l-13.6-16.3c-10-12-9.9-29.5 .3-41.3l15.7-18.3c8.8-10.3 10.2-25 3.5-36.7l-2.4-4.2c-3.5-.2-6.9-.3-10.4-.3C163.1 48 84.4 108.9 57.7 193zM464 256c0-36.8-9.6-71.4-26.4-101.5L412 164.8c-15.7 6.3-23.8 23.8-18.5 39.8l16.9 50.7c3.5 10.4 12 18.3 22.6 20.9l29.1 7.3c1.2-9 1.8-18.2 1.8-27.5zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"/></svg>
+                        <path
+                            d="M57.7 193l9.4 16.4c8.3 14.5 21.9 25.2 38 29.8L163 255.7c17.2 4.9 29 20.6 29 38.5l0 39.9c0 11 6.2 21 16 25.9s16 14.9 16 25.9l0 39c0 15.6 14.9 26.9 29.9 22.6c16.1-4.6 28.6-17.5 32.7-33.8l2.8-11.2c4.2-16.9 15.2-31.4 30.3-40l8.1-4.6c15-8.5 24.2-24.5 24.2-41.7l0-8.3c0-12.7-5.1-24.9-14.1-33.9l-3.9-3.9c-9-9-21.2-14.1-33.9-14.1L257 256c-11.1 0-22.1-2.9-31.8-8.4l-34.5-19.7c-4.3-2.5-7.6-6.5-9.2-11.2c-3.2-9.6 1.1-20 10.2-24.5l5.9-3c6.6-3.3 14.3-3.9 21.3-1.5l23.2 7.7c8.2 2.7 17.2-.4 21.9-7.5c4.7-7 4.2-16.3-1.2-22.8l-13.6-16.3c-10-12-9.9-29.5 .3-41.3l15.7-18.3c8.8-10.3 10.2-25 3.5-36.7l-2.4-4.2c-3.5-.2-6.9-.3-10.4-.3C163.1 48 84.4 108.9 57.7 193zM464 256c0-36.8-9.6-71.4-26.4-101.5L412 164.8c-15.7 6.3-23.8 23.8-18.5 39.8l16.9 50.7c3.5 10.4 12 18.3 22.6 20.9l29.1 7.3c1.2-9 1.8-18.2 1.8-27.5zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
+                    </svg>
                 </div>
             </div>
             <h3 class="mb-0"><%= assembly.name %></h3>
@@ -25,7 +27,8 @@
                 <div class="row">
                     <div class="mb-3">
                         <label for="assemblyDescriptionField" class="form-label">Assembly Description</label>
-                        <textarea class="form-control" id="assemblyDescriptionField" rows="3" <%= "disabled" if @current_user != assembly.author %>>
+                        <textarea class="form-control" id="assemblyDescriptionField" rows="3"
+                            <%= "disabled" if @current_user != assembly.author %>>
                             <%= (assembly.description == "" || assembly.description.nil?) ? "This item has no description" : assembly.description %>
                         </textarea>
                     </div>
@@ -37,7 +40,9 @@
                         <div class="pt-2">
                             <%= f.button class: "btn bg-secondary-subtle w-100", type: "submit" do %>
                             <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 640 512">
-                                <path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z"/></svg>
+                                <path
+                                    d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z" />
+                            </svg>
                             JSON
                             <% end %>
                         </div>
@@ -50,9 +55,11 @@
                     <%= form_with url: delete_assembly_path(assembly.id), method: :post do |f| %>
                     <div class="px-0 mx-0">
                         <div class="pt-2">
-                           <%= f.button class: "btn bg-warning-subtle w-100", type: "submit" do %>
+                            <%= f.button class: "btn bg-warning-subtle w-100", type: "submit" do %>
                             <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 448 512">
-                                <path d="M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 38.7c0 17.7 14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-38.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 38.7c0 53-43 96-96 96l-48 0 0 70.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-70.7-48 0c-53 0-96-43-96-96l0-38.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm208 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48zM248 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"/></svg>
+                                <path
+                                    d="M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 38.7c0 17.7 14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-38.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 38.7c0 53-43 96-96 96l-48 0 0 70.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-70.7-48 0c-53 0-96-43-96-96l0-38.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm208 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48zM248 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z" />
+                            </svg>
                             Fork
                             <% end %>
 
@@ -64,11 +71,49 @@
             </div>
         </div>
         <div class="col-md-8">
-            <%= hidden_field_tag :assembly_ids, "", type: "text", id: "assembly_ids", style: "display: none;", value: @page_assembly_ids %>
-            <%= hidden_field_tag :design_map, "", type: "text", id: "assembly_#{assembly.id}_code", style: "display: none;", value: assembly.design_map %>
-            <div id=<%= "assembly_#{assembly.id}_editor" %> class="" style="width: auto; height: 27vh;">
+            <%= hidden_field_tag :design_map, "", type: "text", id: "#{assembly_type}_assembly_#{assembly.id}_code", style: "display: none;", value: assembly[:assembly_map].to_json %>
+            <%= hidden_field_tag :bond_map, "", type: "text", id: "#{assembly_type}_assembly_#{assembly.id}_bonds", style: "display: none;", value: assembly.normalize_bonds.to_json %>
 
+            <div id="carouselExampleDark" class="carousel carousel-dark slide" style="height: 100%;">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0"
+                        class="active"></button>
+                    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2"></button>
+                </div>
+                <div class="carousel-inner" style="height: 100%;">
+                    <!-- First Slide -->
+                    <div class="carousel-item active" data-bs-interval="2000" style="height: 100%;">
+                            <div id="<%= "#{assembly_type}_assembly_#{assembly.id}_gui"%>" style="height: 100%;"></div>
+                    </div>
+                    <!-- Second Slide -->
+                    <div class="carousel-item" data-bs-interval="2000" style="height: 100%;">
+                        <div class="carousel-caption d-none d-md-block">
+                            <div id="<%= "#{assembly_type}_assembly_#{assembly.id}_editor" %>" class="border overflow-auto"></div>
+                        </div>
+                    </div>
+                    <!-- Third Slide -->
+                    <div class="carousel-item" style="height: 100%;">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>Third slide label</h5>
+                            <p>Some representative placeholder content for the third slide.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Previous Button -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark"
+                    data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <!-- Next Button -->
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark"
+                    data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
+
         </div>
     </div>
 
