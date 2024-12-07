@@ -26,7 +26,86 @@
                 </div>
             </div>
             </div>
-            <div class="edit-container">
+            <div class="edit-container pt-3">
+            <div class="border border-secondary shadow-sm rounded p-3 text-center">
+                <div class="text-center">
+                    <h2>Start Cooking 🥣🧬</h2>
+                </div>
+                <%= form_with url: get_picklist_path(@assembly.id), id: "picklistGeneratorForm",  class: "", method: :get, data: {turbo: false} do |f| %>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Final Volume 🧪</label>
+                                <%= f.text_field :final_volume, type: "text", id: "itemAssemblyVolume", class: "form-control form-control-lg", placeholder: "25uL" %>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Final Scaffold Concetration 📿</label>
+                                <%= f.text_field :scaffold_final_concetration, type: "text", id: "itemAssemblyVolume", class: "form-control form-control-lg", placeholder: "10nM" %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Staple Ratio 🧮</label>
+                                <%= f.text_field :staple_ratio, type: "number", id: "itemAssemblyWells", class: "form-control form-control-lg", placeholder: "5x" %>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Wells 🚰</label>
+                                <%= f.text_field :wells, type: "text", id: "itemAssemblyWells", class: "form-control form-control-lg", placeholder: "[A1, A3, A5, ...]" %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Staple Concetration 🧷</label>
+                                <%= f.text_field :staple_concetration, type: "text", id: "itemAssemblyWells", class: "form-control form-control-lg", placeholder: "25uM" %>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label form-control-lg fs-4">Start Scaffold Concetration 🪀</label>
+                                <%= f.text_field :scaffold_start_concetration, type: "text", id: "itemAssemblyWells", class: "form-control form-control-lg", placeholder: "400nM" %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row ">
+                        <div class="col-md-6 px-4">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <%= f.label :add_buffer_label, "Add Buffer", class: "form-check-label fs-4" %>
+                                    <%= f.check_box :add_buffer, class: "form-check-input fs-4", checked: true %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 px-4">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <%= f.label :add_scaffold_label, "Add Scaffold", class: "form-check-label fs-4" %>
+                                    <%= f.check_box :add_scaffold, class: "form-check-input fs-4 ", checked: true %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%= f.button class: "btn bg-primary-subtle btn-lg w-100", type: "submit" do %>
+                    <svg class="bi pe-none me-2" width="16" height="16" viewBox="0 0 384 512">
+                        <path
+                            d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM216 232l0 102.1 31-31c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0l-72-72c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l31 31L168 232c0-13.3 10.7-24 24-24s24 10.7 24 24z" />
+                        </svg>
+                    Picklist
+                    <% end %>
+                <% end %>
+            </div>
+
                 <%= form_with url: update_assembly_path(@assembly.id), id: "updateAssemblyForm", method: :post, data: {tubro: false} do |f| %>
                     <%= f.hidden_field :id, type: "text", style: "display: none;", value: @assembly.id %>
                     <%= f.hidden_field :design_map, type: "text", id: "designMap", style: "display: none;" %>
@@ -34,13 +113,13 @@
                         <div class="col-md-5">
                             <div class="input-group input-group-lg flex-nowrap pt-3">
                                 <span class="input-group-text" id="addon-wrapping">Author</span>
-                                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control", placeholder: "Author of the project", value: @assembly.author, disabled: true %>
+                                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control form-control-lg", placeholder: "Author of the project", value: @assembly.author, disabled: true %>
                             </div>
                         </div>
                         <div class="col-md-5">
                             <div class="input-group input-group-lg flex-nowrap pt-3">
                                 <span class="input-group-text" id="addon-wrapping">Title</span>
-                                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control", placeholder: "2x7M-10H", value: @assembly.name %>
+                                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control form-control-lg", placeholder: "2x7M-10H", value: @assembly.name %>
                             </div>
                         </div>
                           <div class="col-md-2">
@@ -52,7 +131,7 @@
                     </div>
                     <div class="input-group input-group-lg flex-nowrap pt-3">
                         <span class="input-group-text" id="addon-wrapping">Description</span>
-                        <%= f.text_field :description, type: "text", id: "assemblyDescription", class: "form-control", placeholder: "Describe what the structure is supposed to be..", value: @assembly.description %>
+                        <%= f.text_field :description, type: "text", id: "assemblyDescription", class: "form-control form-control-lg", placeholder: "Describe what the structure is supposed to be..", value: @assembly.description %>
                     </div>
 
                     <div class="row pt-3">
@@ -65,7 +144,7 @@
                             <% end %>
                         </div>
                         <div class="col-md-6">
-                            <%= f.button class: "btn btn-lg bg-primary-subtle w-100", type: "submit" do %>
+                            <%= f.button class: "btn btn-lg bg-warning-subtle w-100", type: "submit" do %>
                                 <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 576 512">
                                 <path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z"/>
                                 </svg>
@@ -84,6 +163,8 @@
                         <% end %>
                     </div>
                 <% end %>
+
+                
             </div>
             <%= render partial: "layouts/footer" %>
         </div>

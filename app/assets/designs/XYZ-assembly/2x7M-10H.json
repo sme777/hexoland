@@ -3,9 +3,9 @@
       "building_blocks": null,
       "ignore_generation": false,
       "max_xy_overlap": 0.25,
-      "xy_trials": 5,
+      "xy_trials": 20,
       "max_z_overlap": 0.21,
-      "z_trials": 5,
+      "z_trials": 20,
       "wells": [],  
       "bond_families": {
         "standard": {

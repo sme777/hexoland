@@ -21,7 +21,7 @@ class PicklistGenerator
 
     def generate_picklist(design_map, final_volume, scaffold_start_concetration, staple_ratio, 
         scaffold_final_concetration, staple_concetration, wells, add_buffer, add_scaffold)
-        
+        bg = BondGenerator.new
         staple_volume = (final_volume.to_f * 10**-6 * (staple_ratio.to_f * scaffold_final_concetration.to_f * 10**-9) / (staple_concetration.to_f * 10**-6)) * 10**9
         scaffold_volume = (final_volume.to_f * 10**-6 * (scaffold_final_concetration.to_f * 10**-9) / (scaffold_start_concetration.to_f * 10**-9)) * 10**9
         core_volume = ((staple_volume / 8.0) * 96).to_i
@@ -33,7 +33,7 @@ class PicklistGenerator
         buffer_volume = round_to_nearest_25(buffer_volume)
         core_counter = 0
         
-        seq_arr = convert_design_map_to_sequences(design_map)
+        seq_arr = convert_design_map_to_sequences(bg.generate_sequences(design_map))
         columns = ['Source Plate Name', 'Source Plate Type', 'Source Well', 'Sample Comments', 'Destination Plate Name', 'Destination Well', 'Transfer Volume']
         main_picklist = Daru::DataFrame.new({}, order: columns)
         # byebug
