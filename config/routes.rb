@@ -27,6 +27,11 @@ Rails.application.routes.draw do
 
   get '/inspector/:id' => 'inspector#inspect', as: :inspect_assembly
 
-  post '/auth/x' => 'user#auth_with_x', as: :sign_in_with_x
-  post '/auth/x' => 'user#auth_with_github', as: :sign_in_with_github
+  get '/auth/:provider/callback', to: 'user#create'
+  get '/auth/failure', to: 'user#failure'
+
+  get '/auth/twitter' => 'user#create', as: :sign_in_with_twitter
+  get '/auth/github' => 'user#create', as: :sign_in_with_github
+
+  get '/auth/sign_out' => 'user#sign_out', as: :sign_out
 end

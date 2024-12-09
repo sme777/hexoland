@@ -52,6 +52,12 @@ gem "daru"
 # gem "image_processing", "~> 1.2"
 gem 'will_paginate', '~> 4.0'
 
+#third-part autnehtican
+gem 'omniauth'
+gem 'omniauth-twitter'
+gem 'omniauth-github'
+gem 'omniauth-rails_csrf_protection'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
