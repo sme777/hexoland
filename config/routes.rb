@@ -26,5 +26,7 @@ Rails.application.routes.draw do
   get '/feed/:page' => 'feed#index', as: :feed_page
 
   get '/inspector/:id' => 'inspector#inspect', as: :inspect_assembly
-  
+
+  post '/auth/x' => 'user#auth_with_x', as: :sign_in_with_x
+  post '/auth/x' => 'user#auth_with_github', as: :sign_in_with_github
 end

@@ -11,15 +11,14 @@
                 <hr>
                 <%= form_with model: Assembly.new, url: :create_assembly, id: "newAssemblyForm", method: :post do |f| %>
 
-                <h3>New Assembly</h3>
+                <h3>📖 New Assembly</h3>
                 <br>
                 <%= render partial: "layouts/errors" %>
-                <strong><label for="assemblyAuthor" class="form-label">For You</label></strong>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="input-group mb-3">
-                            <span class="input-group-text">@</span>
-                            <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control", placeholder: "Author" %>
+                            <span class="input-group-text fs-5">👨‍🏭 @</span>
+                            <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control form-control-lg", placeholder: "Author" %>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -30,8 +29,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="input-group mb-3">
-                            <span class="input-group-text">Title</span>
-                            <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control", placeholder: "2x2x2 Block" %>
+                            <span class="input-group-text fs-5">🪧 Title</span>
+                            <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control form-control-lg", placeholder: "2x2x2 Block" %>
                             <div class="valid-feedback">
                                 Looks good!
                             </div>
@@ -43,38 +42,22 @@
                 </div>
                 <div class="row">
                     <div class="input-group mb-3">
-                        <span class="input-group-text">Assembly Description</span>
-                        <%= f.text_area :description, class: "form-control", id: "assemblyDescription", placeholder: "Description for refernce" %>
+                        <span class="input-group-text fs-5">🧩 Assembly Description</span>
+                        <%= f.text_area :description, class: "form-control form-control-lg", id: "assemblyDescription", placeholder: "Description for refernce" %>
                     </div>
                 </div>
                 <div class="row">
-                    <strong><label for="assemblyVolume" class="form-label">For Community</label></strong>
                     <div class="mb-3">
-                        <div class="form-check">
-                            <%= f.label :assembly_public_check, "Public", class: "form-check-label" %>
-                            <%= f.check_box :assembly_public_check, class: "form-check-input", checked: true %>
+                        <div class="form-check fs-4">
+                            <%= f.label :assembly_public_check, "Public", class: "form-check-label fs-4" %>
+                            <%= f.check_box :assembly_public_check, class: "form-check-input fs-4", checked: true %>
                         </div>
                     </div>
 
                 </div>
-                <div class="row mb-3">
-                    <strong><label for="assemblyVolume" class="form-label">For Picklist</label></strong>
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text">Volumes</span>
-                            <%= f.text_field :volumes, type: "text", id: "assemblyVolume", class: "form-control", placeholder: "[50, 50, 50, ...] or just 50 for all" %>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text">Well Positions</span>
-                            <%= f.text_field :wells, type: "text", id: "assemblyWells", class: "form-control", placeholder: "[A1, A3, A5, ...]" %>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="mb-3">
-                    <strong><label for="assemblyBlock" class="form-label">For Assembly</label></strong>
                     <%= f.hidden_field :design_map, type: "text", id: "designMap", style: "display: none;" %>
                     <div class="valid-feedback">
                         Looks good!
