@@ -11,7 +11,7 @@ class PicklistGenerator
         counter = 1
         @hex_plate.each_row do |row|
             if sequences[1].include?(row["Sequence2"])
-                destination_row = [row["Plate Name"], "384PP_AQ_BP", row["Well Position"], "#{sequences[0]}-#{row["Sequence2"]}", "Destination[1]", destination, volume]
+                destination_row = [row["Plate Name"], "384PP_AQ_BP", row["Well Position"], "#{sequences[0]}_#{row["Sequence2"]}", "Destination[1]", destination, volume]
                 df.add_row(destination_row)
             end
         end

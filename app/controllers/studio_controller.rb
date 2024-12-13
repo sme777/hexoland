@@ -7,7 +7,7 @@ class StudioController < ApplicationController
     before_action :set_assembly, only: [:delete, :update, :get_picklist, :get_json, :make_private, :make_public]
 
     def index
-        @assembly_method = "Code"
+        @assembly_method = "Forward"
         @current_page = 1
         @page_count = (Assembly.all.size.to_f / 3).ceil
         @assemblies = Assembly.order(updated_at: :desc).paginate(page: @current_page, per_page: 3)
@@ -22,19 +22,54 @@ class StudioController < ApplicationController
         render partial: "studio/page_assemblies"
     end
 
-    def code
-        @assembly_method = "Code"
-        render partial: "studio/code"
+    # def code
+    #     @assembly_method = "Code"
+    #     render partial: "studio/code"
+    # end
+
+    # def model
+    #     @assembly_method = "Voxelizer"
+    #     render partial: "studio/model"
+    # end
+
+    # def gui
+    #     @assembly_method = "GUI"
+    #     render partial: "studio/gui"
+    # end
+
+    def forward
+        @assembly_method = "Forward"
+        render partial: "studio/forward"
     end
 
-    def model
-        @assembly_method = "Voxelizer"
-        render partial: "studio/model"
+    def reverse
+        @assembly_method = "Reverse"
+        render partial: "studio/reverse"
     end
 
-    def gui
-        @assembly_method = "GUI"
-        render partial: "studio/gui"
+    def load_sequence(file)
+        br = BondRecoverer.new
+        recovery_map = br.recover(file)
+        render json: recovery_map
+    end
+
+    def load_hexland(file)
+        file_content = File.read(file)
+        render json: file_content
+    end
+
+    def load_obj(file)
+
+    end
+
+    def loader
+        if params[:fileType] == "csv"
+            load_sequence(params[:file])
+        elsif params[:fileType] == "json"
+            load_hexland(params[:file])
+        elsif params[:fileType] == "obj"
+            load_obj(params[:file])
+        end
     end
 
     def create
@@ -97,18 +132,12 @@ class StudioController < ApplicationController
     end
 
     def update
-        # columns that need updating
-        # name
-        # description
-        # design_map
-        # visibility
         @assembly.update_column(:name, params[:name])
         @assembly.update_column(:description, params[:description])
         @assembly.update_column(:public, params[:assembly_public_check] == "1" ? true : false)
         @assembly.update_column(:design_map, params[:design_map]) unless params[:design_map] == ""
         flash[:success] = "Successfully updated Assembly #{@assembly.name} with id #{@assembly.id}"
         redirect_to "/inspector/#{@assembly.id}"
-        # @assembly.update_column(:visibility, params[:visibility])
     end
 
     def delete

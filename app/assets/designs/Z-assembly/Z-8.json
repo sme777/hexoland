@@ -1,5 +1,5 @@
 {
-    "Z-8-10H": {
+    "8Z-10H": {
         "building_blocks": null,
         "ignore_generation": false,
         "max_xy_overlap": 0.0,
@@ -14,8 +14,8 @@
                 "bonds_z": 5,
                 "min_xy_fe": 0,
                 "max_xy_fe": 200,
-                "min_z_fe": 0,
-                "max_z_fe": 200
+                "min_z_fe": 105,
+                "max_z_fe": 130
             }
         },
         "bond_map": {

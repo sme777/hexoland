@@ -10,10 +10,12 @@ Rails.application.routes.draw do
   post '/studio/' => 'studio#create', as: :create_assembly
   post '/studio/:id/update' => 'studio#update', as: :update_assembly
 
-  get '/studio/code_assembly' => 'studio#code', as: :code_assembly
-  get '/studio/model_assembly' => 'studio#model', as: :model_assembly
-  get '/studio/gui_assembly' => 'studio#gui', as: :gui_assembly
+  # get '/studio/code_assembly' => 'studio#code', as: :code_assembly
+  # get '/studio/model_assembly' => 'studio#model', as: :model_assembly
+  # get '/studio/gui_assembly' => 'studio#gui', as: :gui_assembly
 
+  get '/studio/forward' => 'studio#forward', as: :forward_assembly
+  get '/studio/reverse' => 'studio#reverse', as: :reverse_assembly
   get '/studio/:id/make_public' => 'studio#make_public', as: :make_public
   get '/studio/:id/make_private' => 'studio#make_private', as: :make_private
 
@@ -22,6 +24,8 @@ Rails.application.routes.draw do
   get '/studio/assembly/:id/get_json' => 'studio#get_json', as: :get_json
   
   get '/studio/page_assembly/:page' => 'studio#paginate_assemblies', as: :page_assemblies
+
+  post '/studio/loader' => 'studio#loader'
 
   get '/feed/:page' => 'feed#index', as: :feed_page
 

@@ -51,7 +51,7 @@ class BondGenerator
 
     def randomize_sides(side, count, number, type="handles",godmode=false)
         
-        if (number == 0.5 || number == 1.5) || (number * 2 > 4)
+        if (number == 0.5 || number == 1.5 || number == 2.5) || (number * 2 > 4)
             if side == "S14"
                 return group_randomizer(BondGenerator.single_s14_sides[0] + BondGenerator.single_s14_sides[1], number * 2)
             elsif side == "S25"
@@ -611,7 +611,7 @@ class BondGenerator
         # s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds) unless s14_side_count == 0
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
-        # byebug
+        
         s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
@@ -747,10 +747,9 @@ class BondGenerator
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
         ### Generate the Sides
-        # byebug
-        s14s, s14_score = best_sides_out_of("S14", "handles", xy_trails, [], count=s14_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
-        s25s, _ = best_sides_out_of("S25", "handles", xy_trails, [], count=s25_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
-        s36s, _ = best_sides_out_of("S36", "handles", xy_trails, [], count=s36_side_count, number=attr_bonds/2, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
+        s14s, s14_score = best_sides_out_of("S14", "handles", xy_trails, [], count=s14_side_count, number=attr_bonds/2.0, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
+        s25s, s25_score = best_sides_out_of("S25", "handles", xy_trails, [], count=s25_side_count, number=attr_bonds/2.0, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
+        s36s, s36_score = best_sides_out_of("S36", "handles", xy_trails, [], count=s36_side_count, number=attr_bonds/2.0, overlap=max_xy_overlap, godmode=false, min_xy_fe, max_xy_fe)
         
         z_tails, _ = best_z_bonds_out_of(z_bonds, z_count, max_z_overlap, z_trials, min_z_fe, max_z_fe) unless z_count == 0
 
@@ -760,30 +759,30 @@ class BondGenerator
             neighbors.each do |side, neighbor|
                 if side == "S1"
                     if s14s.size == 0
-                        block_neighbors[block][side] = [[], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [[], "BS"]]
+                        block_neighbors[block][side] = [[], s14_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [[], s14_score]]
                     else
-                        block_neighbors[block][side] = [s14s[s14_idx][0], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [s14s[s14_idx][0], "BS"]]
+                        block_neighbors[block][side] = [s14s[s14_idx][0], s14_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [s14s[s14_idx][0], s14_score]]
                     end
                     s14_idx += 1
                 elsif side == "S2" && 
                     if s25s.size == 0
-                        block_neighbors[block][side] = [[], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [[], "BS"]]
+                        block_neighbors[block][side] = [[], s25_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [[], s25_score]]
                     else
-                        block_neighbors[block][side] = [s25s[s25_idx][0], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [s25s[s25_idx][0], "BS"]]
+                        block_neighbors[block][side] = [s25s[s25_idx][0], s25_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [s25s[s25_idx][0], s25_score]]
                     end
 
                     s25_idx += 1
                 elsif side == "S3"
                     if s36s.size == 0
-                        block_neighbors[block][side] = [[], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [[], "BS"]]
+                        block_neighbors[block][side] = [[], s36_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [[], s36_score]]
                     else
-                        block_neighbors[block][side] = [s36s[s36_idx][0], "BS"]
-                        neighbor_map[block][side] = [neighbor_map[block][side], [s36s[s36_idx][0], "BS"]]
+                        block_neighbors[block][side] = [s36s[s36_idx][0], s36_score]
+                        neighbor_map[block][side] = [neighbor_map[block][side], [s36s[s36_idx][0], s36_score]]
                     end
                     s36_idx += 1
                 elsif side == "ZU"
@@ -807,8 +806,8 @@ class BondGenerator
                         s4_bonds = complement_side(block_neighbors[neighbor]["S1"][0])
                     end
                     
-                    block_neighbors[block][side] = [s4_bonds, "BS"]
-                    neighbor_map[block][side] = [neighbor_map[block][side], [s4_bonds, "BS"]]
+                    block_neighbors[block][side] = [s4_bonds, s14_score]
+                    neighbor_map[block][side] = [neighbor_map[block][side], [s4_bonds, s14_score]]
                 elsif side == "S5"
                     if block_neighbors[neighbor].nil?
                         s5_bonds = complement_side(s25s[curr_last_s25_idx_count][0])
@@ -817,8 +816,8 @@ class BondGenerator
                         s5_bonds = complement_side(block_neighbors[neighbor]["S2"][0])
                     end
 
-                    block_neighbors[block][side] = [s5_bonds, "BS"]
-                    neighbor_map[block][side] = [neighbor_map[block][side], [s5_bonds, "BS"]]
+                    block_neighbors[block][side] = [s5_bonds, s25_score]
+                    neighbor_map[block][side] = [neighbor_map[block][side], [s5_bonds, s25_score]]
                 elsif side == "S6"
                     if block_neighbors[neighbor].nil?
                         s6_bonds = complement_side(s36s[curr_last_s36_idx_count][0])
@@ -827,8 +826,8 @@ class BondGenerator
                         s6_bonds = complement_side(block_neighbors[neighbor]["S3"][0])
                     end
 
-                    block_neighbors[block][side] = [s6_bonds, "BS"]
-                    neighbor_map[block][side] = [neighbor_map[block][side], [s6_bonds, "BS"]]
+                    block_neighbors[block][side] = [s6_bonds, s36_score]
+                    neighbor_map[block][side] = [neighbor_map[block][side], [s6_bonds, s36_score]]
                 elsif side == "ZD"
                     # byebug
                     if neighbor_map[neighbor].nil?

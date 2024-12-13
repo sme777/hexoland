@@ -17,6 +17,7 @@ import AssemblyController from "../controllers/assembly_controller"
 import DocsController from "../controllers/docs_controller"
 import InspectorController from "../controllers/inspector_controller"
 import FeedController from "../controllers/feed_controller"
+import LoaderController from "../controllers/loader_controller"
 
 
 application.register("studio", StudioController)
@@ -27,4 +28,4 @@ application.register("assembly", AssemblyController)
 application.register("docs", DocsController)
 application.register("inspector", InspectorController)
 application.register("feed", FeedController)
-
+application.register("loader", LoaderController)

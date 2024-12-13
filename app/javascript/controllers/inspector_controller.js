@@ -67,7 +67,7 @@ export default class extends Controller {
 
     const assemblyMap = JSON.parse(document.getElementById('assembly_code').value);
     const hexBondData = JSON.parse(document.getElementById('bond_map').value);
-    console.log(hexBondData)
+    // console.log(hexBondData)
     this.hexBlocks = []
     assemblyMap.forEach((block) => {
       // const hexGroup = new THREE.Group();
