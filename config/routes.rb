@@ -38,4 +38,6 @@ Rails.application.routes.draw do
   get '/auth/github' => 'user#create', as: :sign_in_with_github
 
   get '/auth/sign_out' => 'user#sign_out', as: :sign_out
+
+  get '/:errors' => 'errors#error_404'
 end
