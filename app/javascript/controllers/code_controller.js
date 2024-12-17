@@ -9,6 +9,9 @@ import {
   onWindowResize,
   animate
 } from './canvas_utils';
+import {
+  Hex
+} from "../models/hex"
 export default class extends Controller {
   connect() {
     console.log("Code Controller Debugger:")
@@ -75,10 +78,13 @@ export default class extends Controller {
       }
     });
 
-    const guiContainer = document.getElementById('guiContainer');
+    this.guiContainer = document.getElementById('guiContainer');
     
-      let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
+      let [scene, camera, renderer, controls] = setupCanvas(this.guiContainer);
       // console.log(assemblyMap)
+      this.scene = scene;
+      this.camera = camera;
+      this.renderer = renderer;
       const assemblyMap = {};    
       const bondMap = {};  
       // console.log(bondMap);
@@ -109,7 +115,7 @@ export default class extends Controller {
 
       animate(scene, camera, renderer);
       window.addEventListener('resize', () => {
-        onWindowResize(renderer, camera, guiContainer);
+        onWindowResize(renderer, camera, this.guiContainer);
       });
 
 
@@ -154,8 +160,67 @@ export default class extends Controller {
         uploadFile(file, "json");
       }
     });
+    
+    this.activeControl = "SELECT";
+    this.setupInteractiveControls();
+
+  }
+
+  // setupGUI
 
 
+  setupInteractiveControls() {
+    const selectControl = document.getElementById("selectionControl");
+    const additionControl = document.getElementById("additionControl");
+    const deletionControl = document.getElementById("deletionControl");
+    const alignmentControl = document.getElementById("alignmentControl");
+
+    selectControl.addEventListener('click', () => {
+      selectControl.classList.add('active');
+
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "SELECT";
+    })
+
+    additionControl.addEventListener('click', () => {
+      additionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "ADD";
+    })
+
+    deletionControl.addEventListener('click', () => {
+      deletionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "REMOVE";
+    })
+
+    alignmentControl.addEventListener('click', () => {
+      alignmentControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+
+      this.activeControl = "ALIGN";
+    })
+
+    this.guiContainer.addEventListener('dblclick', (e) => {
+      if (this.activeControl === "ADD") {
+
+        this.scene.add((new Hex("Empty", new THREE.Vector3(0, 0, 0), {})).getObject());
+      }
+    })
   }
 
   
