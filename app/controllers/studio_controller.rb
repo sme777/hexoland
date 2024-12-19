@@ -87,7 +87,6 @@ class StudioController < ApplicationController
         rescue => e
             flash[:danger] = "An error was encountered while trying to parse assembly code, please double-check!"
         end
-
         redirect_to '/studio'
     end
 
@@ -132,11 +131,27 @@ class StudioController < ApplicationController
     end
 
     def update
+        flash[:danger], flash[:success] = [], []
+        did_merge = false
+        if !(params[:merge_assembly] == "" ||  params[:merge_assembly].nil?)
+            @merge_assembly = Assembly.find_by(id: params[:merge_assembly].to_i)
+            change_count, merged_design_map = @assembly.merge_with(@merge_assembly)
+            flash[:danger] << "Nothing was changed, please make sure that the naming match across Merges!" if change_count == 0
+            @assembly.update_column(:design_map, merged_design_map)
+            did_merge = true
+        end
+
         @assembly.update_column(:name, params[:name])
         @assembly.update_column(:description, params[:description])
         @assembly.update_column(:public, params[:assembly_public_check] == "1" ? true : false)
-        @assembly.update_column(:design_map, params[:design_map]) unless params[:design_map] == ""
-        flash[:success] = "Successfully updated Assembly #{@assembly.name} with id #{@assembly.id}"
+        if params[:design_map] != ""
+            if did_merge
+                flash[:danger] << "Cannot update design map when performing a merge operation!"
+            else
+                @assembly.update_column(:design_map, params[:design_map])
+            end
+        end
+        flash[:success] << "Successfully updated Assembly #{@assembly.name} with id #{@assembly.id}"
         redirect_to "/inspector/#{@assembly.id}"
     end
 
