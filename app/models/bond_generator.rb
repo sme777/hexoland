@@ -620,9 +620,9 @@ class BondGenerator
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
         
-        s14s, _ = best_sides_out_of("S14", "handles", 1, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s25s, _ = best_sides_out_of("S25", "handles", 1, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s36s, _ = best_sides_out_of("S36", "handles", 1, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
 
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
