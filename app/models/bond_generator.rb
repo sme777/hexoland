@@ -436,24 +436,32 @@ class BondGenerator
             attr_bonds = find_common_attr_bonds(bond_families, "bonds_attractive")
             z_bonds = find_common_attr_bonds(bond_families, "bonds_z")
             # byebug
-            pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
-            
-            messages << block_messages
-            pairing_map.each do |pairing, bonds|
-                pair1, pair2 = pairing.split('-')
-                # For 2x7M#1-2x7M#2
-                name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
-                name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+            # block_messages []
+            begin 
+                Timeout.timeout(60) do
+                pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
+                messages << block_messages
 
-                bonds.each do |bond_name, bond|
-                    monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
-                    name = block_id == idx1 ? name1 : name2
-                    bond.each do |side, bs|
-                        structure_map["#{name}##{block_id}"][monomer][side] = bs
+                pairing_map.each do |pairing, bonds|
+                    pair1, pair2 = pairing.split('-')
+                    # For 2x7M#1-2x7M#2
+                    name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
+                    name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+    
+                    bonds.each do |bond_name, bond|
+                        monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
+                        name = block_id == idx1 ? name1 : name2
+                        bond.each do |side, bs|
+                            structure_map["#{name}##{block_id}"][monomer][side] = bs
+                        end
                     end
                 end
-            end
-            structure_map
+                structure_map
+                end
+            rescue Timeout::Error
+                Rails.logger.error "The process took too long and was terminated."
+                raise "The process took too long to complete."
+            end    
 
         end
       end
@@ -612,9 +620,9 @@ class BondGenerator
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
         
-        s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s14s, _ = best_sides_out_of("S14", "handles", 1, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s25s, _ = best_sides_out_of("S25", "handles", 1, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        s36s, _ = best_sides_out_of("S36", "handles", 1, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
         z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
 
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
