@@ -89,9 +89,15 @@ export default class extends Controller {
       }
     });
 
-    const guiContainer = document.getElementById('guiContainer');
+    this.guiContainer = document.getElementById('guiContainer');
 
-    let [scene, camera, renderer, controls] = setupCanvas(guiContainer);
+    let [scene, camera, renderer, controls] = setupCanvas(this.guiContainer);
+    // console.log(assemblyMap)
+    this.scene = scene;
+    this.camera = camera;
+    this.renderer = renderer;
+    const assemblyMap = {};
+    const bondMap = {};
 
     // Make The Variables Globacl
     this.scene = scene;
@@ -99,18 +105,8 @@ export default class extends Controller {
     this.renderer = renderer;
     this.controls = controls;
 
-    // console.log(assemblyMap)
-    const assemblyMap = {};
-    const bondMap = {};
-    // console.log(bondMap);
     const hexBlockGroup = new THREE.Group();
-    // assemblyMap.forEach((block) => {
-    //   const hexGroup = new THREE.Group();
-    //   block.forEach((monomer) => {
-    //     hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), bondMap[monomer.monomer])).getObject());
-    //   })
-    //   hexBlockGroup.add(hexGroup);
-    // })
+
 
     const boundingBox = new THREE.Box3().setFromObject(hexBlockGroup);
 
@@ -132,7 +128,6 @@ export default class extends Controller {
     window.addEventListener('resize', () => {
       onWindowResize(renderer, camera, guiContainer);
     });
-
 
     const uploadFile = async (file, type) => {
       const formData = new FormData();
@@ -236,12 +231,14 @@ export default class extends Controller {
       const box = new THREE.Box3().setFromObject(voxelGroup);
       const center = new THREE.Vector3();
       box.getCenter(center);
-      voxelGroup.position.sub(center);      
+      voxelGroup.position.sub(center);
       voxelGroup.position.set(-center.x, -center.y, -center.z);
       this.scene.add(voxelGroup);
 
       document.getElementById("voxelCount").textContent = counter;
 
+      this.activeControl = "SELECT";
+      this.setupInteractiveControls();
       // Add the original STL model on top of the voxelized version
       // const originalMaterial = new THREE.MeshStandardMaterial({
       //   color: 0xA6CDC6
@@ -271,7 +268,7 @@ export default class extends Controller {
         uploadFile(file, "json");
       }
     });
-
+    // setupGUI
 
     document.getElementById('stlobjLoader').addEventListener('change', (event) => {
       const file = event.target.files[0];
@@ -285,8 +282,7 @@ export default class extends Controller {
       } else {
         alert("Unknown File Type. Please Re-Upload!")
       }
-    })
-
+    });
 
     // Get references to the DOM elements
     const rangeInput = document.getElementById('voxelResolution');
@@ -301,7 +297,61 @@ export default class extends Controller {
       progressBar.setAttribute('aria-valuenow', value); // Update accessibility value
     });
 
+  }
 
+
+  setupInteractiveControls() {
+    const selectControl = document.getElementById("selectionControl");
+    const additionControl = document.getElementById("additionControl");
+    const deletionControl = document.getElementById("deletionControl");
+    const alignmentControl = document.getElementById("alignmentControl");
+
+    selectControl.addEventListener('click', () => {
+      selectControl.classList.add('active');
+
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "SELECT";
+    })
+
+    additionControl.addEventListener('click', () => {
+      additionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "ADD";
+    })
+
+    deletionControl.addEventListener('click', () => {
+      deletionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+
+      this.activeControl = "REMOVE";
+    })
+
+    alignmentControl.addEventListener('click', () => {
+      alignmentControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+
+      this.activeControl = "ALIGN";
+    })
+
+    this.guiContainer.addEventListener('dblclick', (e) => {
+      if (this.activeControl === "ADD") {
+
+        this.scene.add((new Hex("Empty", new THREE.Vector3(0, 0, 0), {})).getObject());
+      }
+    })
   }
 
 

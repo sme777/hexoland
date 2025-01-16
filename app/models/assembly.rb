@@ -51,6 +51,30 @@ class Assembly < ApplicationRecord
       bonds
     end
 
+    def merge_with(merge_assembly)
+      ### Assume most use case will be for merging building blocks into heirarchical assembly
+      merge_map = JSON.parse(merge_assembly.design_map)
+      return self.design_map if merge_map.keys.size != 1
+      assembly_map = JSON.parse(self.design_map)
+      # byebug
+      change_count = 0
+      merge_key = merge_map.keys[0]
+      assembly_map.each do |key, block|
+        if key.include?(merge_key)
+          block.each do |monomer, bonds|
+            merge_map[merge_key].each do |ref_monomer, ref_bonds|
+              next if monomer != ref_monomer
+              ref_bonds.each do |side, bds|
+                assembly_map[key][monomer][side] = bds
+                change_count += 1
+              end
+            end
+          end
+        end
+      end
+      [change_count, assembly_map.to_json]
+    end
+
     private
   
     def assemble_design_map(assembly_map, spacings)

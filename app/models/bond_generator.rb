@@ -436,24 +436,32 @@ class BondGenerator
             attr_bonds = find_common_attr_bonds(bond_families, "bonds_attractive")
             z_bonds = find_common_attr_bonds(bond_families, "bonds_z")
             # byebug
-            pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
-            
-            messages << block_messages
-            pairing_map.each do |pairing, bonds|
-                pair1, pair2 = pairing.split('-')
-                # For 2x7M#1-2x7M#2
-                name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
-                name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+            # block_messages []
+            begin 
+                Timeout.timeout(60) do
+                pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
+                messages << block_messages
 
-                bonds.each do |bond_name, bond|
-                    monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
-                    name = block_id == idx1 ? name1 : name2
-                    bond.each do |side, bs|
-                        structure_map["#{name}##{block_id}"][monomer][side] = bs
+                pairing_map.each do |pairing, bonds|
+                    pair1, pair2 = pairing.split('-')
+                    # For 2x7M#1-2x7M#2
+                    name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
+                    name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+    
+                    bonds.each do |bond_name, bond|
+                        monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
+                        name = block_id == idx1 ? name1 : name2
+                        bond.each do |side, bs|
+                            structure_map["#{name}##{block_id}"][monomer][side] = bs
+                        end
                     end
                 end
-            end
-            structure_map
+                structure_map
+                end
+            rescue Timeout::Error
+                Rails.logger.error "The process took too long and was terminated."
+                raise "The process took too long to complete."
+            end    
 
         end
       end

@@ -26,6 +26,74 @@
                 </div>
             </div>
             </div>
+                     <%= form_with url: update_assembly_path(@assembly.id), id: "updateAssemblyForm", method: :post, data: {tubro: false} do |f| %>
+                    <%= f.hidden_field :id, type: "text", style: "display: none;", value: @assembly.id %>
+                    <%= f.hidden_field :design_map, type: "text", id: "designMap", style: "display: none;" %>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group input-group-lg flex-nowrap pt-3">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon1">Merge With</button>
+                                <%= f.select :merge_assembly, 
+                                        Assembly.all.map {|assembly| [assembly.name, assembly.id]}, 
+                                        { include_blank: 'Choose Assembly' }, 
+                                        { class: 'form-select form-select-lg' } %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="input-group input-group-lg flex-nowrap pt-3">
+                                <span class="input-group-text" id="addon-wrapping">Author</span>
+                                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control form-control-lg", placeholder: "Author of the project", value: @assembly.author, disabled: true %>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="input-group input-group-lg flex-nowrap pt-3">
+                                <span class="input-group-text" id="addon-wrapping">Title</span>
+                                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control form-control-lg", placeholder: "2x7M-10H", value: @assembly.name %>
+                            </div>
+                        </div>
+                          <div class="col-md-2">
+                            <div class="input-group input-group-lg flex-nowrap pt-4">
+                                <%= f.check_box :assembly_public_check, class: "form-check-input fs-4", checked: !!@assembly.public %>
+                                <%= f.label :assembly_public_check, "Public", class: "form-check-label fs-4 px-2" %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group input-group-lg flex-nowrap pt-3">
+                        <span class="input-group-text" id="addon-wrapping">Description</span>
+                        <%= f.text_field :description, type: "text", id: "assemblyDescription", class: "form-control form-control-lg", placeholder: "Describe what the structure is supposed to be..", value: @assembly.description %>
+                    </div>
+
+                    <div class="row pt-3">
+                        <div class="col-md-6">
+                            <%= f.button class: "btn btn-lg bg-dark-subtle w-100" do %>
+                                <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 448 512">
+                                    <path d="M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 38.7c0 17.7 14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-38.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 38.7c0 53-43 96-96 96l-48 0 0 70.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-70.7-48 0c-53 0-96-43-96-96l0-38.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm208 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48zM248 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"/>
+                                </svg>
+                                Fork
+                            <% end %>
+                        </div>
+                        <div class="col-md-6">
+                            <%= f.button class: "btn btn-lg bg-warning-subtle w-100", type: "submit" do %>
+                                <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 576 512">
+                                <path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z"/>
+                                </svg>
+                                Update
+                            <% end %>
+                        </div>
+                    </div>
+                <% end %>
+                <%= form_with url: delete_assembly_path(@assembly.id), id: "deleteAssemblyForm", method: :post, data: {tubro: false} do |f| %>
+                    <div class="pt-3">
+                        <%= f.button "Delete", class: "btn btn-lg bg-danger-subtle w-100", type: "submit" do %>
+                            <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 448 512">
+                                <path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                            </svg>
+                            Delete
+                        <% end %>
+                    </div>
+                <% end %>
             <div class="edit-container pt-3">
             <div class="border border-secondary shadow-sm rounded p-3 text-center">
                 <div class="text-center">
@@ -105,65 +173,6 @@
                     <% end %>
                 <% end %>
             </div>
-
-                <%= form_with url: update_assembly_path(@assembly.id), id: "updateAssemblyForm", method: :post, data: {tubro: false} do |f| %>
-                    <%= f.hidden_field :id, type: "text", style: "display: none;", value: @assembly.id %>
-                    <%= f.hidden_field :design_map, type: "text", id: "designMap", style: "display: none;" %>
-                    <div class="row">
-                        <div class="col-md-5">
-                            <div class="input-group input-group-lg flex-nowrap pt-3">
-                                <span class="input-group-text" id="addon-wrapping">Author</span>
-                                <%= f.text_field :author, type: "text", id: "assemblyAuthor", class: "form-control form-control-lg", placeholder: "Author of the project", value: @assembly.author, disabled: true %>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-group input-group-lg flex-nowrap pt-3">
-                                <span class="input-group-text" id="addon-wrapping">Title</span>
-                                <%= f.text_field :name, type: "text", id: "assemblyName", class: "form-control form-control-lg", placeholder: "2x7M-10H", value: @assembly.name %>
-                            </div>
-                        </div>
-                          <div class="col-md-2">
-                            <div class="input-group input-group-lg flex-nowrap pt-4">
-                                <%= f.check_box :assembly_public_check, class: "form-check-input fs-4", checked: !!@assembly.public %>
-                                <%= f.label :assembly_public_check, "Public", class: "form-check-label fs-4 px-2" %>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-group input-group-lg flex-nowrap pt-3">
-                        <span class="input-group-text" id="addon-wrapping">Description</span>
-                        <%= f.text_field :description, type: "text", id: "assemblyDescription", class: "form-control form-control-lg", placeholder: "Describe what the structure is supposed to be..", value: @assembly.description %>
-                    </div>
-
-                    <div class="row pt-3">
-                        <div class="col-md-6">
-                            <%= f.button class: "btn btn-lg bg-dark-subtle w-100" do %>
-                                <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 448 512">
-                                    <path d="M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 38.7c0 17.7 14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-38.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 38.7c0 53-43 96-96 96l-48 0 0 70.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-70.7-48 0c-53 0-96-43-96-96l0-38.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm208 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48zM248 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"/>
-                                </svg>
-                                Fork
-                            <% end %>
-                        </div>
-                        <div class="col-md-6">
-                            <%= f.button class: "btn btn-lg bg-warning-subtle w-100", type: "submit" do %>
-                                <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 576 512">
-                                <path d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 125.7-86.8 86.8c-10.3 10.3-17.5 23.1-21 37.2l-18.7 74.9c-2.3 9.2-1.8 18.8 1.3 27.5L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128zM549.8 235.7l14.4 14.4c15.6 15.6 15.6 40.9 0 56.6l-29.4 29.4-71-71 29.4-29.4c15.6-15.6 40.9-15.6 56.6 0zM311.9 417L441.1 287.8l71 71L382.9 487.9c-4.1 4.1-9.2 7-14.9 8.4l-60.1 15c-5.5 1.4-11.2-.2-15.2-4.2s-5.6-9.7-4.2-15.2l15-60.1c1.4-5.6 4.3-10.8 8.4-14.9z"/>
-                                </svg>
-                                Update
-                            <% end %>
-                        </div>
-                    </div>
-                <% end %>
-                <%= form_with url: delete_assembly_path(@assembly.id), id: "deleteAssemblyForm", method: :post, data: {tubro: false} do |f| %>
-                    <div class="pt-3">
-                        <%= f.button "Delete", class: "btn btn-lg bg-danger-subtle w-100", type: "submit" do %>
-                            <svg class="bi pe-none me-2" width="20" height="20" viewBox="0 0 448 512">
-                                <path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-                            </svg>
-                            Delete
-                        <% end %>
-                    </div>
-                <% end %>
-
                 
             </div>
             <%= render partial: "layouts/footer" %>
