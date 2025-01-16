@@ -34,7 +34,7 @@ export default class extends Controller {
         assemblyMap.forEach((block) => {
           const hexGroup = new THREE.Group();
           block.forEach((monomer) => {
-            hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), bondMap[monomer.monomer])).getObject());
+            hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), bondMap[monomer.monomer], 48.0, false)).getObject());
           })
           hexBlockGroup.add(hexGroup);
         })

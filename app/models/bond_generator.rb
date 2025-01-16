@@ -2,11 +2,11 @@ require 'set'
 require 'csv'
 require 'timeout'
 
-# BOND_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
-# BASIC_Z_TMP_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
+BOND_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/bond.csv"
+BASIC_Z_PATH = "/Users/samsonpetrosyan/Desktop/hexoland/app/assets/sequences/basic_z.csv"
 
-BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
-BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
+# BOND_PATH =  Rails.root.join("app/assets/sequences/bond.csv")
+# BASIC_Z_PATH = Rails.root.join("app/assets/sequences/basic_z.csv")
 
 class BondGenerator
 
@@ -1168,8 +1168,10 @@ class BondGenerator
         arr.each do |bonds|
             if bonds.is_a?(Array)
                 query_bonds =  BondGenerator.bond2gibbs_z["#{bonds[0]}_&_#{bonds[1]}"]
+                p bonds if query_bonds.nil?
             else
                 query_bonds = BondGenerator.bond2gibbs_z[bonds]
+                p bonds if query_bonds.nil?
             end
             query_bonds.each do |seq|
                 fe += BondGenerator.fe_of(seq)
@@ -1470,12 +1472,12 @@ class BondGenerator
 
     def self.tail_groups_6bonds
         [
-            ["H1_H2", "H34_H3", "H4_H5"],
-            [["H35_H36", "H37_H38"], "H8_H9", "H44_H45"],
-            ["H10_H11", "H12_H13", "H48_H49"],
-            ["H50_H51", "H16_H17", ["H55", "H53_H54"]],
-            [["H18", "H19_H20"], "H58_H59", ["H21_H22", "H23_H24"]],
-            ["H62_H63", "H66_H67", ["H27", "H25_H26"]]
+            ["H1_H2", "H34_H3", "H4_H5#1", "H4_H5#2", ["H35_H36", "H37_H38"]],
+            ["H8_H9#1", "H8_H9#2", "H44_H45", ["H39_H40", "H41"]],
+            ["H10_H11#1", "H10_H11#2", "H12_H13", "H48_H49#1", "H48_H49#2"],
+            ["H50_H51#1", "H50_H51#2", "H16_H17#1", "H16_H17#2", ["H55", "H53_H54"]],
+            [["H18", "H19_H20"], "H58_H59#1", "H58_H59#2", ["H21_H22", "H23_H24"]],
+            ["H62_H63", "H66_H67", ["H27#1", "H25_H26#1"], ["H27#2", "H25_H26#2"]]
 
         ]
     end
@@ -1487,42 +1489,55 @@ class BondGenerator
     end
 
     def self.tail_z_helices
-        ["H1_H2", "H16_H17", ["H35_H36", "H37_H38"], "H44_H45", "H58_H59", "H66_H67", 
-        "H62_H63", "H48_H49", "H34_H3", "H12_H13", "H10_H11", "H8_H9", "H4_H5", "H50_H51", 
-        ["H55", "H53_H54"], ["H27", "H25_H26"], ["H21_H22", "H23_H24"], ["H18", "H19_H20"]]
+        ["H58_H59#1", "H50_H51#1", "H48_H49#1", ["H39_H40", "H41"], ["H27#1", "H25_H26#1"], "H16_H17#1", "H10_H11#1", "H8_H9#1", "H4_H5#1", 
+        "H58_H59#2", "H50_H51#2", "H48_H49#2", ["H39_H40", "H41"], ["H27#2", "H25_H26#2"], "H16_H17#2", "H10_H11#2", "H8_H9#2", "H4_H5#2",
+        "H1_H2", ["H35_H36", "H37_H38"], "H44_H45", "H66_H67",  "H62_H63", "H34_H3", "H12_H13", 
+        ["H55", "H53_H54"], ["H21_H22", "H23_H24"], ["H18", "H19_H20"]]
     end
 
     def self.head_z_helices
-        [["H67_H68", "H66_H65"], "H58_H59", "H44_H45", "H36_H37", "H16_H17", "H1_H2",
-        "H34_H3", "H48_H49", "H12_H13", "H10_H11", "H8_H9", "H4_H5", ["H63_H64", "H62"],
-        "H26_H27", "H54_H55", ["H22", "H23_H24"], ["H18", "H19_H20"],  "H50_H51"]
+        ["H58_H59#1",  "H50_H51#1", "H48_H49#1", "H40_H41", "H26_H27#1", "H16_H17#1", "H10_H11#1",
+        "H8_H9#1", "H4_H5#1", "H58_H59#2",  "H50_H51#2", "H48_H49#2", "H40_H41", "H26_H27#2", "H16_H17#2", "H10_H11#2",
+        "H8_H9#2", "H4_H5#2", ["H67_H68", "H66_H65"], "H44_H45", "H36_H37", "H1_H2",
+        "H34_H3", "H12_H13", ["H63_H64", "H62"], "H54_H55", ["H22", "H23_H24"], ["H18", "H19_H20"]]
     end
 
     def self.tail2head
         {
             "H1_H2" => "H1_H2",
-            "H16_H17" => "H16_H17",
+            "H16_H17#1" => "H16_H17#1",
+            "H16_H17#2" => "H16_H17#2",
             "H35_H36" => "H36_H37",
             "H37_H38" => "H36_H37",
             "H44_H45" => "H44_H45",
-            "H58_H59" => "H58_H59",
+            "H58_H59#1" => "H58_H59#1",
+            "H58_H59#2" => "H58_H59#2",
             "H66_H67" => ["H67_H68", "H66_H65"],
             "H62_H63" => ["H63_H64", "H62"],
-            "H48_H49" => "H48_H49",
+            "H48_H49#1" => "H48_H49#1",
+            "H48_H49#2" => "H48_H49#2",
             "H34_H3" => "H34_H3",
             "H12_H13" => "H12_H13",
-            "H10_H11" => "H10_H11",
-            "H8_H9" => "H8_H9",
-            "H4_H5" => "H4_H5",
-            "H50_H51" => "H50_H51",
+            "H10_H11#1" => "H10_H11#1",
+            "H10_H11#2" => "H10_H11#2",
+            "H8_H9#1" => "H8_H9#1",
+            "H8_H9#2" => "H8_H9#2",
+            "H4_H5#1" => "H4_H5#1",
+            "H4_H5#2" => "H4_H5#2",
+            "H50_H51#1" => "H50_H51#1",
+            "H50_H51#2" => "H50_H51#2",
             "H55" => "H54_H55",
             "H53_H54" => "H54_H55",
-            "H27" => "H26_H27",
-            "H25_H26" => "H26_H27",
+            "H27#1" => "H26_H27#1",
+            "H25_H26#1" => "H26_H27#1",
+            "H27#2" => "H26_H27#2",
+            "H25_H26#2" => "H26_H27#2",
             "H21_H22" => ["H22", "H23_H24"],
             "H23_H24" => ["H22", "H23_H24"],
             "H18" => ["H18", "H19_H20"],
-            "H19_H20" => ["H18", "H19_H20"]
+            "H19_H20" => ["H18", "H19_H20"],
+            "H39_H40" => "H40_H41",
+            "H41" => "H40_H41"
         }
     end
 
@@ -1658,23 +1673,32 @@ class BondGenerator
     def self.bond2gibbs_z
         {
             "H1_H2" => ["AGAAATT", "AGACTTT"],
-            "H16_H17" => ["CGGCCTT", "AGCCCTT"],
+            "H16_H17#1" => ["CGGCCTT", "AGCCCTT"],
+            "H16_H17#2" => ["AACTATA", "TACCGAC"],
             "H35_H36_&_H37_H38" => ["AGTAAGC", "GTCATAC", "BS", "BS"],
             "H44_H45" => ["GGTGTAG", "TAGGTGT"],
-            "H58_H59" => ["CATCATA", "CCCCAGC"],
+            "H58_H59#1" => ["CATCATA", "CCCCAGC"],
+            "H58_H59#2" => ["CAATAAC", "TTTGACA"],
             "H66_H67" => ["CCAACAG", "GCAAACT", "BS", "BS"],
             "H62_H63" => ["ATATAAT", "TTGCTGA", "BS"],
-            "H48_H49" => ["GCATGTC", "GGAACCC"],
+            "H48_H49#1" => ["GCATGTC", "GGAACCC"],
+            "H48_H49#2" => ["AAACTAG", "CCAATAG"],
             "H34_H3" => ["TTGTAGA", "AAGTATT"],
             "H12_H13" => ["AATTTGC", "AACTGAT"],
-            "H10_H11" => ["ACGAGCG", "AACAACT"],
-            "H8_H9" => ["TCCTTAT", "TAGAGCC"],
-            "H4_H5" => ["CTCCGGC", "TACAGGA"],
-            "H50_H51" => ["ATGAATT", "TCAGGTC"],
+            "H10_H11#1" => ["ACGAGCG", "AACAACT"],
+            "H10_H11#2" => ["GAATAGA", "TTCTTTC"],
+            "H8_H9#1" => ["TCCTTAT", "TAGAGCC"],
+            "H8_H9#2" => ["TGTCAAA", "CCATTCC"],
+            "H4_H5#1" => ["CTCCGGC", "TACAGGA"],
+            "H4_H5#2" => ["CTTTATC", "ATTAGGT"],
+            "H50_H51#1" => ["ATGAATT", "TCAGGTC"],
+            "H50_H51#2" => ["AAGCTAA", "TAGTAAT"],
             "H55_&_H53_H54" => ["CAGCAGC", "GAAAGAC", "BS"],
-            "H27_&_H25_H26" => ["CGGTCAT", "GTTTTCA", "BS"],
+            "H27#1_&_H25_H26#1" => ["CGGTCAT", "GTTTTCA", "BS"],
+            "H27#2_&_H25_H26#2" => ["TGGGTTC", "ATACCTA", "BS"],
             "H21_H22_&_H23_H24" => ["CTGGTTT", "GTCCACG", "BS", "BS"],
             "H18_&_H19_H20" => ["GGCGCGT", "GCTACAG", "BS", "BS", "BS"],
+            "H39_H40_&_H41" => ["CGTATAT", "GGGATGA", "BS"]
         }
     end
 
@@ -1787,9 +1811,9 @@ end
 
 bg = BondGenerator.new
 
-s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 1, [], count=1, number=4, overlap=0.0, godmode=false)
+# s14_handles, s14_handles_score = bg.best_sides_out_of("S14", "handles", 1, [], count=1, number=4, overlap=0.0, godmode=false)
 
-p s14_handles, s14_handles_score
+# p s14_handles, s14_handles_score
 
 # p bg.group_randomizer(BondGenerator.s14_sides[0] + BondGenerator.s14_sides[1], 5)
 
@@ -1802,8 +1826,12 @@ p s14_handles, s14_handles_score
 # # p s36_handles, s36_handles_score
 # # p "Handle S36 score: #{s36_handles_score}"
 
-# z_8h_tail_bonds, z_score = bg.best_z_bonds_out_of(4, 4, 0.0, 1)
-# z_8h_head_bonds = bg.z_complement_side(z_8h_tail_bonds)
+z_12h_tail_bonds, z_score = bg.best_z_bonds_out_of(6, 7, 0.17, 100, 0, 200)
+z_12h_head_bonds = bg.z_complement_side(z_12h_tail_bonds)
 # basic_zs = bg.get_basic_zs
-# p z_8h_tail_bonds, z_8h_head_bonds, z_score
+p z_score
+
+z_12h_tail_bonds.each do |bds|
+  p bds
+end
 

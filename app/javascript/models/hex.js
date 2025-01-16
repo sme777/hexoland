@@ -13,17 +13,21 @@ import {
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 export class Hex {
-  constructor(title, pos, bonds = {}) {
-    this.bonds = this.fillBonds(bonds);
+  constructor(title, pos, bonds = {}, helixHeight, ignoreRings) {
+    if (Object.entries(bonds).length === 0) {
+      this.bonds = null;
+    } else {
+      this.bonds = this.fillBonds(bonds);
+    }
     this.hex = new THREE.Group();
     this.title = title;
-    this.helixRadius = 1.5;
-    this.helixHeight = 50;
+    this.helixRadius = helixHeight / 32.0; // 1.5
+    this.helixHeight = helixHeight;        // 48
     const halfHelixHeight = this.helixHeight / 2;
     const quarterHelixHeight = this.helixHeight / 4;
 
     const ringRadius = this.helixRadius;
-    const ringTubeRadius = 0.02;
+    const ringTubeRadius = helixHeight / 2400.0; // 0.02;
     const passiveHelixRingCount = 14;
     const coreBoundHelixRingCount = 8;
     const sideBoundHelixRingCount = 4;
@@ -77,7 +81,10 @@ export class Hex {
     const side6Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side36, helixTypeCount.s6);
 
     // InstancedMesh for rings (shared among all helices)
-    const ringMesh = new THREE.InstancedMesh(ringGeometry, materials.ring, helixTypeCount.ring);
+    let ringMesh;
+    if (!ignoreRings) {
+      ringMesh = new THREE.InstancedMesh(ringGeometry, materials.ring, helixTypeCount.ring);
+    }
 
     // Counters for each instanced mesh
     let passiveIndex = 0;
@@ -92,71 +99,83 @@ export class Hex {
     let ringIndex = 0;
     // Create each helix and corresponding rings based on coordinates
     hexCoordinates.forEach((coord, index) => {
-      const [x, y] = coord;
-
+      let [x, y] = coord;
+      x = x * (this.helixHeight / 48.0);
+      y = y * (this.helixHeight / 48.0);
       const isSideBondHelix = s2Mask[index] || s4Mask[index] || s6Mask[index];
       const isCoreBondHelix = s1Mask[index] || s3Mask[index] || s5Mask[index];
       const height = isCoreBondHelix ? halfHelixHeight : (isSideBondHelix ? quarterHelixHeight : this.helixHeight);
-      const ringCount = isCoreBondHelix ? coreBoundHelixRingCount : (isSideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
-
+      let ringCount;
+      if (!ignoreRings) {
+        ringCount = isCoreBondHelix ? coreBoundHelixRingCount : (isSideBondHelix ? sideBoundHelixRingCount : passiveHelixRingCount);
+      }
       let mesh, meshIndex, bondGroup;
 
       if (isSideBondHelix) {
         if (s2Mask[index]) {      
           mesh = side2Mesh;
           meshIndex = side2Index++;
-          bondGroup = this.addSideBonds(mesh, "S2", s2Mask[index])
-          bondGroup.position.set(x, height * 1.5, y)
-          this.hex.add(bondGroup);
-
-          const zBonds = this.addZBonds(mesh, s2Mask[index], true);
-          zBonds.position.set(x, height * 1.5, y);
-          this.hex.add(zBonds);
+          if (this.bonds !== null) {
+            bondGroup = this.addSideBonds(mesh, "S2", s2Mask[index])
+            bondGroup.position.set(x, height * 1.5, y)
+            this.hex.add(bondGroup);
+            const zBonds = this.addZBonds(mesh, s2Mask[index], true);
+            zBonds.position.set(x, height * 1.5, y);
+            this.hex.add(zBonds);
+          }
         } else if (s4Mask[index]) {
           mesh = side4Mesh;
           meshIndex = side4Index++;
-          bondGroup = this.addSideBonds(mesh, "S4", s4Mask[index])
-          bondGroup.position.set(x, height * 1.5, y)
-          this.hex.add(bondGroup);
-
-          const zBonds = this.addZBonds(mesh, s4Mask[index], true);
-          zBonds.position.set(x, height * 1.5, y);
-          this.hex.add(zBonds);
+          if (this.bonds !== null) {
+            bondGroup = this.addSideBonds(mesh, "S4", s4Mask[index])
+            bondGroup.position.set(x, height * 1.5, y)
+            this.hex.add(bondGroup);
+            const zBonds = this.addZBonds(mesh, s4Mask[index], true);
+            zBonds.position.set(x, height * 1.5, y);
+            this.hex.add(zBonds);
+          }
         } else if (s6Mask[index]) {
           mesh = side6Mesh;
           meshIndex = side6Index++;
-          bondGroup = this.addSideBonds(mesh, "S6", s6Mask[index])
-          bondGroup.position.set(x, height * 1.5, y)
-          this.hex.add(bondGroup);
-
-          const zBonds = this.addZBonds(mesh, s6Mask[index], true);
-          zBonds.position.set(x, height * 1.5, y);
-          this.hex.add(zBonds);
+          if (this.bonds !== null) {
+            bondGroup = this.addSideBonds(mesh, "S6", s6Mask[index])
+            bondGroup.position.set(x, height * 1.5, y)
+            this.hex.add(bondGroup);
+            const zBonds = this.addZBonds(mesh, s6Mask[index], true);
+            zBonds.position.set(x, height * 1.5, y);
+            this.hex.add(zBonds);
+          }
         }
       } else if (isCoreBondHelix) {
         if (s1Mask[index]) {
           mesh = side1Mesh;
           meshIndex = side1Index++;
-          bondGroup = this.addCoreBonds(mesh, "S1", s1Mask[index])
-          bondGroup.position.set(x, height * 1.5, y)
-          this.hex.add(bondGroup);
+          if (this.bonds !== null) {
+            bondGroup = this.addCoreBonds(mesh, "S1", s1Mask[index])
+            bondGroup.position.set(x, height * 1.5, y)
+            this.hex.add(bondGroup);
+          }
         } else if (s3Mask[index]) {
           mesh = side3Mesh;
           meshIndex = side3Index++;
-          bondGroup = this.addCoreBonds(mesh, "S3", s3Mask[index])
-          bondGroup.position.set(x, height * 1.5, y)
-          this.hex.add(bondGroup);
+          if (this.bonds !== null) {
+            bondGroup = this.addCoreBonds(mesh, "S3", s3Mask[index])
+            bondGroup.position.set(x, height * 1.5, y)
+            this.hex.add(bondGroup);
+          }
         } else if (s5Mask[index]) {
           mesh = side5Mesh;
           meshIndex = side5Index++;
-          bondGroup = this.addCoreBonds(mesh, "S5", s5Mask[index]);
-          bondGroup.position.set(x, height * 1.5, y);
-          this.hex.add(bondGroup);
+          if (this.bonds !== null) {
+            bondGroup = this.addCoreBonds(mesh, "S5", s5Mask[index]);
+            bondGroup.position.set(x, height * 1.5, y);
+            this.hex.add(bondGroup);
+          }
         }
       } else {
         mesh = this.passiveHelixMesh;
         meshIndex = passiveIndex++;
-        if (typeof Zhelices[index] !== 0) {
+        if (typeof Zhelices[index] !== 0 && this.bonds !== null) {
           const zBonds = this.addZBonds(mesh, Zhelices[index]);
           zBonds.position.set(x, height * 1.5, y);
           this.hex.add(zBonds);
@@ -169,14 +188,16 @@ export class Hex {
         helixMatrix.setPosition(x, height + this.helixHeight * 0.5, y);
         mesh.setMatrixAt(meshIndex, helixMatrix);
         // Add Divisions
-        for (let i = 0; i < ringCount; i++) {
-          const ringMatrix = new THREE.Matrix4();
-          const rotationMatrix = new THREE.Matrix4();
-          const ringY = (i / (ringCount - 1)) * height + height * 1.5;
-          ringMatrix.setPosition(x, ringY, y);
-          rotationMatrix.makeRotationX(Math.PI / 2);
-          ringMatrix.multiply(rotationMatrix);
-          ringMesh.setMatrixAt(ringIndex++, ringMatrix);
+        if (!ignoreRings) {
+          for (let i = 0; i < ringCount; i++) {
+            const ringMatrix = new THREE.Matrix4();
+            const rotationMatrix = new THREE.Matrix4();
+            const ringY = (i / (ringCount - 1)) * height + height * 1.5;
+            ringMatrix.setPosition(x, ringY, y);
+            rotationMatrix.makeRotationX(Math.PI / 2);
+            ringMatrix.multiply(rotationMatrix);
+            ringMesh.setMatrixAt(ringIndex++, ringMatrix);
+          }
         }
 
       } else if (isSideBondHelix) {
@@ -187,39 +208,41 @@ export class Hex {
         const helixMatrix2 = new THREE.Matrix4();
         helixMatrix2.setPosition(x, height * 3.5 + this.helixHeight * 0.5, y);
         mesh.setMatrixAt(meshIndex + 4, helixMatrix2);
+        if (!ignoreRings) {
+          for (let i = 0; i < ringCount; i++) {
+            const ringMatrix1 = new THREE.Matrix4();
+            const rotationMatrix = new THREE.Matrix4();
+            const ringY1 = (i / (ringCount - 1)) * height + height * 5;
+            ringMatrix1.setPosition(x, ringY1, y);
+            rotationMatrix.makeRotationX(Math.PI / 2);
+            ringMatrix1.multiply(rotationMatrix);
+            ringMesh.setMatrixAt(ringIndex++, ringMatrix1);
+          }
 
-        for (let i = 0; i < ringCount; i++) {
-          const ringMatrix1 = new THREE.Matrix4();
-          const rotationMatrix = new THREE.Matrix4();
-          const ringY1 = (i / (ringCount - 1)) * height + height * 5;
-          ringMatrix1.setPosition(x, ringY1, y);
-          rotationMatrix.makeRotationX(Math.PI / 2);
-          ringMatrix1.multiply(rotationMatrix);
-          ringMesh.setMatrixAt(ringIndex++, ringMatrix1);
-        }
-
-        for (let i = 0; i < ringCount; i++) {
-          const ringMatrix2 = new THREE.Matrix4();
-          const rotationMatrix = new THREE.Matrix4();
-          const ringY2 = (i / (ringCount - 1)) * height + height * 2;
-          ringMatrix2.setPosition(x, ringY2, y);
-          rotationMatrix.makeRotationX(Math.PI / 2);
-          ringMatrix2.multiply(rotationMatrix);
-          ringMesh.setMatrixAt(ringIndex++, ringMatrix2);
+          for (let i = 0; i < ringCount; i++) {
+            const ringMatrix2 = new THREE.Matrix4();
+            const rotationMatrix = new THREE.Matrix4();
+            const ringY2 = (i / (ringCount - 1)) * height + height * 2;
+            ringMatrix2.setPosition(x, ringY2, y);
+            rotationMatrix.makeRotationX(Math.PI / 2);
+            ringMatrix2.multiply(rotationMatrix);
+            ringMesh.setMatrixAt(ringIndex++, ringMatrix2);
+          }
         }
       } else {
         const helixMatrix = new THREE.Matrix4();
         helixMatrix.setPosition(x, height, y);
         mesh.setMatrixAt(meshIndex, helixMatrix);
-
-        for (let i = 0; i < ringCount; i++) {
-          const ringMatrix = new THREE.Matrix4();
-          const rotationMatrix = new THREE.Matrix4();
-          const ringY = (i / (ringCount - 1)) * height + height * 0.5;
-          ringMatrix.setPosition(x, ringY, y);
-          rotationMatrix.makeRotationX(Math.PI / 2);
-          ringMatrix.multiply(rotationMatrix);
-          ringMesh.setMatrixAt(ringIndex++, ringMatrix);
+        if (!ignoreRings) {
+          for (let i = 0; i < ringCount; i++) {
+            const ringMatrix = new THREE.Matrix4();
+            const rotationMatrix = new THREE.Matrix4();
+            const ringY = (i / (ringCount - 1)) * height + height * 0.5;
+            ringMatrix.setPosition(x, ringY, y);
+            rotationMatrix.makeRotationX(Math.PI / 2);
+            ringMatrix.multiply(rotationMatrix);
+            ringMesh.setMatrixAt(ringIndex++, ringMatrix);
+          }
         }
       }
 
@@ -238,7 +261,9 @@ export class Hex {
     this.hex.add(side4Mesh);
     this.hex.add(side5Mesh);
     this.hex.add(side6Mesh);
-    this.hex.add(ringMesh);
+    if (!ignoreRings) {
+      this.hex.add(ringMesh);
+    }
   }
 
   getObject() {

@@ -121,16 +121,31 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="fileDownLoader" class="btn btn-outline-info bg-info-subtle btn-large w-100">Load
-                            .obj File</label>
-                        <input type="file" id="fileDownLoader" style="display:none;" accept=".stl">
+                        <label for="stlobjLoader" class="btn btn-outline-info bg-info-subtle btn-large w-100">Load
+                            .obj/.stl File</label>
+                        <input type="file" id="stlobjLoader" style="display:none;" accept=".stl,.obj">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="resolution-bar">
-                        <h3>Voxel Resolution</h3>
-                        <h5>80x60x140 -- 22,000 voxels</h5>
-                        <input type="range" class="form-range btn-dark" id="voxelResolution">
+                        <div class="row">
+                            <div class="col-md-6">                                
+                                <label for="voxelResolution" class="form-label">Voxel Resolution: <span id="rangeLabel">1</span></label>
+                                  <input 
+                                    type="range" 
+                                    class="form-range btn-dark" 
+                                    id="voxelResolution" 
+                                    min="1" 
+                                    max="50" 
+                                    value="1" 
+                                    step="0.5"
+                                  >
+                            </div>
+                            <div class="col-md-6">
+                                <label for="voxelCount" class="form-label">Voxel Count: <span id="rangeLabel">0</span></label>
+                                <h5 id="voxelCount">0</h5>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
