@@ -8,7 +8,8 @@ import {
   s2Mask,
   s4Mask,
   s6Mask,
-  Zhelices
+  Zhelices,
+  materials
 } from './constants.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
@@ -32,27 +33,6 @@ export class Hex {
     const coreBoundHelixRingCount = 8;
     const sideBoundHelixRingCount = 4;
 
-    const materials = {
-      side14: new THREE.MeshStandardMaterial({
-        color: 0xD1E9F6
-      }),
-      side25: new THREE.MeshStandardMaterial({
-        color: 0xF6EACB
-      }),
-      side36: new THREE.MeshStandardMaterial({
-        color: 0xF1D3CE
-      }),
-      passiveHelix: new THREE.MeshStandardMaterial({
-        color: 0xF5F7F8
-      }),
-      ring: new THREE.MeshStandardMaterial({
-        color: 0xaaaaaa
-      }),
-      repulsiveBond: new THREE.MeshStandardMaterial({}),
-      neutralBond: new THREE.MeshStandardMaterial({}),
-      attractiveSocketBond: new THREE.MeshStandardMaterial({}),
-      attractivePlugBond: new THREE.MeshStandardMaterial({})
-    }
     // Geometries
     const helixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, this.helixHeight, 32);
     const halfHelixGeometry = new THREE.CylinderGeometry(this.helixRadius, this.helixRadius, this.helixHeight * 0.25, 32);
@@ -304,7 +284,7 @@ export class Hex {
   addZBonds(mesh, helix, sideBound=false) {
     const zBondGroup = new THREE.Group();
     let helixTopBond, helixBottomBond;
-    
+    // console.log(this.bonds["ZU"])
     if (this.bonds["ZU"][this.zBondToIndex(helix)] === 1) {
       helixTopBond = this.createAttractivePlugBond(0x7ED4AD);
     } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === 0) {

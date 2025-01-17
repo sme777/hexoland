@@ -20,6 +20,9 @@ import {
 import {
   Hex
 } from "../models/hex";
+import {
+  HexGroup
+} from "../models/hexGroup";
 export default class extends Controller {
   connect() {
     console.log("Code Controller Debugger:")
@@ -124,6 +127,9 @@ export default class extends Controller {
 
     camera.position.z = 200;
 
+    this.activeControl = "SELECT";
+    this.setupInteractiveControls();
+
     animate(scene, camera, renderer);
     window.addEventListener('resize', () => {
       onWindowResize(renderer, camera, guiContainer);
@@ -189,7 +195,7 @@ export default class extends Controller {
       const horiz3_8 = horiz * 3 / 8.0;
       const vert_div_sqrt3 = vert / Math.sqrt(3);
       const depth_delta = 5.0 / resolution;
-      const voxelGroup = new THREE.Group();
+      
       let counter = 0;
 
       const raycaster = new THREE.Raycaster();
@@ -202,13 +208,16 @@ export default class extends Controller {
         new THREE.Vector3(0, 0, -1),
       ];
 
+      let hexCount = 0;
+      let hexPositions = new Array();
+
       for (let x = bbox.min.x; x <= bbox.max.x; x += horiz3_4) {
         for (let z = bbox.min.z; z <= bbox.max.z; z += vert_div_sqrt3) {
           for (let y = bbox.min.y; y <= bbox.max.y; y += depth + depth_delta) {
             const offsetX = Math.floor((z - bbox.min.z) / vert_div_sqrt3) % 2 === 0 ? 0 : horiz3_8;
             const newX = x + offsetX;
 
-            const newHex = (new Hex(`hex#${counter}`, new THREE.Vector3(newX, y, z), {}, depth, true)).getObject();
+            const newHex = (new Hex(`hex#${hexCount}`, new THREE.Vector3(newX, y, z), {}, depth, true)).getObject();
             const hexCenter = new THREE.Vector3(newX, y + depth / 2, z);
             let intersects = false;
 
@@ -222,12 +231,15 @@ export default class extends Controller {
             }
 
             if (intersects) {
-              voxelGroup.add(newHex);
-              counter += 1;
+              hexCount += 1;
+              hexPositions.push([`hex#${hexCount}`, new Array(newX, y, z)])
             }
           }
         }
       }
+      
+      const voxelGroup = (new HexGroup(hexCount, hexPositions, depth, true)).getObject();
+
       const box = new THREE.Box3().setFromObject(voxelGroup);
       const center = new THREE.Vector3();
       box.getCenter(center);
@@ -235,10 +247,9 @@ export default class extends Controller {
       voxelGroup.position.set(-center.x, -center.y, -center.z);
       this.scene.add(voxelGroup);
 
-      document.getElementById("voxelCount").textContent = counter;
+      document.getElementById("voxelCount").textContent = hexCount;
 
-      this.activeControl = "SELECT";
-      this.setupInteractiveControls();
+
       // Add the original STL model on top of the voxelized version
       // const originalMaterial = new THREE.MeshStandardMaterial({
       //   color: 0xA6CDC6
@@ -272,7 +283,7 @@ export default class extends Controller {
 
     document.getElementById('stlobjLoader').addEventListener('change', (event) => {
       const file = event.target.files[0];
-      const resolution = 2.0;
+      const resolution = 12.0;
       const filename = file["name"];
 
       if (filename.endsWith(".stl")) {

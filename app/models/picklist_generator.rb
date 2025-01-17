@@ -2,7 +2,7 @@ require 'csv'
 
 class PicklistGenerator
     def initialize
-        @hex_plate = Daru::DataFrame.from_csv(Rails.root.join("app/assets/sequences/plate.csv"))
+        @hex_plate = Daru::DataFrame.from_csv(Rails.root.join("app/assets/sequences/new_plate.csv"))
     end
 
     def new_picklist(sequences, volume, destination, core_counter, core_volume)
@@ -33,7 +33,7 @@ class PicklistGenerator
         buffer_volume = round_to_nearest_25(buffer_volume)
         core_counter = 0
         
-        seq_arr = convert_design_map_to_sequences(bg.generate_sequences(design_map))
+        seq_arr = convert_design_map_to_sequences(bg.generate_sequences(design_map, design_map["metadata"]))
         columns = ['Source Plate Name', 'Source Plate Type', 'Source Well', 'Sample Comments', 'Destination Plate Name', 'Destination Well', 'Transfer Volume']
         main_picklist = Daru::DataFrame.new({}, order: columns)
         # byebug
@@ -80,8 +80,10 @@ class PicklistGenerator
     end
 
     def convert_design_map_to_sequences(design_map)
+        
         seq_arr = []
         design_map.each do |key1, monomer|
+            next if key1 == "metadata"
             monomer.each do |key2, bond|
                 seq_arr << ["#{key1}-#{key2}", bond["Sequences"]]
             end

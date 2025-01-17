@@ -39,9 +39,11 @@ export default class extends Controller {
       const bondMap = JSON.parse(document.getElementById(`assembly_${assemblyIds[i]}_bonds`).value);  
       // console.log(bondMap);
       const hexBlockGroup = new THREE.Group();
+      console.log(assemblyMap)
       assemblyMap.forEach((block) => {
         const hexGroup = new THREE.Group();
         block.forEach((monomer) => {
+          // console.log(bondMap[monomer.monomer])
           hexGroup.add((new Hex(monomer.monomer, new THREE.Vector3(monomer.position.x, monomer.position.y, monomer.position.z), bondMap[monomer.monomer], 48.0, false)).getObject());
         })
         hexBlockGroup.add(hexGroup);

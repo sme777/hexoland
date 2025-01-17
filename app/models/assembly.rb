@@ -3,14 +3,13 @@ require 'json'
 
 class Assembly < ApplicationRecord
     def compute_neighbors()
-      assembly_map = JSON.parse(self.design_map)
-      structures = assembly_map.keys
+      assembly_map = parse_design_map
       normalized_assembly_map = normalize_assembly_map(assembly_map)
       [assemble_design_map(normalized_assembly_map, get_spacings)]
     end
   
     def normalize_bonds
-      monomer_bonds = normalize_assembly_map(JSON.parse(design_map))
+      monomer_bonds = normalize_assembly_map(parse_design_map)
       normalize_bonds_map = {}
       monomer_bonds.each do |monomer, sides|
         normalize_bonds_map[monomer] = {}
@@ -20,6 +19,7 @@ class Assembly < ApplicationRecord
             if bonds[0].is_a?(Array)
               normalize_bonds_map[monomer][side] = send("#{side}_order", [bonds[0][0], bonds[1]])
             else
+            # byebug
               normalize_bonds_map[monomer][side] = send("#{side}_order", bonds)
             end
             
@@ -76,7 +76,11 @@ class Assembly < ApplicationRecord
     end
 
     private
-  
+    
+    def parse_design_map
+      JSON.parse(self.design_map).reject { |key, _| key == "metadata" }
+    end
+
     def assemble_design_map(assembly_map, spacings)
       horiz, vert, depth = spacings[:horiz], spacings[:vert], spacings[:depth]
       horiz3_4 = horiz * 3 / 4.0
@@ -94,9 +98,8 @@ class Assembly < ApplicationRecord
         assembly_block[monomer] ||= { position: monomer_map[monomer].dup, monomer: monomer }
   
         hex_pos = monomer_map[monomer]
-        # byebug
         sides.each do |side, neighbors|
-          neighbor = neighbors.first
+          neighbor = neighbors.first.first
           next if monomer_map[neighbor] || side == "Sequences"
   
           neighbor_pos = case side
@@ -322,20 +325,19 @@ class Assembly < ApplicationRecord
       # helix_order = (0..71).map { |i| "H#{i}" }
       # bond_arr = Array.new(72, 'x')
       bond_arr = Array.new(72, 'x') 
-      bonds[1].each do |bond|
+      bonds[1][0].each do |bond|
         if bond.is_a?(Array)
           bond.each do |sub_bond|
             helices = sub_bond.split("_")
             helices.each do |helix|
               # byebug
-              bond_arr[zBondToIndex[helix]] = bond2code("tail", helix)
+              bond_arr[zBondToIndex[helix.split("#").first]] = bond2code("tail", helix)
             end
           end
         else
           helices = bond.split("_")
           helices.each do |helix|
-            # byebug
-            bond_arr[zBondToIndex[helix]] = bond2code("tail", helix)
+            bond_arr[zBondToIndex[helix.split("#").first]] = bond2code("tail", helix)
           end
         end
       end
@@ -344,18 +346,19 @@ class Assembly < ApplicationRecord
 
     def ZD_order(bonds)
       bond_arr = Array.new(72, 'x') 
-      bonds[1].each do |bond|
+      bonds[1][0].each do |bond|
         if bond.is_a?(Array)
           bond.each do |sub_bond|
             helices = sub_bond.split("_")
             helices.each do |helix|
-              bond_arr[zBondToIndex[helix]] = bond2code("head", helix)
+              bond_arr[zBondToIndex[helix.split("#").first]] = bond2code("head", helix)
             end
           end
         else
+          # byebug
           helices = bond.split("_")
           helices.each do |helix|
-            bond_arr[zBondToIndex[helix]] = bond2code("head", helix)
+            bond_arr[zBondToIndex[helix.split("#").first]] = bond2code("head", helix)
           end
         end
       end
@@ -390,20 +393,26 @@ class Assembly < ApplicationRecord
       {
         "H1" => "P",
         "H2" => "P",
-        "H16" => "P",
-        "H17" => "S",
+        "H16#1" => "P",
+        "H17#1" => "S",
+        "H16#2" => "S",
+        "H17#2" => "P",
         "H36" => "S",
         "H37" => "S",
         "H44" => "S",
         "H45" => "P",
-        "H58" => "P",
-        "H59" => "S",
+        "H58#1" => "P",
+        "H59#1" => "S",
+        "H58#2" => "S",
+        "H59#2" => "P",
         "H65" => "BS",
         "H66" => "P",
         "H67" => "P",
         "H68" => "BS",
-        "H50" => "P",
-        "H51" => "S",
+        "H50#1" => "P",
+        "H51#1" => "S",
+        "H50#2" => "S",
+        "H51#2" => "P",
         "H18" => "P",
         "H19" => "P",
         "H20" => "BS",
@@ -416,20 +425,32 @@ class Assembly < ApplicationRecord
         "H62" => "P",
         "H63" => "P",
         "H64" => "BS",
-        "H48" => "P",
-        "H49" => "S",
+        "H48#1" => "P",
+        "H49#1" => "S",
+        "H48#2" => "S",
+        "H49#2" => "P",
         "H12" => "P",
         "H13" => "S",
-        "H10" => "S",
-        "H11" => "P",
-        "H8" => "S",
-        "H9" => "P",
-        "H4" => "S",
-        "H5" => "P",
+        "H10#1" => "S",
+        "H11#1" => "P",
+        "H10#2" => "P",
+        "H11#2" => "S",
+        "H8#1" => "S",
+        "H9#1" => "P",
+        "H8#2" => "P",
+        "H9#2" => "S",
+        "H4#1" => "S",
+        "H5#1" => "P",
+        "H4#2" => "P",
+        "H5#2" => "S",
         "H34" => "P",
         "H3" => "P",
-        "H26" => "P",
-        "H27" => "P"
+        "H26#1" => "P",
+        "H27#1" => "P",
+        "H26#2" => "S",
+        "H27#2" => "S",
+        "H40" => "S",
+        "H41" => "P"
       }
     end
 
@@ -437,20 +458,26 @@ class Assembly < ApplicationRecord
       {
         "H1" => "S",
         "H2" => "S",
-        "H16" => "S",
-        "H17" => "P",
+        "H16#1" => "S",
+        "H17#1" => "P",
+        "H16#2" => "P",
+        "H17#2" => "S",
         "H35" => "BS",
         "H36" => "P",
         "H37" => "P",
         "H38" => "BS",
         "H44" => "P",
         "H45" => "S",
-        "H58" => "S",
-        "H59" => "P",
+        "H58#1" => "S",
+        "H58#2" => "P",
+        "H59#1" => "P",
+        "H59#2" => "S",
         "H66" => "S",
         "H67" => "S",
-        "H50" => "S",
-        "H51" => "P",
+        "H50#1" => "S",
+        "H50#2" => "P",
+        "H51#1" => "P",
+        "H51#2" => "S",
         "H18" => "S",
         "H19" => "S",
         "H20" => "BS",
@@ -462,22 +489,36 @@ class Assembly < ApplicationRecord
         "H55" => "P",
         "H62" => "S",
         "H63" => "S",
-        "H48" => "S",
-        "H49" => "P",
+        "H48#1" => "S",
+        "H48#2" => "P",
+        "H49#1" => "P",
+        "H49#2" => "S",
         "H12" => "S",
         "H13" => "P",
-        "H10" => "P",
-        "H11" => "S",
-        "H8" => "P",
-        "H9" => "S",
-        "H4" => "P",
-        "H5" => "S",
+        "H10#1" => "P",
+        "H11#1" => "S",
+        "H10#2" => "S",
+        "H11#2" => "P",
+        "H8#1" => "P",
+        "H9#1" => "S",
+        "H8#2" => "S",
+        "H9#2" => "P",
+        "H4#1" => "P",
+        "H5#1" => "S",
+        "H4#2" => "S",
+        "H5#2" => "P",
         "H34" => "S",
         "H3" => "S",
-        "H25" => "BS",
-        "H26" => "S",
-        "H27" => "S",
-        "H21" => "BS"
+        "H25#1" => "BS",
+        "H26#1" => "S",
+        "H27#1" => "S",
+        "H25#2" => "BS",
+        "H26#2" => "P",
+        "H27#2" => "P",
+        "H21" => "BS",
+        "H39" => "BS",
+        "H40" => "P",
+        "H41" => "S"
       }
     end
 

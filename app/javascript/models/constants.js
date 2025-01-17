@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export const hexCoordinates = [
     [31.67, 22.93],
     [9.4, 21.07],
@@ -169,3 +171,24 @@ export const s6Mask = [
     0, 0, 0, 0, 0, 0, 0, 0
 ];
 
+export const materials = {
+    side14: new THREE.MeshStandardMaterial({
+      color: 0xD1E9F6
+    }),
+    side25: new THREE.MeshStandardMaterial({
+      color: 0xF6EACB
+    }),
+    side36: new THREE.MeshStandardMaterial({
+      color: 0xF1D3CE
+    }),
+    passiveHelix: new THREE.MeshStandardMaterial({
+      color: 0xF5F7F8
+    }),
+    ring: new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa
+    }),
+    repulsiveBond: new THREE.MeshStandardMaterial({}),
+    neutralBond: new THREE.MeshStandardMaterial({}),
+    attractiveSocketBond: new THREE.MeshStandardMaterial({}),
+    attractivePlugBond: new THREE.MeshStandardMaterial({})
+  }
