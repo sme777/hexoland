@@ -1,5 +1,5 @@
 {
-    "10Z-12H": {
+    "10Z-12H#2": {
         "building_blocks": null,
         "ignore_generation": false,
         "repulsive_type": "O",
@@ -13,10 +13,10 @@
                 "max_xy_overlap": 0.0,
                 "xy_trials": 1,
                 "z_bonds": 6,
-                "min_z_fe": 0,
-                "max_z_fe": 200,
+                "min_z_fe": 125,
+                "max_z_fe": 155,
                 "max_z_overlap": 0.17,
-                "z_trials": 1
+                "z_trials": 10
             }
         },
         "bond_map": {

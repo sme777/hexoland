@@ -744,7 +744,6 @@ class BondGenerator
                 end
             end
         end
-        
         ### Set S14, S25, S36 side count 
         s14_side_count, last_s14_idx = [s1_side_count, s4_side_count].max, [s1_side_count, s4_side_count].min
         s25_side_count, last_s25_idx = [s2_side_count, s5_side_count].max, [s2_side_count, s5_side_count].min
@@ -753,27 +752,27 @@ class BondGenerator
         
         ### Generate the Bond of Each Side
         s14s, s14_score = best_sides_out_of("S14", "handles", 
-                                            bond_family_params["xy_trails"], [], 
+                                            bond_family_params["xy_trials"], [], 
                                             count=s14_side_count, 
-                                            number=bond_family_params["attr_bonds"]/2.0, 
+                                            number=bond_family_params["bonds_attractive"]/2.0, 
                                             overlap=bond_family_params["max_xy_overlap"],
                                             godmode=false, 
                                             bond_family_params["min_xy_fe"], 
                                             bond_family_params["max_xy_fe"]) unless s14_side_count == 0
         
         s25s, s25_score = best_sides_out_of("S25", "handles", 
-                                            bond_family_params["xy_trails"], [], 
+                                            bond_family_params["xy_trials"], [], 
                                             count=s25_side_count, 
-                                            number=bond_family_params["attr_bonds"]/2.0, 
+                                            number=bond_family_params["bonds_attractive"]/2.0, 
                                             overlap=bond_family_params["max_xy_overlap"], 
                                             godmode=false, 
                                             bond_family_params["min_xy_fe"], 
                                             bond_family_params["max_xy_fe"]) unless s25_side_count == 0
         
         s36s, s36_score = best_sides_out_of("S36", "handles", 
-                                            bond_family_params["xy_trails"], [], 
+                                            bond_family_params["xy_trials"], [], 
                                             count=s36_side_count, 
-                                            number=bond_family_params["attr_bonds"]/2.0, 
+                                            number=bond_family_params["bonds_attractive"]/2.0, 
                                             overlap=bond_family_params["max_xy_overlap"], 
                                             godmode=false, 
                                             bond_family_params["min_xy_fe"], 

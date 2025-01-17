@@ -1,53 +1,54 @@
 {
-    "8Z-10H": {
+    "8Z-12H#2": {
         "building_blocks": null,
         "ignore_generation": false,
-        "max_xy_overlap": 0.0,
-        "xy_trials": 1,
-        "max_z_overlap": 0.21,
-        "z_trials": 10,
+        "repulsive_type": "O",
         "bond_families": {
-            "standard": {
+            "STD": {
                 "bonds_attractive": 0,
                 "bonds_neutral": 0,
                 "bonds_repulsive": 0,
-                "bonds_z": 5,
                 "min_xy_fe": 0,
                 "max_xy_fe": 200,
-                "min_z_fe": 105,
-                "max_z_fe": 130
+                "max_xy_overlap": 0.0,
+                "xy_trials": 1,
+                "z_bonds": 6,
+                "min_z_fe": 125,
+                "max_z_fe": 155,
+                "max_z_overlap": 0.17,
+                "z_trials": 100
             }
         },
         "bond_map": {
             "M1": {
-                "ZU": "M2"
+                "ZU": ["M2", "STD"]
             },
             "M2": {
-                "ZD": "M1",
-                "ZU": "M3"
+                "ZD": ["M1", "STD"],
+                "ZU": ["M3", "STD"]
             },
             "M3": {
-                "ZD": "M2",
-                "ZU": "M4"
+                "ZD": ["M2", "STD"],
+                "ZU": ["M4", "STD"]
             },
             "M4": {
-                "ZD": "M3",
-                "ZU": "M5"
+                "ZD": ["M3", "STD"],
+                "ZU": ["M5", "STD"]
             },
             "M5": {
-                "ZD": "M4",
-                "ZU": "M6"
+                "ZD": ["M4", "STD"],
+                "ZU": ["M6", "STD"]
             },
             "M6": {
-                "ZD": "M5",
-                "ZU": "M7"
+                "ZD": ["M5", "STD"],
+                "ZU": ["M7", "STD"]
             },
             "M7": {
-                "ZD": "M6",
-                "ZU": "M8"
+                "ZD": ["M6", "STD"],
+                "ZU": ["M8", "STD"]
             },
             "M8": {
-                "ZD": "M7"
+                "ZD": ["M7", "STD"]
             }
         }
     }
