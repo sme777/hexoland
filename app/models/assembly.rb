@@ -10,6 +10,7 @@ class Assembly < ApplicationRecord
   
     def normalize_bonds
       monomer_bonds = normalize_assembly_map(parse_design_map)
+      # byebug
       normalize_bonds_map = {}
       monomer_bonds.each do |monomer, sides|
         normalize_bonds_map[monomer] = {}
@@ -42,10 +43,8 @@ class Assembly < ApplicationRecord
 
     def add_self_reference(bonds, number)
       bonds.each do |monomer, bds|
-        if !bds[0].include?("#") && !bds[0].is_a?(Array)
-          bds[0] = "#{bds[0]}#{number}"
-        else
-          bds[0] = bds[0][0]
+        if !bds[0][0].include?("#")
+          bds[0][0] = "#{bds[0][0]}#{number}"
         end
       end
       bonds
@@ -86,7 +85,6 @@ class Assembly < ApplicationRecord
       horiz3_4 = horiz * 3 / 4.0
       horiz3_8 = horiz * 3 / 8.0
       vert_div_sqrt3 = vert / Math.sqrt(3)
-      # byebug
       monomer_map = construct_monomer_map(assembly_map)
       start_pos = { x: 0, y: 0, z: 0 }
   
@@ -355,8 +353,8 @@ class Assembly < ApplicationRecord
             end
           end
         else
-          # byebug
           helices = bond.split("_")
+
           helices.each do |helix|
             bond_arr[zBondToIndex[helix.split("#").first]] = bond2code("head", helix)
           end

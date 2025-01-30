@@ -388,6 +388,7 @@ class BondGenerator
                                        
       else
         # First build structures with no dependencies
+        
         structure_map["metadata"] = []
         blocks.each do |block|
           next unless design_map[block]["building_blocks"].nil?
@@ -398,7 +399,7 @@ class BondGenerator
             "ignore_generation" => design_map[block]["ignore_generation"],
             "bond_families" => bond_families,
           }]
-          bond_families.each do |name, params|
+          bond_families.each do |bond_family_name, bond_family_params|
             begin
                 Timeout.timeout(60) do
                     structure_map[block] = build_from_neighbors(bond_map, bond_family_name, bond_family_params)
@@ -412,6 +413,13 @@ class BondGenerator
 
         # second build structures with no 1 layer dependencies
         blocks.each do |block|
+            bond_families = design_map[block]["bond_families"]
+            bond_map = design_map[block]["bond_map"]
+            structure_map["metadata"] << [{
+                "building_blocks" => design_map[block]["building_blocks"],
+                "ignore_generation" => design_map[block]["ignore_generation"],
+                "bond_families" => bond_families,
+            }]
             next if design_map[block]["building_blocks"].nil?
             
             used_bonds = {"S1" => [], "S2" => [], "S3" => [], "ZU" => []}
@@ -427,38 +435,42 @@ class BondGenerator
             # check if it's necessary to keep building_blocks
 
             # go over bond-map and replace old bond with the new bonds
-            bond_families = design_map[blocks[0]]["bond_families"]
+            # bond_families = design_map[blocks[0]]["bond_families"]
 
-            attr_bonds = find_common_attr_bonds(bond_families, "bonds_attractive")
-            z_bonds = find_common_attr_bonds(bond_families, "bonds_z")
+            # attr_bonds = find_common_attr_bonds(bond_families, "bonds_attractive")
+            # z_bonds = find_common_attr_bonds(bond_families, "z_bonds")
             # byebug
             # block_messages []
-            begin 
-                Timeout.timeout(60) do
-                pairing_map, block_messages = build_from_blocks(design_map[block]["bond_map"], used_bonds, attr_bonds, z_bonds, bond_families)
-                messages << block_messages
 
-                pairing_map.each do |pairing, bonds|
-                    pair1, pair2 = pairing.split('-')
-                    # For 2x7M#1-2x7M#2
-                    name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
-                    name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+            bond_families.each do |bond_family_name, bond_family_params|
+                begin 
+                    Timeout.timeout(60) do
+                    pairing_map, block_messages = build_from_blocks(bond_map, bond_family_name, bond_family_params)
+                    next if pairing_map.nil?
+                    messages << block_messages
     
-                    bonds.each do |bond_name, bond|
-                        monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
-                        name = block_id == idx1 ? name1 : name2
-                        bond.each do |side, bs|
-                            structure_map["#{name}##{block_id}"][monomer][side] = bs
+                    pairing_map.each do |pairing, bonds|
+                        pair1, pair2 = pairing.split('-')
+                        # For 2x7M#1-2x7M#2
+                        name1, idx1 = pair1.split('#') # This would be 2x7M and 1 for example
+                        name2, idx2 = pair2.split('#') # This would be 2x7M and 2 for example
+        
+                        bonds.each do |bond_name, bond|
+                            monomer, block_id = bond_name[/(.*)#/, 1], bond_name[/#(.*)/, 1]
+                            name = block_id == idx1 ? name1 : name2
+                            bond.each do |side, bs|
+                                structure_map["#{name}##{block_id}"][monomer][side] = bs
+                            end
                         end
                     end
-                end
-                structure_map
-                end
-            rescue Timeout::Error
-                Rails.logger.error "The process took too long and was terminated."
-                raise "The process took too long to complete."
-            end    
-
+                    structure_map
+                    end
+                rescue Timeout::Error
+                    Rails.logger.error "The process took too long and was terminated."
+                    raise "The process took too long to complete."
+                end   
+            end
+             
         end
       end
 
@@ -577,7 +589,7 @@ class BondGenerator
         end
     end
 
-    def build_from_blocks(block_map, used_bonds, attr_bonds, z_bonds, bond_families)
+    def build_from_blocks(block_map, bond_family_name, bond_family_params)
         messages = []
         s1_side_count, s2_side_count, s3_side_count = 0, 0, 0
         s4_side_count, s5_side_count, s6_side_count = 0, 0, 0
@@ -586,21 +598,21 @@ class BondGenerator
             # block_map[pairing].each do |monomer|
             bonding.each do |monomer, sides|
                 sides.each do |side, neighbor|
-                    if side == "S1"
+                    if side == "S1" && neighbor[1] == bond_family_name
                         s1_side_count += 1
-                    elsif side == "S2"
+                    elsif side == "S2" && neighbor[1] == bond_family_name
                         s2_side_count += 1
-                    elsif side == "S3"
+                    elsif side == "S3" && neighbor[1] == bond_family_name
                         s3_side_count += 1
-                    elsif side == "S4"
+                    elsif side == "S4" && neighbor[1] == bond_family_name
                         s4_side_count += 1
-                    elsif side == "S5"
+                    elsif side == "S5" && neighbor[1] == bond_family_name
                         s5_side_count += 1
-                    elsif side == "S6"
+                    elsif side == "S6" && neighbor[1] == bond_family_name
                         s6_side_count += 1
-                    elsif side == "ZU"
+                    elsif side == "ZU" && neighbor[1] == bond_family_name
                         z_tail_count += 1
-                    elsif side == "ZD"
+                    elsif side == "ZD" && neighbor[1] == bond_family_name
                         z_head_count += 1
                     end
                 end
@@ -612,17 +624,55 @@ class BondGenerator
         s36_side_count, last_s36_idx = [s3_side_count, s6_side_count].max, [s3_side_count, s6_side_count].min
         z_count, last_z_idx = [z_tail_count, z_head_count].max, [z_tail_count, z_head_count].min
         
+        ### Check if all bonds are 0, meaning this bond family is noy used
+        if s14_side_count == 0 && s25_side_count == 0 && s36_side_count == 0 && z_count == 0
+            return nil, nil
+        end
         # s14s = best_sides_out_of_w_reference("S14", used_bonds["S1"][0], s14_side_count, attr_bonds) unless s14_side_count == 0
         # s25s = best_sides_out_of_w_reference("S25", used_bonds["S2"][0], s25_side_count, attr_bonds) unless s25_side_count == 0
         # s36s = best_sides_out_of_w_reference("S36", used_bonds["S3"][0], s36_side_count, attr_bonds) unless s36_side_count == 0
         
-        s14s, _ = best_sides_out_of("S14", "handles", 50, [], count=s14_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s25s, _ = best_sides_out_of("S25", "handles", 50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
-        z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
+        s14s, s14_score = best_sides_out_of("S14", "handles", 
+                                    bond_family_params["xy_trials"], [],
+                                    count=s14_side_count, 
+                                    number=bond_family_params["bonds_attractive"]/2.0, 
+                                    overlap=bond_family_params["max_xy_overlap"],
+                                    godmode=false, 
+                                    bond_family_params["min_xy_fe"],
+                                    bond_family_params["max_xy_fe"]) unless s14_side_count == 0
+
+        s25s, s25_score = best_sides_out_of("S25", "handles", 
+                                    bond_family_params["xy_trials"], [],
+                                    count=s25_side_count, 
+                                    number=bond_family_params["bonds_attractive"]/2.0, 
+                                    overlap=bond_family_params["max_xy_overlap"],
+                                    godmode=false, 
+                                    bond_family_params["min_xy_fe"],
+                                    bond_family_params["max_xy_fe"]) unless s25_side_count == 0
+
+        s36s, s36_score = best_sides_out_of("S36", "handles", 
+                                    bond_family_params["xy_trials"], [],
+                                    count=s36_side_count, 
+                                    number=bond_family_params["bonds_attractive"]/2.0, 
+                                    overlap=bond_family_params["max_xy_overlap"],
+                                    godmode=false, 
+                                    bond_family_params["min_xy_fe"],
+                                    bond_family_params["max_xy_fe"]) unless s36_side_count == 0
+
+        z_tails, z_score = best_z_bonds_out_of(bond_family_params["z_bonds"], 
+                                                z_count, 
+                                                bond_family_params["max_z_overlap"], 
+                                                bond_family_params["z_trials"], 
+                                                bond_family_params["min_z_fe"], 
+                                                bond_family_params["max_z_fe"]) unless z_count == 0
+
+        # s25s, _ = best_sides_out_of("S25", "handles", 
+        #                             50, [], count=s25_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        # s36s, _ = best_sides_out_of("S36", "handles", 50, [], count=s36_side_count, number=attr_bonds/2.0, overlap=0.34, godmode=false, 0, 200)
+        # z_tails = best_sides_out_of_w_reference("Z", used_bonds["ZU"][0], z_count, z_bonds) unless z_count == 0
 
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
-        
+        # byebug
         # first iterate over sides S1, S2, S3 to assign the bonds
         block_map.each do |pairing, bonding|
             
@@ -634,19 +684,21 @@ class BondGenerator
                 # byebug
                 sides.each do |side, neighbor_conn|
                     neighbor, conn = neighbor_conn[0], neighbor_conn[1]
+                    # byebug
                     # aux_bond_type = bond_types[bond_idx]
                     # bond_idx += 1
                     if side == "S1"
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s14s[s14_idx][0], conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s14s[s14_idx][0], s14_score]]
                         s14_idx += 1
                     elsif side == "S2"
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s25s[s25_idx][0], conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s25s[s25_idx][0], s25_score]]
                         s25_idx += 1
                     elsif side == "S3"
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s36s[s36_idx][0], conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s36s[s36_idx][0], s36_score]]
                         s36_idx += 1
                     elsif side == "ZU"
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], z_tails[z_idx]]
+                        # byebug
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [z_tails[z_idx], z_score]]
                         z_idx += 1
                     end
                 end
@@ -656,7 +708,7 @@ class BondGenerator
         # curr_z_idx_count = z_idx
         curr_last_s14_idx_count, curr_last_s25_idx_count, curr_last_s36_idx_count = last_s14_idx, last_s25_idx, last_s36_idx
         curr_z_idx_count = last_z_idx
-
+        byebug
         # second iterate over sides S4, S5, S6 to assign the complementary bonds
         block_map.each do |pairing, bonding|
             bonding.each do |monomer, sides|
@@ -670,7 +722,7 @@ class BondGenerator
                             s4_bonds = complement_side(block_map[pairing][neighbor]["S1"][1][0])
                         end
 
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s4_bonds, conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s4_bonds, s14_score]]
 
                     elsif side == "S5"
                         if block_map[pairing][neighbor].nil?
@@ -680,7 +732,7 @@ class BondGenerator
                             s5_bonds = complement_side(block_map[pairing][neighbor]["S2"][1][0])
                         end
                         
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s5_bonds, conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s5_bonds, s25_score]]
                     elsif side == "S6"
                         if block_map[pairing][neighbor].nil?
                             s6_bonds = complement_side(s36s[curr_last_s36_idx_count][0])
@@ -689,7 +741,7 @@ class BondGenerator
                             s6_bonds = complement_side(block_map[pairing][neighbor]["S3"][1][0])
                         end
                         
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s6_bonds, conn]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [s6_bonds, s36_score]]
 
                     elsif side == "ZD"
                         # byebug
@@ -698,10 +750,10 @@ class BondGenerator
                             z_head = z_complement_side([z_tails[curr_z_idx_count]])
                             curr_z_idx_count += 1
                         else
-                            z_head = z_complement_side([block_map[pairing][neighbor]["ZU"][1]])
+                            z_head = z_complement_side([block_map[pairing][neighbor]["ZU"][1][0]])
                         end
                         
-                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], z_head[0]]
+                        block_map[pairing][monomer][side] = [block_map[pairing][monomer][side], [z_head[0], z_score]]
 
                     end
                 end
@@ -1133,6 +1185,15 @@ class BondGenerator
             "S6" => []
         }
 
+        exceptions_S = {
+            "S1" => ["H60_R_S_AND_H61_R_S"],
+            "S2" => [],
+            "S3" => ["H42_L_S_AND_H43_L_S", "H46_L_S_AND_H47_L_S"],
+            "S4" => [],
+            "S5" => ["H71_L_S_AND_H70_L_S", "H33_L_S_AND_H32_L_S"],
+            "S6" => []
+        }
+
         blocker_map[side].each do |helix| 
             if repulsive_type == "B"
                 blocker_seqs << @bond_map["#{helix}_L_B"] unless @bond_map["#{helix}_L_B"].nil?
@@ -1140,6 +1201,9 @@ class BondGenerator
             elsif repulsive_type == "O"
                 blocker_seqs << @bond_map["#{helix}_L_O"] unless @bond_map["#{helix}_L_O"].nil?
                 blocker_seqs << @bond_map["#{helix}_R_O"] unless @bond_map["#{helix}_R_O"].nil?
+            elsif repulsive_type == "S"
+                blocker_seqs << @bond_map["#{helix}_L_S"] unless @bond_map["#{helix}_L_S"].nil?
+                blocker_seqs << @bond_map["#{helix}_R_S"] unless @bond_map["#{helix}_R_S"].nil?
             end
         end
 
@@ -1149,6 +1213,10 @@ class BondGenerator
             end
         elsif repulsive_type == "O"
             exceptions_O[side].each do |exception|
+                blocker_seqs << @bond_map[exception]
+            end
+        elsif repulsive_type == "S"
+            exceptions_S[side].each do |exception|
                 blocker_seqs << @bond_map[exception]
             end
         end
@@ -1233,7 +1301,7 @@ class BondGenerator
             elsif count == 6
                 random_helices = BondGenerator.tail_groups_6bonds.map {|group| group.sample }
             else
-                random_helices = BondGenerator.tail_z_helices.sample(count)
+                random_helices = BondGenerator.tail_groups_1bonds.sample(count)
             end
             # random_samples_fe = 
             # random_helices = BondGenerator.tail_z_helices.sample(count) # sample randomly
@@ -1487,31 +1555,31 @@ class BondGenerator
         }
     end
 
-    def self.tail_groups_2bonds
-      [
-        ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"], "H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
-        ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
-      ]
-    end
+    # def self.tail_groups_2bonds
+    #   [
+    #     ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"], "H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
+    #     ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
+    #   ]
+    # end
 
-    def self.tail_groups_4bonds
-        [
-            ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
-            ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49"],
-            ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
-            ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
-        ]
-    end
+    # def self.tail_groups_4bonds
+    #     [
+    #         ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
+    #         ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49"],
+    #         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
+    #         ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
+    #     ]
+    # end
 
-    def self.tail_groups_5bonds
-        [
-            ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
-            ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
-            ["H10_H11", "H8_H9", "H44_H45", "H12_H13"],
-            ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]],
-            ["H48_H49", "H16_H17", "H50_H51"]
-        ]
-    end
+    # def self.tail_groups_5bonds
+    #     [
+    #         ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
+    #         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
+    #         ["H10_H11", "H8_H9", "H44_H45", "H12_H13"],
+    #         ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]],
+    #         ["H48_H49", "H16_H17", "H50_H51"]
+    #     ]
+    # end
 
     def self.tail_groups_6bonds
         [
@@ -1525,11 +1593,11 @@ class BondGenerator
         ]
     end
 
-    def self.tail_groups_3bonds
-        [["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
-         ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H50_H51"],
-         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"], "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]]]
-    end
+    # def self.tail_groups_3bonds
+    #     [["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
+    #      ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49", "H50_H51"],
+    #      ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"], "H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]]]
+    # end
 
     def self.tail_groups_1bonds
         ["H58#1_H59#1", "H50#1_H51#1", "H48#1_H49#1", ["H39_H40", "H41"], ["H27#1", "H25#1_H26#1"], "H16#1_H17#1", "H10#1_H11#1", "H8#1_H9#1", "H4#1_H5#1", 
@@ -1538,12 +1606,12 @@ class BondGenerator
         ["H55", "H53_H54"], ["H21_H22", "H23_H24"], ["H18", "H19_H20"]]
     end
 
-    def self.head_groups_1bonds
-        ["H58#1_H59#1",  "H50#1_H51#1", "H48#1_H49#1", "H26#1_H27#1", "H16#1_H17#1", "H10#1_H11#1",
-        "H8#1_H9#1", "H4#1_H5#1", "H58#2_H59#2",  "H50#2_H51#2", "H48#2_H49#2", "H40_H41", "H26#2_H27#2", "H16#2_H17#2", "H10#2_H11#2",
-        "H8#2_H9#2", "H4#2_H5#2", ["H67_H68", "H66_H65"], "H44_H45", "H36_H37", "H1_H2",
-        "H34_H3", "H12_H13", ["H63_H64", "H62"], "H54_H55", ["H22", "H23_H24"], ["H18", "H19_H20"]]
-    end
+    # def self.head_groups_1bonds
+    #     ["H58#1_H59#1",  "H50#1_H51#1", "H48#1_H49#1", "H26#1_H27#1", "H16#1_H17#1", "H10#1_H11#1",
+    #     "H8#1_H9#1", "H4#1_H5#1", "H58#2_H59#2",  "H50#2_H51#2", "H48#2_H49#2", "H40_H41", "H26#2_H27#2", "H16#2_H17#2", "H10#2_H11#2",
+    #     "H8#2_H9#2", "H4#2_H5#2", ["H67_H68", "H66_H65"], "H44_H45", "H36_H37", "H1_H2",
+    #     "H34_H3", "H12_H13", ["H63_H64", "H62"], "H54_H55", ["H22", "H23_H24"], ["H18", "H19_H20"]]
+    # end
 
     def self.tail_z_helices
         ["H58_H59", "H50_H51", "H48_H49", ["H39_H40", "H41"], ["H27", "H25_H26"], "H16_H17", "H10_H11", "H8_H9", "H4_H5",

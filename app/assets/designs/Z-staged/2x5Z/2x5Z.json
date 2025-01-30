@@ -1,10 +1,10 @@
 {
-    "5Z-12H#4": {
-        "building_blocks": null,
+    "2x5Z-12H": {
+        "building_blocks": [["5Z", 2]],
         "ignore_generation": false,
-        "repulsive_type": "O",
+        "repulsive_type": "B",
         "bond_families": {
-            "STD": {
+            "2STD": {
                 "bonds_attractive": 0,
                 "bonds_neutral": 0,
                 "bonds_repulsive": 0,
@@ -17,6 +17,39 @@
                 "max_z_fe": 150,
                 "max_z_overlap": 0.0,
                 "z_trials": 10
+            }
+        },
+        "bond_map": {
+            "5Z#1-5Z#2" : {
+                "M5#1": {
+                    "ZU": ["M1#2", "2STD"]
+                },
+                "M1#2": {
+                    "ZD": ["M5#1", "2STD"]
+                }
+            }
+        }
+            
+    },
+
+    "5Z": {
+        "building_blocks": null,
+        "ignore_generation": true,
+        "repulsive_type": "B",
+        "bond_families": {
+            "STD": {
+                "bonds_attractive": 0,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 0,
+                "max_xy_fe": 200,
+                "max_xy_overlap": 0.0,
+                "xy_trials": 1,
+                "z_bonds": 6,
+                "min_z_fe": 120,
+                "max_z_fe": 160,
+                "max_z_overlap": 0.0,
+                "z_trials": 1
             }
         },
         "bond_map": {
@@ -41,4 +74,5 @@
             }
         }
     }
+
 }

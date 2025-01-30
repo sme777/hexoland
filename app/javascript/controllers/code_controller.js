@@ -251,13 +251,13 @@ export default class extends Controller {
 
 
       // Add the original STL model on top of the voxelized version
-      // const originalMaterial = new THREE.MeshStandardMaterial({
-      //   color: 0xA6CDC6
-      // });
-      // const originalMesh = new THREE.Mesh(stlGeometry, originalMaterial);
-      // originalMesh.position.sub(center);      
-      // originalMesh.position.set(-center.x, -center.y, -center.z);
-      // scene.add(originalMesh);
+      const originalMaterial = new THREE.MeshStandardMaterial({
+        color: 0xA6CDC6
+      });
+      const originalMesh = new THREE.Mesh(stlGeometry, originalMaterial);
+      originalMesh.position.sub(center);      
+      originalMesh.position.set(-center.x, -center.y, -center.z);
+      scene.add(originalMesh);
     };
 
     const voxelizeOBJ = async (file, resolution) => {
@@ -283,7 +283,7 @@ export default class extends Controller {
 
     document.getElementById('stlobjLoader').addEventListener('change', (event) => {
       const file = event.target.files[0];
-      const resolution = 12.0;
+      const resolution = 3.0;
       const filename = file["name"];
 
       if (filename.endsWith(".stl")) {
