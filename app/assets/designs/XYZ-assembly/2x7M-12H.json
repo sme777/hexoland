@@ -1,8 +1,8 @@
 {
-    "2x7M-10H-4S4B#2": {
+    "2x7M-12H-4S4B#2": {
       "building_blocks": null,
       "ignore_generation": false,
-      "repulsive_type": "B",
+      "repulsive_type": "O",
       "bond_families": {
           "STD": {
               "bonds_attractive": 4,
@@ -11,12 +11,12 @@
               "min_xy_fe": 45,
               "max_xy_fe": 53,
               "max_xy_overlap": 0.25,
-              "xy_trials": 10,
-              "z_bonds": 5,
-              "min_z_fe": 110,
-              "max_z_fe": 120,
-              "max_z_overlap": 0.21,
-              "z_trials": 100
+              "xy_trials": 15,
+              "z_bonds": 6,
+              "min_z_fe": 130,
+              "max_z_fe": 145,
+              "max_z_overlap": 0.17,
+              "z_trials": 15
           }
       },
       "bond_map": {

@@ -374,7 +374,6 @@ class BondGenerator
             "repulsive_type" => design_map[structure]["repulsive_type"],
             "bond_families" => bond_families,
         }
-
         bond_families.each do |bond_family_name, bond_family_params|
             begin
                 Timeout.timeout(60) do
@@ -708,7 +707,6 @@ class BondGenerator
         # curr_z_idx_count = z_idx
         curr_last_s14_idx_count, curr_last_s25_idx_count, curr_last_s36_idx_count = last_s14_idx, last_s25_idx, last_s36_idx
         curr_z_idx_count = last_z_idx
-        byebug
         # second iterate over sides S4, S5, S6 to assign the complementary bonds
         block_map.each do |pairing, bonding|
             bonding.each do |monomer, sides|
@@ -934,7 +932,7 @@ class BondGenerator
                 # bond_family = neighbors[0][1]
                 # repulsive_type = (metadata.nil? || metadata[bond_family]["repulsive_type"].nil?) ? "B" : metadata[bond_family]["repulsive_type"]
 
-                all_seqs = sequence_generator(bonding[block], metadata["repulsive_type"])
+                all_seqs = sequence_generator(bonding[block], "B")
                 all_seqs += @basic_zs
 
                 if bonding[block].keys.include?("ZU") #include_z_bonds && 

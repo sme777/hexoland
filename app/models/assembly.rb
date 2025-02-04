@@ -52,8 +52,8 @@ class Assembly < ApplicationRecord
 
     def merge_with(merge_assembly)
       ### Assume most use case will be for merging building blocks into heirarchical assembly
-      merge_map = JSON.parse(merge_assembly.design_map)
-      return self.design_map if merge_map.keys.size != 1
+      merge_map = JSON.parse(merge_assembly.design_map).reject { |key, _| key == "metadata" }
+      return [0, self.design_map.to_json] if merge_map.keys.size != 1
       assembly_map = JSON.parse(self.design_map)
       # byebug
       change_count = 0
