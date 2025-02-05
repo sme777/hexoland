@@ -762,7 +762,6 @@ class BondGenerator
     end
 
     def build_from_neighbors(neighbor_map, bond_family_name, bond_family_params)
-        
         # Stores sequence list for each monomer
         block_sequences = {}
         # Stores neighbor map for information

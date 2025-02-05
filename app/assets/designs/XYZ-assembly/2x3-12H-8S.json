@@ -1,0 +1,55 @@
+{
+    "2x3-12H-8S": {
+      "building_blocks": null,
+      "ignore_generation": false,
+      "repulsive_type": "B",
+      "bond_families": {
+          "STD": {
+              "bonds_attractive": 8,
+              "bonds_neutral": 0,
+              "bonds_repulsive": 0,
+              "min_xy_fe": 90,
+              "max_xy_fe": 105,
+              "max_xy_overlap": 0.0,
+              "xy_trials": 3,
+              "z_bonds": 6,
+              "min_z_fe": 135,
+              "max_z_fe": 145,
+              "max_z_overlap": 0.0,
+              "z_trials": 10
+          }
+      },
+      "bond_map": {
+        "M1": {
+            "S2": ["M5", "STD"],
+            "S3": ["M3", "STD"],
+            "ZU": ["M2", "STD"]
+        },
+        "M2": {
+            "S2": ["M6", "STD"],
+            "S3": ["M4", "STD"],
+            "ZD": ["M1", "STD"]
+        },
+        "M3": {
+            "S1": ["M5", "STD"],
+            "S6": ["M1", "STD"],
+            "ZU": ["M4", "STD"]
+        },
+        "M4": {
+            "S1": ["M6", "STD"],
+            "S6": ["M2", "STD"],
+            "ZD": ["M3", "STD"]
+        },
+        "M5": {
+            "S4": ["M3", "STD"],
+            "S5": ["M1", "STD"],
+            "ZU": ["M6", "STD"]
+        },
+        "M6": {
+            "S4": ["M4", "STD"],
+            "S5": ["M2", "STD"],
+            "ZD": ["M5", "STD"]
+        }
+      }
+    }
+}

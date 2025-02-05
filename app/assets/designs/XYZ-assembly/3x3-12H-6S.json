@@ -1,5 +1,5 @@
 {
-    "Stool-12H-6S": {
+    "3x3-12H-6S": {
       "building_blocks": null,
       "ignore_generation": false,
       "repulsive_type": "B",
@@ -8,7 +8,7 @@
               "bonds_attractive": 6,
               "bonds_neutral": 2,
               "bonds_repulsive": 0,
-              "min_xy_fe": 66,
+              "min_xy_fe": 65,
               "max_xy_fe": 80,
               "max_xy_overlap": 0.17,
               "xy_trials": 10,
@@ -16,52 +16,56 @@
               "min_z_fe": 135,
               "max_z_fe": 145,
               "max_z_overlap": 0.17,
-              "z_trials": 10
+              "z_trials": 50
           }
       },
       "bond_map": {
         "M1": {
+            "S2": ["M7", "STD"],
             "S3": ["M4", "STD"],
             "ZU": ["M2", "STD"]
         },
         "M2": {
-            "S2": ["M7", "STD"],
+            "S2": ["M8", "STD"],
             "S3": ["M5", "STD"],
-            "ZU": ["M3", "STD"],
-            "ZD": ["M1", "STD"]
+            "ZD": ["M1", "STD"],
+            "ZU": ["M3", "STD"]
         },
         "M3": {
-            "S2": ["M8", "STD"],
+            "S2": ["M9", "STD"],
             "S3": ["M6", "STD"],
             "ZD": ["M2", "STD"]
         },
         "M4": {
+            "S1": ["M7", "STD"],
             "S6": ["M1", "STD"],
             "ZU": ["M5", "STD"]
         },
         "M5": {
-            "S1": ["M7", "STD"],
+            "S1": ["M8", "STD"],
             "S6": ["M2", "STD"],
             "ZU": ["M6", "STD"],
             "ZD": ["M4", "STD"]
         },
         "M6": {
-            "S1": ["M8", "STD"],
+            "S1": ["M9", "STD"],
             "S6": ["M3", "STD"],
             "ZD": ["M5", "STD"]
         },
         "M7": {
-            "S4": ["M5", "STD"],
-            "S5": ["M2", "STD"],
+            "S4": ["M4", "STD"],
+            "S5": ["M1", "STD"],
             "ZU": ["M8", "STD"]
         },
         "M8": {
-            "S4": ["M6", "STD"],
-            "S5": ["M3", "STD"],
+            "S4": ["M5", "STD"],
+            "S5": ["M2", "STD"],
             "ZU": ["M9", "STD"],
             "ZD": ["M7", "STD"]
         },
         "M9": {
+            "S4": ["M6", "STD"],
+            "S5": ["M3", "STD"],
             "ZD": ["M8", "STD"]
         }
       }

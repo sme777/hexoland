@@ -87,12 +87,19 @@ class Assembly < ApplicationRecord
       vert_div_sqrt3 = vert / Math.sqrt(3)
       monomer_map = construct_monomer_map(assembly_map)
       start_pos = { x: 0, y: 0, z: 0 }
-  
       # Use a hash to ensure unique entries by monomer
       assembly_block = {}
-  
+      assignment_started = false
       assembly_map.each do |monomer, sides|
-        monomer_map[monomer] ||= start_pos.dup
+        if monomer_map[monomer].nil?
+          if assignment_started
+            next
+          else
+            monomer_map[monomer] ||= start_pos.dup
+            assignment_started = true
+          end
+        end
+
         assembly_block[monomer] ||= { position: monomer_map[monomer].dup, monomer: monomer }
   
         hex_pos = monomer_map[monomer]
