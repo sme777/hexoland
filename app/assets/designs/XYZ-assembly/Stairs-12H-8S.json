@@ -1,5 +1,5 @@
 {
-    "Stairs-12H-8S": {
+    "Stairs-10H-8S": {
       "building_blocks": null,
       "ignore_generation": false,
       "repulsive_type": "B",
@@ -10,13 +10,13 @@
               "bonds_repulsive": 0,
               "min_xy_fe": 90,
               "max_xy_fe": 105,
-              "max_xy_overlap": 0.17,
-              "xy_trials": 10,
-              "z_bonds": 6,
-              "min_z_fe": 135,
-              "max_z_fe": 145,
-              "max_z_overlap": 0.17,
-              "z_trials": 10
+              "max_xy_overlap": 0.0,
+              "xy_trials": 1,
+              "z_bonds": 5,
+              "min_z_fe": 110,
+              "max_z_fe": 120,
+              "max_z_overlap": 0.21,
+              "z_trials": 100
           }
       },
       "bond_map": {
