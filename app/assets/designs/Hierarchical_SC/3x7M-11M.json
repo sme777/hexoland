@@ -1,0 +1,86 @@
+{
+    "3x7M-11M": {
+        "building_blocks": null,
+        "ignore_generation": false,
+        "repulsive_type": "B",
+        "bond_families": {
+            "MAIN": {
+                "bonds_attractive": 5,
+                "bonds_neutral": 3,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 53,
+                "max_xy_fe": 68,
+                "max_xy_overlap": 0.21,
+                "xy_trials": 10,
+                "z_bonds": 5,
+                "min_z_fe": 110,
+                "max_z_fe": 120,
+                "max_z_overlap": 0.21,
+                "z_trials": 100
+            }
+
+        },
+        "bond_map": {
+            "M1": {
+                "S2": ["M7", "MAIN"],
+                "S3": ["M4", "MAIN"],
+                "ZU": ["M2", "MAIN"]
+            },
+            "M2": {
+                "S1": ["M11", "MAIN"],
+                "S2": ["M8", "MAIN"],
+                "S3": ["M5", "MAIN"],
+                "S4": ["M10", "MAIN"],
+                "ZU": ["M3", "MAIN"],
+                "ZD": ["M1", "MAIN"]
+            },
+            "M3": {
+                "S2": ["M9", "MAIN"],
+                "S3": ["M6", "MAIN"],
+                "ZD": ["M2", "MAIN"]
+            },
+            "M4": {
+                "S1": ["M7", "MAIN"],
+                "S6": ["M1", "MAIN"],
+                "ZU": ["M5", "MAIN"]
+            },
+            "M5": {
+                "S1": ["M8", "MAIN"],
+                "S5": ["M10", "MAIN"],
+                "S6": ["M2", "MAIN"],
+                "ZU": ["M6", "MAIN"],
+                "ZD": ["M4", "MAIN"]
+            },
+            "M6": {
+                "S1": ["M9", "MAIN"],
+                "S6": ["M3", "MAIN"],
+                "ZD": ["M5", "MAIN"]
+            },
+            "M7": {
+                "S4": ["M4", "MAIN"],
+                "S5": ["M1", "MAIN"],
+                "ZU": ["M8", "MAIN"]
+            },
+            "M8": {
+                "S4": ["M5", "MAIN"],
+                "S5": ["M2", "MAIN"],
+                "S6": ["M11", "MAIN"],
+                "ZU": ["M9", "MAIN"],
+                "ZD": ["M7", "MAIN"]
+            },
+            "M9": {
+                "S4": ["M6", "MAIN"],
+                "S5": ["M3", "MAIN"],
+                "ZD": ["M8", "MAIN"]
+            },
+            "M10": {
+                "S1": ["M2", "MAIN"],
+                "S2": ["M5", "MAIN"]
+            },
+            "M11": {
+                "S3": ["M8", "MAIN"],
+                "S4": ["M2", "MAIN"]
+            }
+        }
+    }
+}

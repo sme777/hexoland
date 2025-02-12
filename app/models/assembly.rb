@@ -10,17 +10,14 @@ class Assembly < ApplicationRecord
   
     def normalize_bonds
       monomer_bonds = normalize_assembly_map(parse_design_map)
-      # byebug
       normalize_bonds_map = {}
       monomer_bonds.each do |monomer, sides|
         normalize_bonds_map[monomer] = {}
-        # byebug
         sides.each do |side, bonds|
           unless side == "Sequences"
             if bonds[0].is_a?(Array)
               normalize_bonds_map[monomer][side] = send("#{side}_order", [bonds[0][0], bonds[1]])
             else
-            # byebug
               normalize_bonds_map[monomer][side] = send("#{side}_order", bonds)
             end
             

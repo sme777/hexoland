@@ -1,0 +1,82 @@
+{
+    "3x7M-10M": {
+        "building_blocks": null,
+        "ignore_generation": false,
+        "repulsive_type": "B",
+        "bond_families": {
+            "SIDES": {
+                "bonds_attractive": 8,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 95,
+                "max_xy_fe": 110,
+                "max_xy_overlap": 0.0,
+                "xy_trials": 1,
+                "z_bonds": 0,
+                "min_z_fe": 0,
+                "max_z_fe": 0,
+                "max_z_overlap": 0.0,
+                "z_trials": 0
+            },
+            "CORE": {
+                "bonds_attractive": 6,
+                "bonds_neutral": 2,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 65,
+                "max_xy_fe": 80,
+                "max_xy_overlap": 0.17,
+                "xy_trials": 10,
+                "z_bonds": 6,
+                "min_z_fe": 135,
+                "max_z_fe": 145,
+                "max_z_overlap": 0.0,
+                "z_trials": 5
+            }
+
+        },
+        "bond_map": {
+            "M1": {
+                "S1": ["M4", "CORE"],
+                "S3": ["M7", "SIDES"],
+                "ZU": ["M2", "CORE"]
+            },
+            "M2": {
+                "S1": ["M5", "CORE"],
+                "ZU": ["M3", "CORE"],
+                "ZD": ["M1", "CORE"]
+            },
+            "M3": {
+                "S1": ["M6", "CORE"],
+                "S3": ["M9", "SIDES"],
+                "ZD": ["M2", "CORE"]
+            },
+            "M4": {
+                "S2": ["M8", "SIDES"],
+                "S4": ["M1", "CORE"],
+                "ZU": ["M5", "CORE"]
+            },
+            "M5": {
+                "S4": ["M2", "CORE"],
+                "ZU": ["M6", "CORE"],
+                "ZD": ["M4", "CORE"]
+            },
+            "M6": {
+                "S2": ["M10", "SIDES"],
+                "S4": ["M3", "CORE"],
+                "ZD": ["M5", "CORE"]
+            },
+            "M7": {
+                "S6": ["M1", "SIDES"]
+            },
+            "M8": {
+                "S5": ["M4", "SIDES"]
+            },
+            "M9": {
+                "S6": ["M3", "SIDES"]
+            },  
+            "M10": {
+                "S5": ["M6", "SIDES"]
+            }
+        }
+    }
+}

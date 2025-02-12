@@ -1,16 +1,16 @@
 {
-    "3x5Z-12H-4S4B": {
+    "3x5Z-12H-5S3B": {
         "building_blocks": [["5Z", 3]],
         "ignore_generation": false,
         "repulsive_type": "B",
         "bond_families": {
             "2STD": {
-                "bonds_attractive": 4,
-                "bonds_neutral": 4,
+                "bonds_attractive": 5,
+                "bonds_neutral": 3,
                 "bonds_repulsive": 0,
-                "min_xy_fe": 45,
-                "max_xy_fe": 53,
-                "max_xy_overlap": 0.25,
+                "min_xy_fe": 55,
+                "max_xy_fe": 68,
+                "max_xy_overlap": 0.21,
                 "xy_trials": 1,
                 "z_bonds": 0,
                 "min_z_fe": 0,

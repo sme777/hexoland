@@ -374,6 +374,7 @@ class BondGenerator
             "repulsive_type" => design_map[structure]["repulsive_type"],
             "bond_families" => bond_families,
         }
+        
         bond_families.each do |bond_family_name, bond_family_params|
             begin
                 Timeout.timeout(60) do
@@ -833,12 +834,10 @@ class BondGenerator
                                         bond_family_params["z_trials"], 
                                         bond_family_params["min_z_fe"], 
                                         bond_family_params["max_z_fe"]) unless z_count == 0
-        # byebug
         s14_idx, s25_idx, s36_idx, z_idx = 0, 0, 0, 0
-
         neighbor_map.each do |block, neighbors|
             neighbors.each do |side, neighbor|
-                if side == "S1"
+                if side == "S1" && neighbor[1] == bond_family_name
                     if s14s.size == 0
                         # block_neighbors[block][side] = [[], s14_score]
                         neighbor_map[block][side] = [neighbor_map[block][side], [[], s14_score]]
@@ -847,7 +846,7 @@ class BondGenerator
                         neighbor_map[block][side] = [neighbor_map[block][side], [s14s[s14_idx][0], s14_score]]
                     end
                     s14_idx += 1
-                elsif side == "S2" && 
+                elsif side == "S2" && neighbor[1] == bond_family_name
                     if s25s.size == 0
                         # block_neighbors[block][side] = [[], s25_score]
                         neighbor_map[block][side] = [neighbor_map[block][side], [[], s25_score]]
@@ -857,7 +856,7 @@ class BondGenerator
                     end
 
                     s25_idx += 1
-                elsif side == "S3"
+                elsif side == "S3" && neighbor[1] == bond_family_name
                     if s36s.size == 0
                         # block_neighbors[block][side] = [[], s36_score]
                         neighbor_map[block][side] = [neighbor_map[block][side], [[], s36_score]]
@@ -866,7 +865,7 @@ class BondGenerator
                         neighbor_map[block][side] = [neighbor_map[block][side], [s36s[s36_idx][0], s36_score]]
                     end
                     s36_idx += 1
-                elsif side == "ZU"
+                elsif side == "ZU" && neighbor[1] == bond_family_name
                     neighbor_map[block][side] = [neighbor_map[block][side], [z_tails[z_idx], z_score]]
                     z_idx += 1
                 end
@@ -878,7 +877,7 @@ class BondGenerator
         neighbor_map.each do |block, neighbors|
             neighbors.each do |side, neighbor_group|
                 neighbor = neighbor_group[0]
-                if side == "S4"
+                if side == "S4" && neighbor_group[1] == bond_family_name
                     if neighbor_map[neighbor].nil?
                         s4_bonds = complement_side(s14s[curr_last_s14_idx_count][0])
                         curr_last_s14_idx_count += 1
@@ -888,7 +887,7 @@ class BondGenerator
                     
                     # block_neighbors[block][side] = [s4_bonds, s14_score]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s4_bonds, s14_score]]
-                elsif side == "S5"
+                elsif side == "S5" && neighbor_group[1] == bond_family_name
                     if neighbor_map[neighbor].nil?
                         s5_bonds = complement_side(s25s[curr_last_s25_idx_count][0])
                         curr_last_s25_idx_count += 1
@@ -898,7 +897,7 @@ class BondGenerator
 
                     # block_neighbors[block][side] = [s5_bonds, s25_score]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s5_bonds, s25_score]]
-                elsif side == "S6"
+                elsif side == "S6" && neighbor_group[1] == bond_family_name
                     if neighbor_map[neighbor].nil?
                         s6_bonds = complement_side(s36s[curr_last_s36_idx_count][0])
                         curr_last_s36_idx_count += 1
@@ -908,7 +907,7 @@ class BondGenerator
 
                     # block_neighbors[block][side] = [s6_bonds, s36_score]
                     neighbor_map[block][side] = [neighbor_map[block][side], [s6_bonds, s36_score]]
-                elsif side == "ZD"
+                elsif side == "ZD" && neighbor_group[1] == bond_family_name
                     # byebug
                     if neighbor_map[neighbor].nil?
                         z_head = z_complement_side([z_tails[curr_z_idx_count]])
@@ -1559,25 +1558,15 @@ class BondGenerator
     #   ]
     # end
 
-    # def self.tail_groups_4bonds
-    #     [
-    #         ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
-    #         ["H10_H11", "H8_H9", "H44_H45", "H12_H13", "H48_H49"],
-    #         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
-    #         ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"], "H16_H17", "H50_H51"]
-    #     ]
-    # end
+    def self.tail_groups_4bonds
+        [
+            ["H1_H2", "H34_H3", "H4#1_H5#1", "H4#2_H5#2", ["H35_H36", "H37_H38"], ["H39_H40", "H41"]],
+            ["H8#1_H9#1", "H8#2_H9#2", "H44_H45", "H10#1_H11#1", "H10#2_H11#2", "H12_H13"],
+            ["H48#1_H49#1", "H48#2_H49#2", "H50#1_H51#1", "H50#2_H51#2", "H16#1_H17#1", "H16#2_H17#2", ["H55", "H53_H54"], ["H18", "H19_H20"]],
+            ["H58#1_H59#1", "H58#2_H59#2", ["H21_H22", "H23_H24"], "H62_H63", "H66_H67", ["H27#1", "H25#1_H26#1"], ["H27#2", "H25#2_H26#2"]],
+        ]
+    end
 
-    # def self.tail_groups_5bonds
-    #     [
-    #         ["H1_H2", "H34_H3", "H4_H5", ["H35_H36", "H37_H38"]],
-    #         ["H66_H67", ["H27", "H25_H26"], "H62_H63", ["H21_H22", "H23_H24"]],
-    #         ["H10_H11", "H8_H9", "H44_H45", "H12_H13"],
-    #         ["H58_H59", ["H18", "H19_H20"], ["H55", "H53_H54"]],
-    #         ["H48_H49", "H16_H17", "H50_H51"]
-    #     ]
-    # end
-    # 
     def self.tail_groups_5bonds
         [
             ["H1_H2", "H34_H3", "H66_H67", ["H27#1", "H25#1_H26#1"], ["H27#2", "H25#2_H26#2"]],
