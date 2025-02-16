@@ -1,0 +1,66 @@
+<div class="gui-container-controls" style="
+                                                position: absolute;
+                                                top: <%= top %>vh;
+                                                right: <%= right %>vh;
+                                                z-index: 10;
+                                                background: rgba(255, 255, 255, 0.8); /* Optional: semi-transparent background */
+                                                padding: 1rem;
+                                                border-radius: 0.5rem;
+                                            ">
+    <div class="d-flex flex-column flex-shrink-0 bg-body-tertiary" style="width: 4.5rem;">
+        <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
+            <li class="nav-item">
+                <button class="nav-link active py-3 border-bottom rounded-0 w-100" aria-current="page"
+                    data-bs-toggle="tooltip" data-bs-placement="right" id="selectionControl">
+                    <svg class="bi pe-none" wdith="24" height="24"
+                        viewBox="0 0 320 512">
+                        <path
+                            d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z" />
+                    </svg>
+                </button>
+            </li>
+            <li>
+                <button class="nav-link py-3 border-bottom rounded-0 w-100" data-bs-toggle="tooltip"
+                    data-bs-placement="right" id="additionControl">
+                    <svg class="bi pe-none" xmlns="http://www.w3.org/2000/svg" wdith="24" height="24"
+                        viewBox="0 0 448 512">
+                        <path
+                            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z" />
+                    </svg>
+                </button>
+            </li>
+            <li>
+                <button class="nav-link py-3 border-bottom rounded-0 w-100" data-bs-toggle="tooltip"
+                    data-bs-placement="right" id="alignmentControl">
+                    <svg class="bi pe-none" wdith="24" height="24"
+                        viewBox="0 0 448 512">
+                        <path
+                            d="M352 64c0-17.7-14.3-32-32-32L128 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32l-192 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32z" />
+                    </svg>
+                </button>
+            </li>
+            <li>
+                <button class="nav-link py-3 border-bottom rounded-0 w-100" data-bs-toggle="tooltip"
+                    data-bs-placement="right" aria-label="Orders" data-bs-original-title="Orders" id="deletionControl">
+                    <svg class="bi pe-none" wdith="24" height="24"
+                        viewBox="0 0 448 512">
+                        <path
+                            d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                    </svg>
+                </button>
+            </li>
+            <li>
+                <button class="nav-link py-3 border-bottom rounded-0 w-100" data-bs-toggle="modal"
+                    data-bs-placement="right" data-bs-target="#cameraControlsModal" id="cameraControl">
+                    <svg class="bi pe-none" wdith="24" height="24"
+                        viewBox="0 0 512 512">
+                        <path
+                            d="M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z" />
+                        </svg>
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+</div>
+

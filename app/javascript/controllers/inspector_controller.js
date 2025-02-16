@@ -13,9 +13,11 @@ import {
 } from "vanilla-jsoneditor"
 import {
   setupCanvas,
-  onWindowResize
+  onWindowResize,
+  setupInteractiveControls
   // animate
 } from './canvas_utils';
+import * as bootstrap from "bootstrap";
 
 export default class extends Controller {
 
@@ -114,8 +116,274 @@ export default class extends Controller {
     });
 
     // form submission
-    
+    this.activeControl = "SELECT";
+    setupInteractiveControls(this.activeControl, this.container, this.scene);
+
+
+    const captureBtn = document.getElementById('captureSelectedBtn');
+    captureBtn.addEventListener('click', () => this.handleCapture());
+
+
   }
+
+  async handleCapture() {
+    const modal = document.getElementById('cameraControlsModal');
+    const bsModal = bootstrap.Modal.getInstance(modal);
+    
+    try {
+      // Show loading state
+      this.updateCaptureStatus('Preparing capture...', 'info');
+      
+      // Get selected sides based on UI state
+      const selectedSides = this.getSelectedSides();
+      
+      // Capture screenshots for all selected hexagons
+      const results = await this.captureHexagons(selectedSides);
+      
+      // Hide modal
+      bsModal.hide();
+      
+      // Process results (e.g., download or display)
+      this.processResults(results);
+      
+    } catch (error) {
+      console.error('Capture error:', error);
+      this.updateCaptureStatus('Error capturing screenshots', 'danger');
+    }
+  }
+
+  getSelectedSides() {
+    // Check if we're in "All" or "Custom" mode
+    const isAllMode = document.getElementById('all-tab').classList.contains('active');
+    
+    if (isAllMode) {
+      // Return all sides if in "All" mode
+      return {
+        lateral: [0, 1, 2, 3, 4, 5],
+        top: true,
+        bottom: true
+      };
+    }
+    
+    // Get global side settings if custom mode
+    return {
+      lateral: Array.from({ length: 6 }, (_, i) => {
+        return document.getElementById(`side${i + 1}`).checked ? i : null;
+      }).filter(side => side !== null),
+      top: document.getElementById('topView').checked,
+      bottom: document.getElementById('bottomView').checked
+    };
+  }
+
+
+  async captureHexagons(selectedSides) {
+    const results = [];
+    const totalCaptures = this.hexBlocks.length;
+    
+    // Create a renderer for screenshots
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true
+    });
+    renderer.setSize(1024, 1024); // High resolution captures
+    
+    // Create camera for screenshots
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+    
+    // Create separate scene for captures
+    const captureScene = new THREE.Scene();
+    captureScene.background = new THREE.Color(0xffffff);
+    
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.6);
+    
+    // Main directional light (frontal)
+    const mainLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    
+    // Fill light from the opposite side
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    
+    // Top light for better surface definition
+    const topLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    topLight.position.set(0, 1, 0);
+    
+    captureScene.add(ambientLight, mainLight, fillLight, topLight);
+    
+    for (let i = 0; i < this.hexBlocks.length; i++) {
+      const hexagon = this.hexBlocks[i];
+      const hexagonScreenshots = [];
+      
+      // Update progress
+      this.updateCaptureStatus(
+        `Capturing hexagon ${i + 1} of ${totalCaptures}...`, 
+        'info'
+      );
+      
+      // Clone hexagon for capture
+      console.log(hexagon);
+      const hexClone = hexagon.getObject().clone();
+      captureScene.add(hexClone);
+      
+      // Get bounding box for camera positioning
+      const boundingBox = new THREE.Box3().setFromObject(hexClone);
+      const center = boundingBox.getCenter(new THREE.Vector3());
+      const size = boundingBox.getSize(new THREE.Vector3());
+      
+      // Calculate camera distance
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const fov = camera.fov * (Math.PI / 180);
+      const cameraDistance = Math.abs(maxDim / Math.sin(fov / 2) / 2);
+      
+      // Capture lateral sides
+      for (const sideIndex of selectedSides.lateral) {
+        const angle = (sideIndex * 60) * (Math.PI / 180);
+        
+        // Position camera for lateral view
+        camera.position.x = center.x + cameraDistance * Math.cos(angle);
+        camera.position.y = center.y;
+        camera.position.z = center.z + cameraDistance * Math.sin(angle);
+        camera.lookAt(center);
+        
+        // Update main and fill light positions
+        mainLight.position.copy(camera.position);
+        
+        // Position fill light opposite to main light
+        fillLight.position.set(
+            -camera.position.x,
+            camera.position.y,
+            -camera.position.z
+        );
+        
+        // Render and capture
+        renderer.render(captureScene, camera);
+        const screenshot = renderer.domElement.toDataURL('image/png');
+        
+        hexagonScreenshots.push({
+          type: 'lateral',
+          side: sideIndex + 1,
+          angle: sideIndex * 60,
+          dataURL: screenshot
+        });
+      }
+      
+      // Capture top view if selected
+      if (selectedSides.top) {
+        camera.position.set(center.x, center.y + cameraDistance, center.z);
+        camera.lookAt(center);
+        mainLight.position.copy(camera.position);
+        fillLight.position.set(center.x, center.y - cameraDistance, center.z);
+        
+        renderer.render(captureScene, camera);
+        hexagonScreenshots.push({
+          type: 'top',
+          dataURL: renderer.domElement.toDataURL('image/png')
+        });
+      }
+      
+      // Capture bottom view if selected
+      if (selectedSides.bottom) {
+        camera.position.set(center.x, center.y - cameraDistance, center.z);
+        camera.lookAt(center);
+        mainLight.position.copy(camera.position);
+        fillLight.position.set(center.x, center.y + cameraDistance, center.z);
+        
+        renderer.render(captureScene, camera);
+        hexagonScreenshots.push({
+          type: 'bottom',
+          dataURL: renderer.domElement.toDataURL('image/png')
+        });
+      }
+      
+      // Clean up
+      captureScene.remove(hexClone);
+      
+      // Add to results
+      results.push({
+        hexagonId: hexagon.title,
+        screenshots: hexagonScreenshots
+      });
+    }
+    
+    // Final cleanup
+    renderer.dispose();
+    
+    return results;
+  }
+
+  updateCaptureStatus(message, type = 'info') {
+    const statusEl = document.createElement('div');
+    statusEl.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+    statusEl.textContent = message;
+    document.body.appendChild(statusEl);
+    
+    setTimeout(() => statusEl.remove(), 3000);
+  }
+
+  processResults(results) {
+    // Create a container for all screenshots
+    const captureContainer = document.getElementById('captureContainer');
+    if (!captureContainer) {
+      console.error('Capture container not found');
+      return;
+    }
+
+    // Clear existing content
+    captureContainer.innerHTML = '';
+    
+    // Create a container for all screenshots
+    const resultsContainer = document.createElement('div');
+    
+    results.forEach(hexResult => {
+      const hexDiv = document.createElement('div');
+      hexDiv.className = 'card mb-4';
+      
+      hexDiv.innerHTML = `
+        <div class="card-header">
+          <h5 class="card-title mb-0">${hexResult.hexagonId}</h5>
+        </div>
+        <div class="card-body">
+          <div class="row row-cols-2 row-cols-md-4 g-3 screenshots-grid">
+            ${hexResult.screenshots.map(screenshot => `
+              <div class="col">
+                <div class="card h-100">
+                  <img src="${screenshot.dataURL}" class="card-img-top" alt="Screenshot">
+                  <div class="card-footer text-muted small">
+                    ${screenshot.type === 'lateral' 
+                      ? `Side ${screenshot.side} (${screenshot.angle}°)` 
+                      : `${screenshot.type} view`}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary btn-sm download-all">
+            <i class="bi bi-download me-2"></i>Download All
+          </button>
+        </div>
+      `;
+      
+      // Add download handler
+      hexDiv.querySelector('.download-all').addEventListener('click', () => {
+        hexResult.screenshots.forEach(screenshot => {
+          const link = document.createElement('a');
+          link.download = `${hexResult.hexagonId}_${screenshot.type}${
+            screenshot.type === 'lateral' ? `_side${screenshot.side}` : ''
+          }.png`;
+          link.href = screenshot.dataURL;
+          link.click();
+        });
+      });
+      
+      resultsContainer.appendChild(hexDiv);
+    });
+    
+    // Append results to the specified container
+    captureContainer.appendChild(resultsContainer);
+  }
+
 
   onHover() {
     // Cast a ray from the camera to the mouse position

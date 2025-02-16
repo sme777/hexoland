@@ -1,0 +1,228 @@
+<div class="modal fade" id="cameraControlsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cameraModalLabel">Camera Controls</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Selection Mode Tabs -->
+                <ul class="nav nav-pills nav-fill mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-content"
+                            type="button" role="tab">
+                            <i class="bi bi-grid-3x3 me-2"></i>
+                            All Hexagons
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="custom-tab" data-bs-toggle="pill" data-bs-target="#custom-content"
+                            type="button" role="tab">
+                            <i class="bi bi-list-check me-2"></i>
+                            Custom Selection
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- All Hexagons Tab -->
+                    <div class="tab-pane fade show active" id="all-content" role="tabpanel">
+                        <div class="text-center p-4">
+                            <div class="hexagon-count mb-3">
+                                <span class="badge bg-primary rounded-pill fs-5 px-4">
+                                    <span id="totalCount"><%= assembly_map.size unless assembly_map.nil? %></span> Hexagons
+                                </span>
+                            </div>
+                            <p class="text-muted mb-0">
+                                All hexagons will be captured from 8 angles:
+                            </p>
+                            <div class="mt-3 text-muted">
+                                <small>
+                                    • 6 lateral sides (60° intervals)<br>
+                                    • Top view<br>
+                                    • Bottom view
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Selection Tab -->
+                    <div class="tab-pane fade" id="custom-content" role="tabpanel">
+                        <div class="hexagon-list">
+                            <!-- Search Box -->
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="hexagonSearch"
+                                    placeholder="Search hexagons...">
+                            </div>
+
+                            <!-- Global Side Selection -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">Default Side Selection</span>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="enableDefaultSides"
+                                                checked>
+                                            <label class="form-check-label" for="enableDefaultSides">Apply to
+                                                all</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2">
+                                        <!-- Lateral Sides -->
+                                        <div class="col-12">
+                                            <label class="d-block mb-2 text-muted small">Lateral Sides</label>
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+
+                                                <input type="checkbox" class="btn-check" id="side1" checked>
+                                                <label class="btn btn-outline-secondary" for="side1">1</label>
+
+                                                <input type="checkbox" class="btn-check" id="side2" checked>
+                                                <label class="btn btn-outline-secondary" for="side2">2</label>
+
+                                                <input type="checkbox" class="btn-check" id="side3" checked>
+                                                <label class="btn btn-outline-secondary" for="side3">3</label>
+
+                                                <input type="checkbox" class="btn-check" id="side4" checked>
+                                                <label class="btn btn-outline-secondary" for="side4">4</label>
+
+                                                <input type="checkbox" class="btn-check" id="side5" checked>
+                                                <label class="btn btn-outline-secondary" for="side5">5</label>
+
+                                                <input type="checkbox" class="btn-check" id="side6" checked>
+                                                <label class="btn btn-outline-secondary" for="side6">6</label>
+                                            </div>
+                                        </div>
+
+                                        <!-- Top/Bottom -->
+                                        <div class="col-12">
+                                            <label class="d-block mb-2 text-muted small">Top/Bottom Views</label>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <input type="checkbox" class="btn-check" id="topView" checked>
+                                                <label class="btn btn-outline-secondary" for="topView">Top</label>
+
+                                                <input type="checkbox" class="btn-check" id="bottomView" checked>
+                                                <label class="btn btn-outline-secondary" for="bottomView">Bottom</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selection Controls -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" id="selectAllBtn">
+                                        Select All
+                                    </button>
+                                    <button class="btn btn-outline-primary" id="deselectAllBtn">
+                                        Deselect All
+                                    </button>
+                                </div>
+                                <span class="badge bg-secondary">
+                                    <span id="selectedCount">0</span> selected
+                                </span>
+                            </div>
+
+                            <!-- Hexagon List -->
+                            <div class="hexagon-checklist" style="max-height: 300px; overflow-y: auto;">
+                                <div class="list-group" id="hexagonList">
+                                    <!-- Example Item with Custom Side Selection -->
+                                    <% if !assembly_map.nil?%>
+                                    <% assembly_map.each do |monomer, bonds| %>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <input class="form-check-input me-3" type="checkbox" value="0">
+                                                <span>
+                                                    <strong><%= monomer %></strong>
+                                                    <small class="text-muted d-block">Active Sides: <%= bonds.keys %></small>
+                                                </span>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-secondary" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#sides-0">
+                                                <i class="bi bi-gear-fill"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Collapsible Side Selection -->
+                                        <div class="collapse" id="sides-0">
+                                            <div class="border rounded p-2 mt-2">
+                                                <small class="text-muted d-block mb-2">Custom side selection:</small>
+                                                <div class="row g-2">
+                                                    <div class="col-12">
+                                                        <div class="btn-group btn-group-sm w-100" role="group">
+                                                            <input type="checkbox" class="btn-check" id="hex1-side1"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side1">1</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-side2"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side2">2</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-side3"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side3">3</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-side4"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side4">4</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-side5"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side5">5</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-side6"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-side6">6</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <input type="checkbox" class="btn-check" id="hex1-top"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-top">Top</label>
+
+                                                            <input type="checkbox" class="btn-check" id="hex1-bottom"
+                                                                checked>
+                                                            <label class="btn btn-outline-secondary"
+                                                                for="hex1-bottom">Bottom</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% end %>
+                                    <% end %>
+
+                                    <!-- More items would be dynamically added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="captureSelectedBtn">
+                    <i class="bi bi-camera-fill me-2"></i>
+                    Capture Screenshots
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

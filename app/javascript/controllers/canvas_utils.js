@@ -53,3 +53,76 @@ export function animate(scene, camera, renderer) {
     };
     animateLoop(); // Start the loop
 }
+
+
+export function setupInteractiveControls(activeControl, guiContainer, scene) {
+    const selectControl = document.getElementById("selectionControl");
+    const additionControl = document.getElementById("additionControl");
+    const deletionControl = document.getElementById("deletionControl");
+    const alignmentControl = document.getElementById("alignmentControl");
+    const cameraControl = document.getElementById("cameraControl");
+
+    selectControl.addEventListener('click', () => {
+      selectControl.classList.add('active');
+
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+      cameraControl.classList.remove('active');
+      activeControl = "SELECT";
+    })
+
+    additionControl.addEventListener('click', () => {
+      additionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+      cameraControl.classList.remove('active');
+      activeControl = "ADD";
+    })
+
+    deletionControl.addEventListener('click', () => {
+      deletionControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      alignmentControl.classList.remove('active');
+      cameraControl.classList.remove('active');
+      activeControl = "REMOVE";
+    })
+
+    alignmentControl.addEventListener('click', () => {
+      alignmentControl.classList.add('active');
+
+      selectControl.classList.remove('active');
+      additionControl.classList.remove('active');
+      deletionControl.classList.remove('active');
+      cameraControl.classList.remove('active');
+      activeControl = "ALIGN";
+    })
+
+    cameraControl.addEventListener('click', () => {
+        cameraControl.classList.add('active');
+  
+        selectControl.classList.remove('active');
+        additionControl.classList.remove('active');
+        deletionControl.classList.remove('active');
+        alignmentControl.classList.remove('active');
+        activeControl = "CAMERA";
+
+
+
+      })
+
+    guiContainer.addEventListener('dblclick', (e) => {
+      if (activeControl === "ADD") {
+
+        scene.add((new Hex("Empty", new THREE.Vector3(0, 0, 0), {})).getObject());
+      }
+    })
+  }
+
+
+
+  

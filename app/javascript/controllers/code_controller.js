@@ -15,7 +15,8 @@ import {
 import {
   setupCanvas,
   onWindowResize,
-  animate
+  animate,
+  setupInteractiveControls
 } from './canvas_utils';
 import {
   Hex
@@ -128,7 +129,6 @@ export default class extends Controller {
     camera.position.z = 200;
 
     this.activeControl = "SELECT";
-    this.setupInteractiveControls();
 
     animate(scene, camera, renderer);
     window.addEventListener('resize', () => {
@@ -308,62 +308,12 @@ export default class extends Controller {
       progressBar.setAttribute('aria-valuenow', value); // Update accessibility value
     });
 
+
+    setupInteractiveControls(this.activeControl, this.guiContainer, this.scene);
   }
 
 
-  setupInteractiveControls() {
-    const selectControl = document.getElementById("selectionControl");
-    const additionControl = document.getElementById("additionControl");
-    const deletionControl = document.getElementById("deletionControl");
-    const alignmentControl = document.getElementById("alignmentControl");
-
-    selectControl.addEventListener('click', () => {
-      selectControl.classList.add('active');
-
-      additionControl.classList.remove('active');
-      deletionControl.classList.remove('active');
-      alignmentControl.classList.remove('active');
-
-      this.activeControl = "SELECT";
-    })
-
-    additionControl.addEventListener('click', () => {
-      additionControl.classList.add('active');
-
-      selectControl.classList.remove('active');
-      deletionControl.classList.remove('active');
-      alignmentControl.classList.remove('active');
-
-      this.activeControl = "ADD";
-    })
-
-    deletionControl.addEventListener('click', () => {
-      deletionControl.classList.add('active');
-
-      selectControl.classList.remove('active');
-      additionControl.classList.remove('active');
-      alignmentControl.classList.remove('active');
-
-      this.activeControl = "REMOVE";
-    })
-
-    alignmentControl.addEventListener('click', () => {
-      alignmentControl.classList.add('active');
-
-      selectControl.classList.remove('active');
-      additionControl.classList.remove('active');
-      deletionControl.classList.remove('active');
-
-      this.activeControl = "ALIGN";
-    })
-
-    this.guiContainer.addEventListener('dblclick', (e) => {
-      if (this.activeControl === "ADD") {
-
-        this.scene.add((new Hex("Empty", new THREE.Vector3(0, 0, 0), {})).getObject());
-      }
-    })
-  }
+  
 
 
 }
