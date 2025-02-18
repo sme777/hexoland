@@ -37,6 +37,20 @@ class StudioController < ApplicationController
     #     render partial: "studio/gui"
     # end
 
+    def search
+        query = params[:query]
+        results = if query.present?
+            Assembly.where("name ILIKE ?", "%#{query}%")
+          else
+            Assembly.none
+        end
+        @page_count = (results.size.to_f / 3).ceil
+        @assemblies = results.order(updated_at: :desc).paginate(page: 1, per_page: 3)
+        @page_assembly_ids = @assemblies.map {|asm| asm.id }
+
+        render "index"
+    end
+
     def forward
         @assembly_method = "Forward"
         render partial: "studio/forward"

@@ -79,6 +79,18 @@
             <hr>
             <div class="latest-assemblies py-4">
                 <h3>All Assemblies</h3>
+                <div class="container mt-4">
+                <%= form_with(url: search_assembly_path, method: :get, local: true, class: "d-flex") do |f| %>
+                    <div class="input-group">
+                    <%= f.search_field :query, 
+                        class: "form-control",
+                        placeholder: "Search models...",
+                        value: params[:query]
+                    %>
+                    <%= f.submit "Search", class: "btn btn-outline-primary" %>
+                    </div>
+                <% end %>
+                </div>
                 <%= render partial: "page_assemblies" %>
             </div>
             <%= render partial: "layouts/footer" %>

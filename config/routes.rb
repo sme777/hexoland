@@ -19,6 +19,8 @@ Rails.application.routes.draw do
   get '/studio/:id/make_public' => 'studio#make_public', as: :make_public
   get '/studio/:id/make_private' => 'studio#make_private', as: :make_private
 
+  get '/studio/search' => 'studio#search', as: :search_assembly
+
   post '/studio/assembly/:id/delete' => 'studio#delete', as: :delete_assembly
   get '/studio/assembly/:id/get_picklist' => 'studio#get_picklist', as: :get_picklist
   get '/studio/assembly/:id/get_json' => 'studio#get_json', as: :get_json

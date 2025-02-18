@@ -329,7 +329,7 @@ export default class extends Controller {
     }
 
     // Clear existing content
-    captureContainer.innerHTML = '';
+    captureContainer.innerHTML = '<h3>Captured Bonds</h3>';
     
     // Create a container for all screenshots
     const resultsContainer = document.createElement('div');
