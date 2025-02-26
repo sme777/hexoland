@@ -61,7 +61,7 @@ export class Hex {
     const side6Mesh = new THREE.InstancedMesh(halfHelixGeometry, materials.side36, helixTypeCount.s6);
 
 
-    // const bondMeshes = this.initializeBondInstancedMeshes(bondGeometries, maxBondCount);
+    const bondMeshes = this.initializeBondInstancedMeshes(bondGeometries, maxBondCount);
 
     // InstancedMesh for rings (shared among all helices)
     let ringMesh;

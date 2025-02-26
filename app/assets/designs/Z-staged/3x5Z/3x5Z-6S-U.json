@@ -1,0 +1,93 @@
+{
+    "3x5Z-6S-U": {
+        "building_blocks": [["5Z", 3]],
+        "ignore_generation": false,
+        "repulsive_type": "B",
+        "bond_families": {
+            "6S": {
+                "bonds_attractive": 6,
+                "bonds_neutral": 2,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 69,
+                "max_xy_fe": 77,
+                "max_xy_overlap": 0.0,
+                "xy_trials": 1,
+                "z_bonds": 0,
+                "min_z_fe": 0,
+                "max_z_fe": 200,
+                "max_z_overlap": 0.0,
+                "z_trials": 0
+            }
+        },
+        "bond_map": {
+            "5Z#1-5Z#2" : {
+                "M3#1": {
+                    "S4": ["M3#2", "6S"]
+                },
+                "M3#2": {
+                    "S1": ["M3#1", "6S"]
+                }
+            },
+            "5Z#1-5Z#3" : {
+                "M3#1": {
+                    "S5": ["M3#3", "6S"]
+                },
+                "M3#3": {
+                    "S2": ["M3#1", "6S"]
+                }
+            },
+            "5Z#2-5Z#3" : {
+                "M3#2": {
+                    "S6": ["M3#3", "6S"]
+                },
+                "M3#3": {
+                    "S3": ["M3#2", "6S"]
+                }
+            }
+        }
+            
+    },
+
+    "5Z": {
+        "building_blocks": null,
+        "ignore_generation": true,
+        "repulsive_type": "B",
+        "bond_families": {
+            "STD": {
+                "bonds_attractive": 0,
+                "bonds_neutral": 0,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 0,
+                "max_xy_fe": 200,
+                "max_xy_overlap": 0.0,
+                "xy_trials": 1,
+                "z_bonds": 6,
+                "min_z_fe": 135,
+                "max_z_fe": 150,
+                "max_z_overlap": 0.0,
+                "z_trials": 1
+            }
+        },
+        "bond_map": {
+            "M1": {
+                "ZU": ["M2", "STD"]
+
+            },
+            "M2": {
+                "ZD": ["M1", "STD"],
+                "ZU": ["M3", "STD"]
+            },
+            "M3": {
+                "ZD": ["M2", "STD"],
+                "ZU": ["M4", "STD"]
+            },
+            "M4": {
+                "ZD": ["M3", "STD"],
+                "ZU": ["M5", "STD"]
+            },
+            "M5": {
+                "ZD": ["M4", "STD"]
+            }
+        }
+    }
+}

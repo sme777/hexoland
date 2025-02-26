@@ -187,8 +187,10 @@ export const materials = {
     ring: new THREE.MeshStandardMaterial({
       color: 0xaaaaaa
     }),
-    repulsiveBond: new THREE.MeshStandardMaterial({}),
-    neutralBond: new THREE.MeshStandardMaterial({}),
-    attractiveSocketBond: new THREE.MeshStandardMaterial({}),
-    attractivePlugBond: new THREE.MeshStandardMaterial({})
+    repulsiveXYBond: new THREE.MeshStandardMaterial({color: 0xA91E3B}),
+    neutralXYBond: new THREE.MeshStandardMaterial({color: 0xFDB840}),
+    attractiveXYBond: new THREE.MeshStandardMaterial({color: 0x808836}),
+    repulsiveZBond: new THREE.MeshStandardMaterial({color: 0xD76C82}),
+    neutralZBond: new THREE.MeshStandardMaterial({color: 0xFCF596}),
+    attractiveZBond: new THREE.MeshStandardMaterial({color: 0x7ED4AD}),
   }

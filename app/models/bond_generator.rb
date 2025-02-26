@@ -898,7 +898,7 @@ class BondGenerator
                 # bond_family = neighbors[0][1]
                 # repulsive_type = (metadata.nil? || metadata[bond_family]["repulsive_type"].nil?) ? "B" : metadata[bond_family]["repulsive_type"]
 
-                all_seqs = sequence_generator(bonding[block], "B")
+                all_seqs = sequence_generator(bonding[block], "X")
                 all_seqs += @basic_zs
 
                 if bonding[block].keys.include?("ZU") #include_z_bonds && 
@@ -1152,6 +1152,15 @@ class BondGenerator
             "S6" => []
         }
 
+        exceptions_X = {
+            "S1" => ["H60_R_X_AND_H61_R_X"],
+            "S2" => [],
+            "S3" => ["H42_L_X_AND_H43_L_X", "H46_L_X_AND_H47_L_X"],
+            "S4" => [],
+            "S5" => ["H71_L_X_AND_H70_L_X", "H33_L_X_AND_H32_L_X"],
+            "S6" => []
+        }
+
         blocker_map[side].each do |helix| 
             if repulsive_type == "B"
                 blocker_seqs << @bond_map["#{helix}_L_B"] unless @bond_map["#{helix}_L_B"].nil?
@@ -1162,6 +1171,9 @@ class BondGenerator
             elsif repulsive_type == "S"
                 blocker_seqs << @bond_map["#{helix}_L_S"] unless @bond_map["#{helix}_L_S"].nil?
                 blocker_seqs << @bond_map["#{helix}_R_S"] unless @bond_map["#{helix}_R_S"].nil?
+            elsif repulsive_type == "X"
+                blocker_seqs << @bond_map["#{helix}_L_X"] unless @bond_map["#{helix}_L_X"].nil?
+                blocker_seqs << @bond_map["#{helix}_R_X"] unless @bond_map["#{helix}_R_X"].nil?
             end
         end
 
@@ -1175,6 +1187,10 @@ class BondGenerator
             end
         elsif repulsive_type == "S"
             exceptions_S[side].each do |exception|
+                blocker_seqs << @bond_map[exception]
+            end
+        elsif repulsive_type == "X"
+            exceptions_X[side].each do |exception|
                 blocker_seqs << @bond_map[exception]
             end
         end
