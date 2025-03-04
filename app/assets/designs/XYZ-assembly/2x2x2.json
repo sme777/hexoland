@@ -1,0 +1,69 @@
+{
+    "2x2x2-12H-6S#1": {
+        "building_blocks": null,
+        "ignore_generation": false,
+        "repulsive_type": "B",
+        "bond_families": {
+            "STD": {
+                "bonds_attractive": 6,
+                "bonds_neutral": 2,
+                "bonds_repulsive": 0,
+                "min_xy_fe": 0,
+                "max_xy_fe": 200,
+                "max_xy_overlap": 0.17,
+                "xy_trials": 1,
+                "z_bonds": 6,
+                "min_z_fe": 135,
+                "max_z_fe": 145,
+                "max_z_overlap": 0.0,
+                "z_trials": 1
+            }
+        },
+      "bond_map": {
+        "M1A": {
+          "S1": ["M3A", "STD"],
+          "S2": ["M4A", "STD"],
+          "S3": ["M2A", "STD"],
+          "ZU": ["M1B", "STD"]
+        },
+        "M2A": {
+          "S1": ["M4A", "STD"],
+          "S6": ["M1A", "STD"],
+          "ZU": ["M2B", "STD"]
+        },
+        "M3A": {
+          "S3": ["M4A", "STD"],
+          "S4": ["M1A", "STD"],
+          "ZU": ["M3B", "STD"]
+        },
+        "M4A": {
+          "S4": ["M2A", "STD"],
+          "S5": ["M1A", "STD"],
+          "S6": ["M3A", "STD"],
+          "ZU": ["M4B", "STD"]
+        },
+        "M1B": {
+          "S1": ["M3B", "STD"],
+          "S2": ["M4B", "STD"],
+          "S3": ["M2B", "STD"],
+          "ZD": ["M1A", "STD"]
+        },
+        "M2B": {
+          "S1": ["M4B", "STD"],
+          "S6": ["M1B", "STD"],
+          "ZD": ["M2A", "STD"]
+        },
+        "M3B": {
+          "S3": ["M4B", "STD"],
+          "S4": ["M1B", "STD"],
+          "ZD": ["M3A", "STD"]
+        },
+        "M4B": {
+          "S4": ["M2B", "STD"],
+          "S5": ["M1B", "STD"],
+          "S6": ["M3B", "STD"],
+          "ZD": ["M4A", "STD"]
+        }
+      }
+    }
+}
