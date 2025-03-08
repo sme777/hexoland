@@ -341,43 +341,59 @@ export class Hex {
   addZBonds(mesh, helix, sideBound = false) {
     const zBondGroup = new THREE.Group();
     let helixTopBond, helixBottomBond;
-
+    let helixTopIndex, helixBottomIndex
     if (this.bonds["ZU"][this.zBondToIndex(helix)] === 1) {
       helixTopBond = this.instacedBonds.plugZ.mesh
-      this.instacedBonds.plugZ.index++;
+      helixTopIndex = this.instacedBonds.plugZ.index++;
     } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === 0) {
       helixTopBond = this.instacedBonds.sockZ.mesh
-      this.instacedBonds.sockZ.index++;
+      helixTopIndex = this.instacedBonds.sockZ.index++;
     } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === "-") {
       helixTopBond = this.instacedBonds.neutZ.mesh
-      this.instacedBonds.neutZ.index++;
+      helixTopIndex = this.instacedBonds.neutZ.index++;
     } else if (this.bonds["ZU"][this.zBondToIndex(helix)] === "x") {
       helixTopBond = this.instacedBonds.replZ.mesh
-      this.instacedBonds.replZ.index++;
+      helixTopIndex = this.instacedBonds.replZ.index++;
     }
 
     if (this.bonds["ZD"][this.zBondToIndex(helix)] === 1) {
       helixBottomBond = this.instacedBonds.plugZ.mesh
-      this.instacedBonds.plugZ.index++;
+      helixBottomIndex = this.instacedBonds.plugZ.index++;
     } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === 0) {
       helixBottomBond = this.instacedBonds.sockZ.mesh
-      this.instacedBonds.sockZ.index++;
+      helixBottomIndex = this.instacedBonds.sockZ.index++;
     } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === "-") {
       helixBottomBond = this.instacedBonds.neutZ.mesh
-      this.instacedBonds.neutZ.index++;
+      helixBottomIndex = this.instacedBonds.neutZ.index++;
     } else if (this.bonds["ZD"][this.zBondToIndex(helix)] === "x") {
       helixBottomBond = this.instacedBonds.replZ.mesh
-      this.instacedBonds.replZ.index++;
+      helixBottomIndex = this.instacedBonds.replZ.index++;
 
     }
 
     const height = mesh.geometry.parameters.height;
     if (sideBound) {
-      helixTopBond.position.set(mesh.position.x, mesh.position.y + height * 4.5 + 0.4, mesh.position.z); // Top
-      helixBottomBond.position.set(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z); // Bottom
+      const topBondMatrix = new THREE.Matrix4();
+      topBondMatrix.setPosition(mesh.position.x, mesh.position.y + height * 4.5 + 0.4, mesh.position.z);
+      helixTopBond.setMatrixAt(helixTopIndex, topBondMatrix);
+  
+      const bottomBondMatrix = new THREE.Matrix4();
+      bottomBondMatrix.setPosition(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z);
+      helixBottomBond.setMatrixAt(helixBottomBond, bottomBondMatrix);
+
+      // helixTopBond.position.set(mesh.position.x, mesh.position.y + height * 4.5 + 0.4, mesh.position.z); // Top
+      // helixBottomBond.position.set(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z); // Bottom
     } else {
-      helixTopBond.position.set(mesh.position.x, mesh.position.y + 0.4, mesh.position.z); // Top
-      helixBottomBond.position.set(mesh.position.x, mesh.position.y - height - 0.4, mesh.position.z); // Bottom
+      const topBondMatrix = new THREE.Matrix4();
+      topBondMatrix.setPosition(mesh.position.x, mesh.position.y + 0.4, mesh.position.z);
+      helixTopBond.setMatrixAt(helixTopIndex, topBondMatrix);
+  
+      const bottomBondMatrix = new THREE.Matrix4();
+      bottomBondMatrix.setPosition(mesh.position.x, mesh.position.y - height - 0.4, mesh.position.z);
+      helixBottomBond.setMatrixAt(helixBottomBond, bottomBondMatrix);
+
+      // helixTopBond.position.set(mesh.position.x, mesh.position.y + 0.4, mesh.position.z); // Top
+      // helixBottomBond.position.set(mesh.position.x, mesh.position.y - height - 0.4, mesh.position.z); // Bottom
     }
     // Rotate the right bond to face downward
     helixBottomBond.rotation.x = Math.PI; // 180 degrees around the X-axis
