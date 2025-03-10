@@ -51,6 +51,16 @@ export class Hex {
     this.hex.add(this.instancedHelices.s4.mesh);
     this.hex.add(this.instancedHelices.s5.mesh);
     this.hex.add(this.instancedHelices.s6.mesh);
+
+    this.hex.add(this.instacedBonds.replXY.mesh);
+    this.hex.add(this.instacedBonds.neutXY.mesh);
+    this.hex.add(this.instacedBonds.plugXY.mesh);
+    this.hex.add(this.instacedBonds.sockXY.mesh);
+    this.hex.add(this.instacedBonds.replZ.mesh);
+    this.hex.add(this.instacedBonds.neutZ.mesh);
+    this.hex.add(this.instacedBonds.plugZ.mesh);
+    this.hex.add(this.instacedBonds.sockZ.mesh);
+
     if (!this.ignoreRings) {
       this.hex.add(this.instancedHelices.ring.mesh);
     }
@@ -78,8 +88,7 @@ export class Hex {
             bondGroup = this.addSideBonds(mesh, "S2", s2Mask[index])
             bondGroup.position.set(x, height * 1.5, y)
             this.hex.add(bondGroup);
-            const zBonds = this.addZBonds(mesh, s2Mask[index], true);
-            this.hex.add(zBonds);
+            // this.addZBonds(mesh, s2Mask[index], true);
           }
         } else if (s4Mask[index]) {
           mesh = this.instancedHelices.s4.mesh;
@@ -88,8 +97,7 @@ export class Hex {
             bondGroup = this.addSideBonds(mesh, "S4", s4Mask[index])
             bondGroup.position.set(x, height * 1.5, y)
             this.hex.add(bondGroup);
-            const zBonds = this.addZBonds(mesh, s4Mask[index], true);
-            this.hex.add(zBonds);
+            // this.addZBonds(mesh, s4Mask[index], true);
           }
         } else if (s6Mask[index]) {
           mesh = this.instancedHelices.s6.mesh;
@@ -98,8 +106,7 @@ export class Hex {
             bondGroup = this.addSideBonds(mesh, "S6", s6Mask[index])
             bondGroup.position.set(x, height * 1.5, y)
             this.hex.add(bondGroup);
-            const zBonds = this.addZBonds(mesh, s6Mask[index], true);
-            this.hex.add(zBonds);
+            // this.addZBonds(mesh, s6Mask[index], true);
           }
         }
       } else if (isCoreBondHelix) {
@@ -131,11 +138,9 @@ export class Hex {
       } else {
         mesh = this.instancedHelices.passive.mesh;
         meshIndex = this.instancedHelices.passive.index++;
-        if (typeof Zhelices[index] !== 0 && this.bonds !== null) {
-          const zBonds = this.addZBonds(mesh, Zhelices[index]);
-          zBonds.position.set(x, height * 1.5, y);
-          this.hex.add(zBonds);
-        }
+        // if (typeof Zhelices[index] !== 0 && this.bonds !== null) {
+        //   this.addZBonds(mesh, Zhelices[index]);
+        // }
 
       }
 
@@ -189,6 +194,10 @@ export class Hex {
         const helixMatrix = new THREE.Matrix4();
         helixMatrix.setPosition(x, height, y);
         mesh.setMatrixAt(meshIndex, helixMatrix);
+        if (typeof Zhelices[index] !== 0 && this.bonds !== null) {
+          this.addZBonds(mesh, Zhelices[index]);
+        }
+        
         if (!this.ignoreRings) {
           for (let i = 0; i < ringCount; i++) {
             const ringMatrix = new THREE.Matrix4();
@@ -339,7 +348,6 @@ export class Hex {
   }
 
   addZBonds(mesh, helix, sideBound = false) {
-    const zBondGroup = new THREE.Group();
     let helixTopBond, helixBottomBond;
     let helixTopIndex, helixBottomIndex
     if (this.bonds["ZU"][this.zBondToIndex(helix)] === 1) {
@@ -379,10 +387,10 @@ export class Hex {
   
       const bottomBondMatrix = new THREE.Matrix4();
       bottomBondMatrix.setPosition(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z);
-      helixBottomBond.setMatrixAt(helixBottomBond, bottomBondMatrix);
-
-      // helixTopBond.position.set(mesh.position.x, mesh.position.y + height * 4.5 + 0.4, mesh.position.z); // Top
-      // helixBottomBond.position.set(mesh.position.x, mesh.position.y + height * 0.5 - 0.4, mesh.position.z); // Bottom
+      const rotationMatrix = new THREE.Matrix4().makeRotationX(Math.PI);
+      bottomBondMatrix.multiply(rotationMatrix);
+      
+      helixBottomBond.setMatrixAt(helixBottomIndex, bottomBondMatrix);
     } else {
       const topBondMatrix = new THREE.Matrix4();
       topBondMatrix.setPosition(mesh.position.x, mesh.position.y + 0.4, mesh.position.z);
@@ -390,19 +398,11 @@ export class Hex {
   
       const bottomBondMatrix = new THREE.Matrix4();
       bottomBondMatrix.setPosition(mesh.position.x, mesh.position.y - height - 0.4, mesh.position.z);
-      helixBottomBond.setMatrixAt(helixBottomBond, bottomBondMatrix);
-
-      // helixTopBond.position.set(mesh.position.x, mesh.position.y + 0.4, mesh.position.z); // Top
-      // helixBottomBond.position.set(mesh.position.x, mesh.position.y - height - 0.4, mesh.position.z); // Bottom
+      const rotationMatrix = new THREE.Matrix4().makeRotationX(Math.PI);
+      bottomBondMatrix.multiply(rotationMatrix);
+      
+      helixBottomBond.setMatrixAt(helixBottomIndex, bottomBondMatrix);
     }
-    // Rotate the right bond to face downward
-    helixBottomBond.rotation.x = Math.PI; // 180 degrees around the X-axis
-
-    // Add bonds to the group
-    zBondGroup.add(helixTopBond);
-    zBondGroup.add(helixBottomBond);
-
-    return zBondGroup;
   }
 
   initializeInstancedHelices() {
