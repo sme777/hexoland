@@ -766,7 +766,7 @@ export default class extends Controller {
 
     document.getElementById('stlobjLoader').addEventListener('change', (event) => {
       const file = event.target.files[0];
-      const resolution = 1.0;
+      const resolution = 2.0;
       const filename = file["name"];
 
       if (filename.endsWith(".stl")) {
