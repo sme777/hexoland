@@ -247,7 +247,8 @@ export class Hex {
     };
     const socketGeometry = new THREE.ExtrudeGeometry(outerShape, extrudeSettings);
     socketGeometry.rotateX(Math.PI / 2);
-    socketGeometry.translate(0, 0.6, 0);
+    // Center the socket geometry for consistent positioning with other bond types
+    socketGeometry.translate(0, baseHeight/2, 0);
 
     return {
       repulsiveBond: repulsiveBondGeometry,
@@ -263,15 +264,34 @@ export class Hex {
     let repulsiveXYCount = 0, neutralXYCount = 0, attractiveXYPlugCount = 0, attractiveXYSocketCount = 0;
     let repulsiveZCount = 0, neutralZCount = 0, attractiveZPlugCount = 0, attractiveZSocketCount = 0;
 
-    // Count side helices for Z bonds
-    // s2Mask, s4Mask, and s6Mask contain side helix identifiers
-    const sideHelixCount = Object.values(s2Mask).concat(
-      Object.values(s4Mask), 
-      Object.values(s6Mask)
-    ).filter(val => val !== 0).length;
+    // Count side helices and their corresponding Z bonds
+    // We'll collect all side helix IDs first
+    const sideHelixIDs = [
+      ...Object.values(s2Mask).filter(val => val !== 0),
+      ...Object.values(s4Mask).filter(val => val !== 0), 
+      ...Object.values(s6Mask).filter(val => val !== 0)
+    ];
     
-    // Each side helix needs both top and bottom bonds by default (repulsive)
-    repulsiveZCount += sideHelixCount * 2;
+    // Count how many side helices have explicitly defined bond types
+    // The rest will be repulsive by default
+    let definedSideHelixZBonds = 0;
+    
+    // Count side helix bonds that have explicit definitions
+    for (const helixID of sideHelixIDs) {
+      const zBondIndex = this.zBondToIndex(helixID);
+      if (zBondIndex !== undefined) {
+        // Check if there's an explicit definition in ZU and ZD
+        const hasZUBond = this.bonds["ZU"] && this.bonds["ZU"][zBondIndex] !== undefined;
+        const hasZDBond = this.bonds["ZD"] && this.bonds["ZD"][zBondIndex] !== undefined;
+        // Count each defined bond
+        definedSideHelixZBonds += (hasZUBond ? 1 : 0) + (hasZDBond ? 1 : 0);
+      }
+    }
+    
+    // Each side helix needs both top and bottom bonds
+    // Only those without explicit definitions get repulsive bonds by default
+    const undefinedSideHelixZBonds = sideHelixIDs.length * 2 - definedSideHelixZBonds;
+    repulsiveZCount += undefinedSideHelixZBonds;
     
     // Now count the rest of the bonds from the bonds object
     for (const [side, codes] of Object.entries(bonds)) {
@@ -356,23 +376,14 @@ export class Hex {
     sides.forEach(key => {
       if (!bonds.hasOwnProperty(key)) {
         if (key === "ZU" || key === "ZD") {
-          // For Z bonds, start with an empty array
-          bonds[key] = new Array(72);
+          // For Z bonds, pre-fill the entire array with repulsive bonds
+          // This ensures all bonds have a default value
+          bonds[key] = Array(72).fill('x');
           
-          // Fill positions that correspond to valid helices in the indexMap
-          // This ensures that passive helices get Z bonds as intended
-          for (let i = 0; i < Zhelices.length; i++) {
-            if (Zhelices[i] && Zhelices[i] !== 0) {
-              const zBondIndex = this.zBondToIndex(Zhelices[i]);
-              if (zBondIndex !== undefined) {
-                bonds[key][zBondIndex] = 'x'; // Default to repulsive
-              }
-            }
-          }
-          
-          // Side helices will get Z bonds directly in the addZBonds method,
-          // even if they don't have entries here
+          // Now, passive helices and side helices will have default values
+          // These can be overridden by explicit bond settings
         } else {
+          // For XY bonds (sides), fill with repulsive bonds as default
           bonds[key] = Array(8).fill('x');
         }
       }
@@ -385,18 +396,28 @@ export class Hex {
     let helixTopIndex, helixBottomIndex;
     const zBondIndex = this.zBondToIndex(helix);
     
-    // For side helices, we always want to add Z bonds even if they don't have an indexMap entry
-    // For other helices, we only add Z bonds if they have a valid index in the map
-    if (!sideBound && zBondIndex === undefined) return;
+    // Check if this is a side helix
+    const isSideHelix = 
+      Object.values(s2Mask).includes(helix) || 
+      Object.values(s4Mask).includes(helix) || 
+      Object.values(s6Mask).includes(helix);
     
-    // For side helices without a defined Z bond index, use default repulsive bonds
-    let topBondType = 'x';  // Default to repulsive
-    let bottomBondType = 'x';  // Default to repulsive
+    // We want to add Z bonds in these cases:
+    // 1. It's a side helix (they always get Z bonds)
+    // 2. It's a passive helix with a valid index in the map
+    if (!sideBound && !isSideHelix && zBondIndex === undefined) return;
     
-    // If we have a valid index, get the actual bond types
+    // Initialize bond types - will use array values if possible
+    let topBondType, bottomBondType;
+    
+    // If we have a valid index, get the actual bond types from the filled bonds array
     if (zBondIndex !== undefined) {
-      topBondType = this.bonds["ZU"][zBondIndex] || topBondType;
-      bottomBondType = this.bonds["ZD"][zBondIndex] || bottomBondType;
+      topBondType = this.bonds["ZU"][zBondIndex];
+      bottomBondType = this.bonds["ZD"][zBondIndex]; 
+    } else {
+      // For helices without an index entry, default to repulsive
+      topBondType = 'x';
+      bottomBondType = 'x';
     }
     
     // Create the bond meshes based on bond types
@@ -409,7 +430,7 @@ export class Hex {
     } else if (topBondType === "-") {
       helixTopBond = this.instancedBonds.neutZ.mesh;
       helixTopIndex = this.instancedBonds.neutZ.index++;
-    } else if (topBondType === "x") {
+    } else if (topBondType === "x" || topBondType === undefined) {
       helixTopBond = this.instancedBonds.replZ.mesh;
       helixTopIndex = this.instancedBonds.replZ.index++;
     }
@@ -423,7 +444,7 @@ export class Hex {
     } else if (bottomBondType === "-") {
       helixBottomBond = this.instancedBonds.neutZ.mesh;
       helixBottomIndex = this.instancedBonds.neutZ.index++;
-    } else if (bottomBondType === "x") {
+    } else if (bottomBondType === "x" || bottomBondType === undefined) {
       helixBottomBond = this.instancedBonds.replZ.mesh;
       helixBottomIndex = this.instancedBonds.replZ.index++;
     }
@@ -530,10 +551,11 @@ export class Hex {
     // Start with Static Instances Meshes
     const passiveHelixMesh = new THREE.InstancedMesh(helixGeometry, materials.passiveHelix, helixTypeCount.passive);
     const helixColors = new Float32Array(helixTypeCount.passive * 3); // RGB for each instance
+    const passiveColor = colors.passive;
     for (let i = 0; i < helixTypeCount.passive; i++) {
-      colors[i * 3 + 0] = colors.passive.r; // R
-      colors[i * 3 + 1] = colors.passive.g; // G
-      colors[i * 3 + 2] = colors.passive.b; // B
+      helixColors[i * 3 + 0] = passiveColor.r; // R
+      helixColors[i * 3 + 1] = passiveColor.g; // G
+      helixColors[i * 3 + 2] = passiveColor.b; // B
     }
     passiveHelixMesh.instanceColor = new THREE.InstancedBufferAttribute(helixColors, 3);
 
@@ -859,7 +881,7 @@ export class Hex {
 
   createAttractiveSocketBond(color = 0x808836) {
     const baseRadius = 1.5;
-    const baseHeight = 1;
+    const baseHeight = 0.75; // Match the baseHeight of the plug to ensure consistency
     const holeRadius = 0.75;
     const outerShape = new THREE.Shape();
 
@@ -883,11 +905,13 @@ export class Hex {
     };
     const geometry = new THREE.ExtrudeGeometry(outerShape, extrudeSettings);
     geometry.rotateX(Math.PI / 2);
-    geometry.translate(0, 0.6, 0);
+    // Center the socket geometry for consistent positioning with other bond types
+    geometry.translate(0, baseHeight/2, 0);
+    
     // Create the material and mesh
     const material = new THREE.MeshStandardMaterial({
       color: color
-    }); // Greenish color for the bond
+    });
     const socket = new THREE.Mesh(geometry, material);
     return socket;
   }
@@ -899,14 +923,19 @@ export class Hex {
   
   // Helper function to check if a Z bond index belongs to a side helix
   isSideHelixZBond(index) {
-    // Convert index back to helix ID
+    // First try to convert index back to helix ID
     const helixID = Object.keys(indexMap).find(key => indexMap[key] === index);
     if (!helixID) return false;
     
+    // Get all side helix IDs from the mask arrays
+    const allSideHelixIDs = [
+      ...Object.values(s2Mask).filter(val => val !== 0),
+      ...Object.values(s4Mask).filter(val => val !== 0),
+      ...Object.values(s6Mask).filter(val => val !== 0)
+    ];
+    
     // Check if this helixID appears in any of the side helix masks
-    return Object.values(s2Mask).includes(helixID) || 
-           Object.values(s4Mask).includes(helixID) || 
-           Object.values(s6Mask).includes(helixID);
+    return allSideHelixIDs.includes(helixID);
   }
   rotate(x, y, z) {
     this.prism.rotation.x += x;
