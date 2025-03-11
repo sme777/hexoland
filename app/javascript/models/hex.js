@@ -112,21 +112,18 @@ export class Hex {
           meshIndex = this.instancedHelices.s1.index++;
           if (this.bonds !== null) {
             this.addCoreBonds(mesh, "S1", s1Mask[index]);
-            this.addZBonds(mesh, s1Mask[index], true);
           }
         } else if (s3Mask[index]) {
           mesh = this.instancedHelices.s3.mesh;
           meshIndex = this.instancedHelices.s3.index++;
           if (this.bonds !== null) {
             this.addCoreBonds(mesh, "S3", s3Mask[index]);
-            this.addZBonds(mesh, s3Mask[index], true);
           }
         } else if (s5Mask[index]) {
           mesh = this.instancedHelices.s5.mesh;
           meshIndex = this.instancedHelices.s5.index++;
           if (this.bonds !== null) {
             this.addCoreBonds(mesh, "S5", s5Mask[index]);
-            this.addZBonds(mesh, s5Mask[index], true);
           }
         }
       } else {
@@ -392,16 +389,12 @@ export class Hex {
     const height = mesh.geometry.parameters.height;
     let topY, bottomY;
     
-    if (helixInfo.isCore) {
-      // Core helices are half-height and positioned in the top half
-      topY = this.helixHeight;  // Top of core helix
-      bottomY = this.helixHeight / 2; // Bottom of core helix
-    } else if (helixInfo.isSide) {
+    if (helixInfo.isSide) {
       // Side helices have two quarter-height segments with a gap
       if (sideBound) {
         // Side helices have two cylinders
-        topY = this.helixHeight * 2; // Top of the upper cylinder
-        bottomY = this.helixHeight / 4; // Bottom of the lower cylinder
+        topY = this.helixHeight * 1.5; // Top of the upper cylinder
+        bottomY = this.helixHeight / 2; // Bottom of the lower cylinder
       } else {
         console.warn('Side helix without sideBound flag set');
         return;
@@ -739,7 +732,7 @@ export class Hex {
     if (helixInfo.index === -1 || !helixInfo.isCore) return; // Invalid or not a core helix
     
     const bondOffset = 0.4;
-    const halfHeight = this.helixHeight * 0.5;
+    const quarterHeight = this.helixHeight * 0.25;
     
     // Core helices have a single half-height cylinder
     // positioned from y=halfHeight to y=helixHeight
@@ -747,15 +740,16 @@ export class Hex {
     // Position bonds at the top and bottom of the core cylinder
     if (leftBond) {
       const leftBondMatrix = new THREE.Matrix4();
-      leftBondMatrix.setPosition(helixInfo.x, halfHeight * 3/2 + bondOffset, helixInfo.y); // Top of cylinder
+      leftBondMatrix.makeRotationX(Math.PI);
+      leftBondMatrix.setPosition(helixInfo.x, quarterHeight * 3 - bondOffset, helixInfo.y); // Top of cylinder
       leftBond.setMatrixAt(leftBondIndex, leftBondMatrix);
       leftBond.instanceMatrix.needsUpdate = true;
     }
     
     if (rightBond) {
       const rightBondMatrix = new THREE.Matrix4();
-      rightBondMatrix.makeRotationX(Math.PI); // Flip to face down
-      rightBondMatrix.setPosition(helixInfo.x, halfHeight * 3/2 - bondOffset, helixInfo.y); // Bottom of cylinder
+      // rightBondMatrix.makeRotationX(Math.PI); // Flip to face down
+      rightBondMatrix.setPosition(helixInfo.x, quarterHeight * 5 + bondOffset, helixInfo.y); // Bottom of cylinder
       rightBond.setMatrixAt(rightBondIndex, rightBondMatrix);
       rightBond.instanceMatrix.needsUpdate = true;
     }
