@@ -88,21 +88,24 @@ export class Hex {
           mesh = this.instancedHelices.s2.mesh;
           meshIndex = this.instancedHelices.s2.index++;
           if (this.bonds !== null) {
-            this.addSideBonds(mesh, "S2", s2Mask[index])
+            this.addSideBonds(mesh, "S2", s2Mask[index]);
+            // Side helices should always have Z bonds
             this.addZBonds(mesh, s2Mask[index], true);
           }
         } else if (s4Mask[index]) {
           mesh = this.instancedHelices.s4.mesh;
           meshIndex = this.instancedHelices.s4.index++;
           if (this.bonds !== null) {
-            this.addSideBonds(mesh, "S4", s4Mask[index])
+            this.addSideBonds(mesh, "S4", s4Mask[index]);
+            // Side helices should always have Z bonds
             this.addZBonds(mesh, s4Mask[index], true);
           }
         } else if (s6Mask[index]) {
           mesh = this.instancedHelices.s6.mesh;
           meshIndex = this.instancedHelices.s6.index++;
           if (this.bonds !== null) {
-            this.addSideBonds(mesh, "S6", s6Mask[index])
+            this.addSideBonds(mesh, "S6", s6Mask[index]);
+            // Side helices should always have Z bonds
             this.addZBonds(mesh, s6Mask[index], true);
           }
         }
@@ -129,7 +132,7 @@ export class Hex {
       } else {
         mesh = this.instancedHelices.passive.mesh;
         meshIndex = this.instancedHelices.passive.index++;
-        if (typeof Zhelices[index] !== 0 && this.bonds !== null) {
+        if (Zhelices[index] && Zhelices[index] !== 0 && this.bonds !== null) {
           this.addZBonds(mesh, Zhelices[index]);
         }
 
@@ -260,31 +263,57 @@ export class Hex {
     let repulsiveXYCount = 0, neutralXYCount = 0, attractiveXYPlugCount = 0, attractiveXYSocketCount = 0;
     let repulsiveZCount = 0, neutralZCount = 0, attractiveZPlugCount = 0, attractiveZSocketCount = 0;
 
+    // Count side helices for Z bonds
+    // s2Mask, s4Mask, and s6Mask contain side helix identifiers
+    const sideHelixCount = Object.values(s2Mask).concat(
+      Object.values(s4Mask), 
+      Object.values(s6Mask)
+    ).filter(val => val !== 0).length;
+    
+    // Each side helix needs both top and bottom bonds by default (repulsive)
+    repulsiveZCount += sideHelixCount * 2;
+    
+    // Now count the rest of the bonds from the bonds object
     for (const [side, codes] of Object.entries(bonds)) {
-      codes.forEach((code, _) => {
+      codes.forEach((code, index) => {
         if (code === 0) {
           if (xySides.includes(side)) {
             attractiveXYSocketCount++;
           } else if (zSides.includes(side)) {
             attractiveZSocketCount++;
+            // When we assign a custom Z bond, we need to decrease the default repulsive count
+            if (this.isSideHelixZBond(index)) {
+              repulsiveZCount--;
+            }
           }
         } else if (code === 1) {
           if (xySides.includes(side)) {
             attractiveXYPlugCount++;
           } else if (zSides.includes(side)) {
             attractiveZPlugCount++;
+            // When we assign a custom Z bond, we need to decrease the default repulsive count
+            if (this.isSideHelixZBond(index)) {
+              repulsiveZCount--;
+            }
           }
         } else if (code === "x") {
           if (xySides.includes(side)) {
             repulsiveXYCount++;
           } else if (zSides.includes(side)) {
-            repulsiveZCount++;
+            // Only count this for non-side helix Z bonds, since we already counted them
+            if (!this.isSideHelixZBond(index)) {
+              repulsiveZCount++;
+            }
           }
         } else if (code === "-") {
           if (xySides.includes(side)) {
             neutralXYCount++;
           } else if (zSides.includes(side)) {
             neutralZCount++;
+            // When we assign a custom Z bond, we need to decrease the default repulsive count
+            if (this.isSideHelixZBond(index)) {
+              repulsiveZCount--;
+            }
           }
         }
       });
@@ -327,11 +356,25 @@ export class Hex {
     sides.forEach(key => {
       if (!bonds.hasOwnProperty(key)) {
         if (key === "ZU" || key === "ZD") {
-          bonds[key] = Array(72).fill('x');
+          // For Z bonds, start with an empty array
+          bonds[key] = new Array(72);
+          
+          // Fill positions that correspond to valid helices in the indexMap
+          // This ensures that passive helices get Z bonds as intended
+          for (let i = 0; i < Zhelices.length; i++) {
+            if (Zhelices[i] && Zhelices[i] !== 0) {
+              const zBondIndex = this.zBondToIndex(Zhelices[i]);
+              if (zBondIndex !== undefined) {
+                bonds[key][zBondIndex] = 'x'; // Default to repulsive
+              }
+            }
+          }
+          
+          // Side helices will get Z bonds directly in the addZBonds method,
+          // even if they don't have entries here
         } else {
           bonds[key] = Array(8).fill('x');
         }
-
       }
     });
     return bonds;
@@ -341,10 +384,20 @@ export class Hex {
     let helixTopBond, helixBottomBond;
     let helixTopIndex, helixBottomIndex;
     const zBondIndex = this.zBondToIndex(helix);
-    if (!zBondIndex && zBondIndex !== 0) return; // Skip if the helix doesn't have a valid Z bond index
     
-    const topBondType = this.bonds["ZU"][zBondIndex];
-    const bottomBondType = this.bonds["ZD"][zBondIndex];
+    // For side helices, we always want to add Z bonds even if they don't have an indexMap entry
+    // For other helices, we only add Z bonds if they have a valid index in the map
+    if (!sideBound && zBondIndex === undefined) return;
+    
+    // For side helices without a defined Z bond index, use default repulsive bonds
+    let topBondType = 'x';  // Default to repulsive
+    let bottomBondType = 'x';  // Default to repulsive
+    
+    // If we have a valid index, get the actual bond types
+    if (zBondIndex !== undefined) {
+      topBondType = this.bonds["ZU"][zBondIndex] || topBondType;
+      bottomBondType = this.bonds["ZD"][zBondIndex] || bottomBondType;
+    }
     
     // Create the bond meshes based on bond types
     if (topBondType === 1) {
@@ -842,6 +895,18 @@ export class Hex {
   // Return the index if the zBond exists in the map, otherwise return undefined or handle the error as needed
   zBondToIndex(zBond) {
     return indexMap[zBond] !== undefined ? indexMap[zBond] : undefined;
+  }
+  
+  // Helper function to check if a Z bond index belongs to a side helix
+  isSideHelixZBond(index) {
+    // Convert index back to helix ID
+    const helixID = Object.keys(indexMap).find(key => indexMap[key] === index);
+    if (!helixID) return false;
+    
+    // Check if this helixID appears in any of the side helix masks
+    return Object.values(s2Mask).includes(helixID) || 
+           Object.values(s4Mask).includes(helixID) || 
+           Object.values(s6Mask).includes(helixID);
   }
   rotate(x, y, z) {
     this.prism.rotation.x += x;
